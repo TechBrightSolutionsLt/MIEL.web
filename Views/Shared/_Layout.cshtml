@@ -20,6 +20,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="~/css/style.css" rel="stylesheet">
+    @RenderSection("Styles", required: false)
 </head>
 
 <body>
@@ -48,10 +49,22 @@
         </div>
 
         <div class="row align-items-center py-3 px-xl-5">
-            <div class="col-lg-3 d-none d-lg-block">
+            @* <div class="col-lg-3 d-none d-lg-block">
                 <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
                     <h1 class="m-0 display-5 font-weight-semi-bold">
                         <span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper
+                    </h1>
+                </a>
+            </div> *@
+            <div class="col-lg-3 d-none d-lg-block">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none d-flex align-items-center">
+                    <img src="~/img/logo.jpg"
+                         alt="MIEL Collections"
+                         style="height: 50px; width: auto;"
+                         class="mr-2" />
+
+                    <h1 class="m-0 font-weight-semi-bold text-dark" style="color: #D19C97 !important;">
+                        MIEL Collections
                     </h1>
                 </a>
             </div>
@@ -103,10 +116,11 @@
                             <a class="nav-item nav-link" href="#">Shop</a>
                             <a class="nav-item nav-link" href="#">Shop Detail</a>
                             <a class="nav-item nav-link" href="#">Contact</a>
+                            <a asp-controller="Home" asp-action="About" class="nav-item nav-link">About</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0">
-                            <a class="nav-item nav-link" href="#">Login</a>
-                            <a class="nav-item nav-link" href="#">Register</a>
+                            <a asp-controller="Home" asp-action="Login" class="nav-item nav-link">Login</a>
+                            <a asp-controller="Home" asp-action="Register" class="nav-item nav-link">Register</a>
                         </div>
                     </div>
                 </nav>
@@ -126,10 +140,15 @@
                 <a href="" class="text-decoration-none">
                     <h1 class="mb-4 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border border-white px-3 mr-1">E</span>Shopper</h1>
                 </a>
-                <p>Dolore erat dolor sit lorem vero amet. Sed sit lorem magna, ipsum no sit erat lorem et magna ipsum dolore amet erat.</p>
+                @* <p>Dolore erat dolor sit lorem vero amet. Sed sit lorem magna, ipsum no sit erat lorem et magna ipsum dolore amet erat.</p>
                 <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA</p>
                 <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
-                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p> *@
+
+                <p class="mb-2"><i class="fa fa-map-marker text-primary mr-3"></i>ABN No.54408112778,<br />&nbsp; &nbsp; &nbsp; 12 Woodbine Close Lisarow,NSW 2250</p>
+                <p class="mb-2" style="font-size: 15px;"><i class="fa fa-envelope text-primary mr-3"></i>minimuthuppu@mielcolllections.com</p>
+                <p class="mb-0"><i class="fa fa-phone text-primary mr-3"></i>Mini:0450095524, &nbsp; &nbsp; Binoy:0430823457</p>
+                <p class="mb-0"><i class="fa fa-whatsapp text-primary mr-3"></i>0450095524</p>
             </div>
             <div class="col-lg-8 col-md-12">
                 <div class="row">
@@ -175,10 +194,15 @@
         </div>
         <div class="row border-top border-light mx-xl-5 py-4">
             <div class="col-md-6 px-xl-0">
-                <p class="mb-md-0 text-center text-md-left text-dark">
+                @* <p class="mb-md-0 text-center text-md-left text-dark">
                     &copy; <a class="text-dark font-weight-semi-bold" href="#">Your Site Name</a>. All Rights Reserved. Designed
                     by
                     <a class="text-dark font-weight-semi-bold" href="https://htmlcodex.com">HTML Codex</a>
+                </p> *@
+                <p class="mb-md-0 text-center text-md-left text-dark">
+                    &copy; <a class="text-dark font-weight-semi-bold" href="#">Miel Collections</a>. All Rights Reserved. Designed
+                    by
+                    <a class="text-dark font-weight-semi-bold" href="http://techbrightsolutions.com">TechBright Solutions</a>
                 </p>
             </div>
             <div class="col-md-6 px-xl-0 text-center text-md-right">
