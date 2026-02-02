@@ -1,0 +1,61 @@
+# =========================
+# Visual Studio / ASP.NET Core Project
+# =========================
+
+# Build folders
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+TestResults/
+*.log
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio folders
+.vs/
+.vscode/
+
+# Publish output
+publish/
+out/
+dist/
+
+# ASP.NET Core specific
+appsettings.Development.json
+appsettings.Local.json
+*.db
+*.db-shm
+*.db-wal
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# Backup and temporary files
+~$*
+*.tmp
+*.bak
+*.swp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Optional: exclude wwwroot/lib (client-side libraries)
+wwwroot/lib/
+
+# Optional: exclude user-secrets (if using)
+secrets.json
