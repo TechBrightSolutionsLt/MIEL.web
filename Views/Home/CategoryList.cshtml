@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Shop Products";
+    Layout = "_Layout";
+}
+@* @model IEnumerable<Category>
+
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5 pb-3">
+
+        @foreach (var category in Model)
+        {
+            <div class="col-lg-4 col-md-6 pb-4">
+                <div class="cat-item">
+                    <a asp-controller="Shop"
+                       asp-action="Products"
+                       asp-route-categoryId="@category.Id"
+                       class="cat-img">
+
+                        <img src="~/img/categories/@category.ImageUrl"
+                             alt="@category.Name" />
+                    </a>
+
+                    <h3>@category.Name</h3>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+ *@
+ <h2>Category List page alone</h2>

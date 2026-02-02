@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using MIEL.web.Models;
 
 namespace MIEL.web.Controllers
@@ -39,6 +40,14 @@ namespace MIEL.web.Controllers
         public IActionResult Register()
         {
             return View();
+        }
+        public IActionResult ShopProducts()
+        {
+            return View("~/Views/Home/CategoryList.cshtml");
+        }
+        public IActionResult Admin()
+        {
+            return View("~/Views/Admin/AdminDashboard.cshtml");
         }
     }
 }

@@ -1,5 +1,101 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Admin | MIEL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+    <!-- Admin Styles -->
+    <link rel="stylesheet" href="~/css/admin.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+
+<body>
+
+    <div class="admin-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="brand">
+                MIEL Admin
+            </div>
+
+            <ul>
+                <li>
+                    <a asp-controller="Admin" asp-action="Dashboard" class="active">
+                        <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="AdminCategory" asp-action="Index">
+                        <i class="fas fa-list mr-2"></i> Categories
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="AdminProduct" asp-action="Index">
+                        <i class="fas fa-box mr-2"></i> Products
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Account" asp-action="Logout">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+
+            <!-- Topbar -->
+            <div class="admin-topbar">
+                <button class="btn btn-sm btn-light d-md-none"
+                        onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div>
+                    Welcome, Admin
+                </div>
+
+                <div>
+                    <i class="fas fa-bell mr-3"></i>
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <main class="p-4">
+                @RenderBody()
+            </main>
+
+            <!-- Footer -->
+            <footer class="admin-footer">
+                © @DateTime.Now.Year MIEL Collections. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('show');
+        }
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>
