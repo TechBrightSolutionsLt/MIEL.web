@@ -1,0 +1,109 @@
+﻿@model MIEL.web.Models.ViewModel.UserRegistrationVM
+
+@{
+    ViewData["Title"] = "Customer Registration";
+    Layout = "_Layout";
+}
+
+
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="font-weight-bold">Sign Up</h2>
+        <hr style="width:60px;border:2px solid orange;">
+    </div>
+
+    <form asp-action="Register" method="post" class="mx-auto" style="max-width:750px;">
+
+        <!-- STEP 1 -->
+        <h5 class="mb-4">
+            <span class="badge badge-warning rounded-circle mr-2">1</span>
+            Basic Information
+        </h5>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <input asp-for="FirstName" class="form-control" placeholder="First Name" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group col-md-6">
+                <input asp-for="LastName" class="form-control" placeholder="Last Name" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input asp-for="Email" class="form-control" placeholder="Email ID" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <input asp-for="MobileNumber" class="form-control" placeholder="Mobile Number" />
+        </div>
+
+        <div class="form-group">
+            <label class="d-block">Gender</label>
+            <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" asp-for="Gender" value="Male" class="custom-control-input" id="male">
+                <label class="custom-control-label" for="male">Male</label>
+            </div>
+            <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" asp-for="Gender" value="Female" class="custom-control-input" id="female">
+                <label class="custom-control-label" for="female">Female</label>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <h5 class="mb-4 mt-5">
+            <span class="badge badge-warning rounded-circle mr-2">2</span>
+            Address Details
+        </h5>
+
+        <div class="form-group">
+            <textarea asp-for="Address" class="form-control" rows="3" placeholder="Address"></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <input asp-for="City" class="form-control" placeholder="City" />
+            </div>
+            <div class="form-group col-md-6">
+                <input asp-for="Postcode" class="form-control" placeholder="Postcode" />
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <h5 class="mb-4 mt-5">
+            <span class="badge badge-warning rounded-circle mr-2">3</span>
+            Account Password
+        </h5>
+
+        <div class="form-group">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Create Password" />
+        </div>
+
+        <div class="form-group">
+            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm Password" />
+        </div>
+
+        <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" required />
+            <label class="form-check-label">
+                I agree to the <a href="#">Terms & Conditions</a>
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-block py-2">
+            CREATE MY ACCOUNT
+        </button>
+
+        <div class="text-center mt-3">
+            <a asp-action="Login">Already have an account?</a>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
