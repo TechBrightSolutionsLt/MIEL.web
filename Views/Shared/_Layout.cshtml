@@ -24,6 +24,13 @@
 </head>
 
 <body>
+    @using Microsoft.AspNetCore.Http
+    @inject IHttpContextAccessor HttpContextAccessor
+
+    @{
+        var userName = HttpContextAccessor.HttpContext.Session.GetString("UserName");
+        var roleId = HttpContextAccessor.HttpContext.Session.GetString("RoleId");
+    }
 
     <!-- Topbar Start -->
     <div class="container-fluid">
@@ -118,10 +125,52 @@
                             @* <a class="nav-item nav-link" href="#">Contact</a> *@
                             <a asp-controller="Home" asp-action="About" class="nav-item nav-link">About</a>
                         </div>
-                        <div class="navbar-nav ml-auto py-0">
+                        @* <div class="navbar-nav ml-auto py-0">
                             <a asp-controller="Home" asp-action="Admin" class="nav-item nav-link">Admin</a>
-                            <a asp-controller="Home" asp-action="Login" class="nav-item nav-link">Login</a>
+                            <a asp-controller="Account" asp-action="Login" class="nav-item nav-link">Login</a>
                             <a asp-controller="Users" asp-action="Register" class="nav-item nav-link">Register</a>
+                        </div> *@
+                        <div class="navbar-nav ml-auto py-0">
+
+                            @*  USER LOGGED IN *@
+                            @if (!string.IsNullOrEmpty(userName))
+                            {
+                                <div class="nav-item dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center"
+                                       data-toggle="dropdown">
+                                        <i class="fa fa-user-circle mr-2"></i>
+                                        <span>@userName</span>
+                                    </a>
+
+                                    <div class="dropdown-menu dropdown-menu-right">
+
+                                        @* Admin only *@
+                                        @if (roleId == "1")
+                                        {
+                                            <a asp-controller="Admin" asp-action="AdminDashboard" class="dropdown-item">
+                                                Admin Dashboard
+                                            </a>
+                                        }
+
+                                        <a asp-controller="Account" asp-action="Profile" class="dropdown-item">
+                                            My Profile
+                                        </a>
+
+                                        <div class="dropdown-divider"></div>
+
+                                        <a asp-controller="Account" asp-action="Logout" class="dropdown-item text-danger">
+                                            Logout
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @* USER LOGGED OUT *@
+                                <a asp-controller="Account" asp-action="Login" class="nav-item nav-link">Login</a>
+                                <a asp-controller="Users" asp-action="Register" class="nav-item nav-link">Register</a>
+                            }
+
                         </div>
                     </div>
                 </nav>

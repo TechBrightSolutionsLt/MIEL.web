@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDBContext>(Options => Options.UseSqlServer(buil
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 app.UseSession();
@@ -37,6 +38,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();        // AFTER routing
 app.UseAuthorization();
 
 app.MapControllerRoute(

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model MIEL.web.Models.ViewModel.UserLoginVM
+
+@{
     ViewData["Title"] = "Login";
 }
 
@@ -11,32 +13,41 @@
                     Login to MIEL Collections
                 </h3>
 
-                <form method="post">
+                <form asp-action="Login" method="post">
+
                     <div class="form-group mb-3">
-                        <label>Email</label>
-                        <input type="email"
+                        <label>Email or Mobile</label>
+                        <input asp-for="Username"
                                class="form-control"
-                               placeholder="Enter your email"
-                               required />
+                               placeholder="Enter email or mobile number" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-3">
                         <label>Password</label>
-                        <input type="password"
+                        <input asp-for="Password"
+                               type="password"
                                class="form-control"
-                               placeholder="Enter your password"
-                               required />
+                               placeholder="Enter your password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block w-100">
+                    <button type="submit" class="btn btn-primary w-100">
                         Login
                     </button>
                 </form>
 
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger mt-3">
+                        @ViewBag.Error
+                    </div>
+                }
+
                 <div class="text-center mt-3">
                     <p class="mb-0">
                         Don’t have an account?
-                        <a asp-controller="Home" asp-action="Register" style="color:#D19C97;">
+                        <a asp-controller="Account" asp-action="Login" style="color:#D19C97;">
                             Register
                         </a>
                     </p>
@@ -47,3 +58,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
