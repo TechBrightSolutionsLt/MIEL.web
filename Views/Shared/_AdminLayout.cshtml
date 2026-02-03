@@ -1,4 +1,141 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    Layout = null;
+    var userName = HttpContextAccessor.HttpContext.Session.GetString("UserName") ?? "Admin";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Admin | MIEL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="~/css/admin.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <div class="admin-wrapper">
+
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="brand">MIEL Admin</div>
+
+            <ul>
+                <li>
+                    <a asp-controller="Admin" asp-action="Dashboard" class="active">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="AdminCategory" asp-action="Index">
+                        <i class="fas fa-list me-2"></i> Categories
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="AdminProduct" asp-action="Index">
+                        <i class="fas fa-box me-2"></i> Products
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Account" asp-action="Logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- CONTENT -->
+        <div class="admin-content">
+
+            <!-- TOPBAR -->
+            <div class="admin-topbar">
+
+                <button class="btn btn-sm btn-light d-md-none"
+                        onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="welcome-text">
+                    Welcome, @userName
+                </div>
+
+                <!-- USER DROPDOWN -->
+                <div class="dropdown topbar-actions">
+                    <a class="admin-user-dropdown dropdown-toggle"
+                       href="#"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+
+                        <i class="fas fa-user-circle admin-user-icon"></i>
+                        <span class="admin-user-name">@userName</span>
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end admin-user-menu">
+                        <li>
+                            <a asp-controller="Admin" asp-action="Dashboard" class="dropdown-item">
+                                Admin Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Account" asp-action="Profile" class="dropdown-item">
+                                My Profile
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <a asp-controller="Account"
+                               asp-action="Logout"
+                               class="dropdown-item text-danger">
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PAGE BODY -->
+            <main class="p-4">
+                @RenderBody()
+            </main>
+
+            <!-- FOOTER -->
+            <footer class="admin-footer">
+                © @DateTime.Now.Year MIEL Collections. All rights reserved.
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('show');
+        }
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>
+
+
+@* <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -99,3 +236,4 @@
 
 </body>
 </html>
+ *@
