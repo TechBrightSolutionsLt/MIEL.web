@@ -2,7 +2,8 @@
 using System.Linq;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
-using YourNamespace.Models;
+using MIEL.web.Models;
+
 
 namespace MIEL.web.Repositories
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using MIEL.web.Models.EntityModels;
-using YourNamespace.Models;
+using MIEL.web.Models;
 
 namespace MIEL.web.Repositories
 {
