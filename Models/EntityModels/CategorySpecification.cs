@@ -10,6 +10,6 @@ namespace MIEL.web.Models.EntityModels
         [MaxLength(100)]
         public string SpecName { get; set; }
         public int CategoryId { get; set; }
-        public string Options { get; set; }
+        public string? Options { get; set; }
     }
 }

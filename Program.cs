@@ -21,8 +21,8 @@ builder.Services.AddDbContext<AppDBContext>(Options => Options.UseSqlServer(buil
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ICategorySpecificationRepository, CategoryRepository>();
+builder.Services.AddScoped<CategorySpecifications>();
 
 var app = builder.Build();
 app.UseSession();
