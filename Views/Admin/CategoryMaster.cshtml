@@ -1,0 +1,33 @@
+﻿@model IEnumerable<YourNamespace.Models.Category>
+
+@{
+    ViewData["Title"] = "Category Master";
+}
+
+<h2>Category Master</h2>
+
+<p>
+    <a asp-action="Upsert" class="btn btn-primary">Add New Category</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Category Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CategoryName</td>
+                <td>
+                    <a asp-action="Upsert" asp-route-id="@item.CategoryId" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
