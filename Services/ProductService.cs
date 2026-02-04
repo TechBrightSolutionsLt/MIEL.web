@@ -24,6 +24,7 @@ namespace MIEL.web.Services
             _productRepo.Add(vm.Product);
         }
 
+
         public List<Product> GetAll()
         {
             return _productRepo.GetAll();

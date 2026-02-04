@@ -36,6 +36,21 @@ namespace MIEL.web.Controllers
             return View(vm);
         }
 
+        [HttpGet]
+        public IActionResult GetSizesByCategory(int categoryId)
+        {
+            var sizes = _specRepo
+                .GetByCategory(categoryId)
+                .FirstOrDefault(x => x.SpecName.ToLower() == "size");
+
+            if (sizes == null || string.IsNullOrEmpty(sizes.Options))
+                return Json(new List<string>());
+
+            var options = sizes.Options.Split(',').ToList();
+            return Json(options);
+        }
+
+
         // POST
         [HttpPost]
         public IActionResult Create(ProductCreateViewModel vm)
