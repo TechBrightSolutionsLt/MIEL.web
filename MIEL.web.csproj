@@ -13,6 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\CategoryMaster\**" />
+    <Content Remove="Views\CategoryMaster\**" />
+    <EmbeddedResource Remove="Views\CategoryMaster\**" />
+    <None Remove="Views\CategoryMaster\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ContainerPort Include="8081" />
   </ItemGroup>
 
@@ -27,7 +34,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="Views\CategoryMaster\" />
   </ItemGroup>
 
 </Project>

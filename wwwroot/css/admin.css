@@ -197,6 +197,25 @@ body {
     }
 }
 
+.form-label {
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #D19C97;
+    border-color: #D19C97;
+}
+
+    .btn-primary:hover {
+        background-color: #c38a85;
+        border-color: #c38a85;
+    }
+
+.card {
+    border-radius: 8px;
+}
+
+
 /*body {
     overflow-x: hidden;
 }

@@ -4,6 +4,7 @@ using MIEL.web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MIEL.web.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260203111633_createspecificationtable")]
+    partial class createspecificationtable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,24 +110,6 @@ namespace MIEL.web.Migrations
                     b.HasKey("CustomerId");
 
                     b.ToTable("users_TB");
-                });
-
-            modelBuilder.Entity("YourNamespace.Models.Category", b =>
-                {
-                    b.Property<int>("CategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
-
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("CategoryId");
-
-                    b.ToTable("Categories");
                 });
 #pragma warning restore 612, 618
         }
