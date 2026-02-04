@@ -13,6 +13,7 @@ namespace MIEL.web.Data
         
 
         public DbSet<userModel> users_TB { get; set; }
+        public DbSet<CategorySpecification> Specifications { get; set; }
     }
     
 }
