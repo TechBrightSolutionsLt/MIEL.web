@@ -113,6 +113,23 @@ namespace MIEL.web.Migrations
                     b.ToTable("Products_TB");
                 });
 
+            modelBuilder.Entity("ImageItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImageItems");
+                });
+
             modelBuilder.Entity("MIEL.web.Models.EntityModels.userModel", b =>
                 {
                     b.Property<int>("CustomerId")
