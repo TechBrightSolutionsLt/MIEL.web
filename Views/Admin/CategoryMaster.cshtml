@@ -1,33 +1,113 @@
-﻿@model IEnumerable<YourNamespace.Models.Category>
+﻿@model MIEL.web.Models.ViewModels.CategoryMasterVM
 
 @{
     ViewData["Title"] = "Category Master";
 }
 
-<h2>Category Master</h2>
+<div class="container mt-4">
 
-<p>
-    <a asp-action="Upsert" class="btn btn-primary">Add New Category</a>
-</p>
+    <h2 class="mb-4">Category Master</h2>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Category Name</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.CategoryName</td>
-                <td>
-                    <a asp-action="Upsert" asp-route-id="@item.CategoryId" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@item.CategoryId" class="btn btn-sm btn-danger"
-                       onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <!-- ADD / EDIT FORM (Moved to Top) -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            @(Model.Category.CategoryId == 0 ? "Add Category" : "Edit Category")
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Upsert" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="Category.CategoryId" />
+
+                <div class="row align-items-end">
+
+                    <div class="col-md-6">
+                        <label asp-for="Category.CategoryName" class="form-label fw-bold"></label>
+                        <input asp-for="Category.CategoryName" class="form-control" placeholder="Enter Category Name" />
+                        <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mt-3 mt-md-0">
+                        <button type="submit" class="btn btn-success w-100">
+                            @(Model.Category.CategoryId == 0 ? "Save Category" : "Update Category")
+                        </button>
+                    </div>
+
+                    @if (Model.Category.CategoryId != 0)
+                    {
+                        <div class="col-md-3 mt-3 mt-md-0">
+                            <a asp-action="CategoryMaster" class="btn btn-secondary w-100">
+                                Cancel
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- CATEGORY LIST TABLE -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            Category List
+        </div>
+
+        <div class="card-body p-0">
+
+            <table class="table table-bordered table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Category Name</th>
+                        <th width="200">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.Categories)
+                    {
+                        <tr>
+                            <td>@item.CategoryName</td>
+
+                            <td>
+                                <a asp-action="CategoryMaster"
+                                   asp-route-id="@item.CategoryId"
+                                   class="btn btn-sm btn-warning me-2">
+                                    Edit
+                                </a>
+
+                                <form asp-action="Delete" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.CategoryId" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure you want to delete this category?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (!Model.Categories.Any())
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">
+                                No categories found
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>

@@ -2,7 +2,7 @@
 using MIEL.web.Models.EntityModels;
 using System.Collections.Generic;
 using System.Linq;
-using YourNamespace.Models;
+using MIEL.web.Models;
 
 public class CategoryRepository : ICategorySpecificationRepository
 {

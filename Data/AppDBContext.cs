@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MIEL.web.Models.EntityModels;
-using YourNamespace.Models;
+using MIEL.web.Models;
 
 namespace MIEL.web.Data
 {
