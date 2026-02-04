@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MIEL.web.Models.EntityModels;
-using YourNamespace.Models;
+using MIEL.web.Models;
 
 namespace MIEL.web.Data
 {
@@ -15,9 +15,11 @@ namespace MIEL.web.Data
         public DbSet<userModel> users_TB { get; set; }
 
         // Add this line for Category table
+        public DbSet<Product> Products_TB { get; set; }
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<ImageItem> ImageItems { get; set; }
 
+        public DbSet<CategorySpecification> Specifications { get; set; }
     }
 }

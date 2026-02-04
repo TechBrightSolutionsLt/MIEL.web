@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using MIEL.web.Models.EntityModels;
-using YourNamespace.Models;
+using MIEL.web.Models;
 
 namespace MIEL.web.Repositories
 {
@@ -12,5 +12,6 @@ namespace MIEL.web.Repositories
         void Update(Category category);
         void Delete(int id);
         void Save();
+        List<Category> GetALL();
     }
 }

@@ -2,7 +2,8 @@
 using System.Linq;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
-using YourNamespace.Models;
+using MIEL.web.Models;
+
 
 namespace MIEL.web.Repositories
 {
@@ -47,6 +48,10 @@ namespace MIEL.web.Repositories
         public void Save()
         {
             _context.SaveChanges();
+        }
+        public List<Category> GetALL()
+        {
+            return _context.Categories.ToList();
         }
     }
 }

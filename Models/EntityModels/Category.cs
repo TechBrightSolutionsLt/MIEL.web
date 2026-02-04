@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace YourNamespace.Models
+namespace MIEL.web.Models.EntityModels
 {
     public class Category
     {

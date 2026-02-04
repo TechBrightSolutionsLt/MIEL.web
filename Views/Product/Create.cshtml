@@ -1,0 +1,104 @@
+﻿@using MIEL.web.Models.ViewModel
+@model ProductCreateViewModel
+
+
+@{
+    ViewData["Title"] = "Product Creation";
+    Layout = "_AdminLayout";
+}
+
+
+<div class="container mt-4">
+    <h3 class="mb-4">Add New Product</h3>
+
+    <form asp-action="Create" method="post">
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Product Name</label>
+                <input asp-for="Product.Name" class="form-control" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Brand</label>
+                <input asp-for="Product.Brand" class="form-control" />
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Description</label>
+                <textarea asp-for="Product.Description" class="form-control"></textarea>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Stitching Type</label>
+                <input asp-for="Product.StitchingType" class="form-control" />
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Occasion</label>
+                <input asp-for="Product.Occasion" class="form-control" />
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Package Details</label>
+                <input asp-for="Product.PackageDetails" class="form-control" />
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Category</label>
+                <select asp-for="Product.CategoryId"
+                        class="form-select"
+                        id="categoryDropdown">
+                    <option value="">-- Select Category --</option>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <option value="@cat.CategoryId">@cat.CategoryName</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <hr />
+
+        <h5>Available Sizes</h5>
+        <div id="sizeContainer" class="row">
+            <!-- Sizes will load here -->
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+                Save Product
+            </button>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <script>
+        document.getElementById("categoryDropdown").addEventListener("change", function () {
+
+            const categoryId = this.value;
+            const container = document.getElementById("sizeContainer");
+            container.innerHTML = "";
+
+            if (!categoryId) return;
+
+            fetch(`/Product/GetSizesByCategory?categoryId=${categoryId}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    data.forEach(size => {
+                        container.innerHTML += `
+                            <div class="col-md-2">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="SelectedSizes"
+                                           value="${size}" />
+                                    <label class="form-check-label">${size}</label>
+                                </div>
+                            </div>`;
+                    });
+                });
+        });
+    </script>
+}

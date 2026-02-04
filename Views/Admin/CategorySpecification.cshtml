@@ -1,0 +1,223 @@
+﻿@model MIEL.web.Models.ViewModel.CategorySpecificationVM
+
+@{
+    ViewData["Title"] = "Category Specification";
+    Layout = "_AdminLayout";
+}
+
+<!-- PAGE HEADER -->
+<div class="mb-4">
+    <h2 class="mb-1">Add Category Specifications</h2>
+    <small class="text-muted">Create and manage specifications for each category</small>
+</div>
+
+<form id="specForm">
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <!-- CATEGORY -->
+            <div class="mb-4">
+                <label class="form-label">Select Category</label>
+
+                <select asp-for="SelectedCategoryId"
+                        asp-items="Model.Categories"
+                        id="SelectedCategoryId"
+                        class="form-select">
+                    <option value="">-- Select Category --</option>
+                </select>
+            </div>
+
+            <!-- SPEC INPUT -->
+            <div class="mb-4">
+                <label class="form-label">Specification Name</label>
+
+                <div class="d-flex gap-2">
+                    <input type="text"
+                           id="SpecName"
+                           class="form-control"
+                           placeholder="e.g. Length, Fabric, Sleeve Type" />
+
+                    <button type="submit"
+                            id="btnSave"
+                            class="btn btn-primary">
+                        Add
+                    </button>
+                </div>
+
+                <input type="hidden" id="Id" value="0" />
+            </div>
+
+            <!-- TABLE -->
+            <div class="mt-4">
+
+                <h5 class="mb-3">Specifications</h5>
+
+                <table class="table table-bordered align-middle" id="specTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Specification Name</th>
+                            <th style="width:120px;">Delete</th>
+                        </tr>
+                    </thead>
+
+                    <tbody></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</form>
+
+@section Scripts {
+
+    <script>
+
+        let isEditing = false;
+
+        /* ============================
+           FORM SUBMIT
+        ============================ */
+
+        document.getElementById("specForm")
+        .addEventListener("submit", function (e) {
+            e.preventDefault();
+            saveSpecification();
+        });
+
+        /* ============================
+           CATEGORY CHANGE
+        ============================ */
+
+        document.getElementById("SelectedCategoryId")
+        .addEventListener("change", function () {
+
+            if (isEditing) return;
+
+            let categoryId = this.value;
+
+            if (categoryId) {
+                loadSpecifications(categoryId);
+            } else {
+                document.querySelector("#specTable tbody").innerHTML = "";
+            }
+        });
+
+        /* ============================
+           LOAD SPECIFICATIONS
+        ============================ */
+
+        function loadSpecifications(categoryId) {
+
+            fetch(`@Url.Action("GetSpecifications", "CategorySpecification")?categoryId=${categoryId}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    let rows = "";
+
+                    data.forEach(item => {
+
+                        rows += `
+                            <tr>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-link p-0 text-decoration-none"
+                                            onclick="editSpec(${item.id}, '${item.specName}')">
+                                        ${item.specName}
+                                    </button>
+                                </td>
+
+                                <td>
+                                    <button class="btn btn-danger btn-sm"
+                                            onclick="deleteSpec(${item.id})">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    document.querySelector("#specTable tbody").innerHTML = rows;
+                });
+        }
+
+        /* ============================
+           SAVE
+        ============================ */
+
+        function saveSpecification() {
+
+            let model = {
+                Id: parseInt(document.getElementById("Id").value),
+                SpecName: document.getElementById("SpecName").value,
+                SelectedCategoryId: parseInt(document.getElementById("SelectedCategoryId").value)
+            };
+
+            if (!model.SelectedCategoryId) {
+                alert("Please select category");
+                return;
+            }
+
+            if (model.SpecName.trim() === "") {
+                alert("Enter specification name");
+                return;
+            }
+
+            fetch("@Url.Action("SaveSpecification", "CategorySpecification")", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(model)
+            })
+            .then(() => {
+
+                isEditing = false;
+
+                document.getElementById("Id").value = 0;
+                document.getElementById("SpecName").value = "";
+                document.getElementById("btnSave").innerText = "Add";
+
+                loadSpecifications(model.SelectedCategoryId);
+            });
+        }
+
+        /* ============================
+           EDIT
+        ============================ */
+
+        function editSpec(id, name) {
+
+            isEditing = true;
+
+            document.getElementById("Id").value = id;
+            document.getElementById("SpecName").value = name;
+
+            document.getElementById("btnSave").innerText = "Update";
+        }
+
+        /* ============================
+           DELETE
+        ============================ */
+
+        function deleteSpec(id) {
+
+            if (!confirm("Delete this specification?"))
+                return;
+
+            fetch("@Url.Action("DeleteSpecification", "CategorySpecification")", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `id=${id}`
+            })
+            .then(() => {
+
+                let catId = document.getElementById("SelectedCategoryId").value;
+                loadSpecifications(catId);
+            });
+        }
+
+    </script>
+
+}
