@@ -36,4 +36,6 @@ public class CategorySpecifications
     {
         _repo.Delete(id);
     }
+
+
 }
