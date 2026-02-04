@@ -1,0 +1,47 @@
+﻿@using MIEL.web.Models.ViewModel
+@model ProductCreateViewModel
+
+
+@{
+    ViewData["Title"] = "Product Creation";
+    Layout = "_AdminLayout";
+}
+
+<form asp-action="Create" method="post">
+
+    <input asp-for="Product.Name" placeholder="Name" />
+    <textarea asp-for="Product.Description"></textarea>
+    <input asp-for="Product.Brand" />
+    <input asp-for="Product.StitchingType" />
+    <input asp-for="Product.Occasion" />
+    <input asp-for="Product.PackageDetails" />
+
+    <select asp-for="Product.CategoryId">
+        <option value="">Select Category</option>
+        @foreach (var c in Model.Categories)
+        {
+            <option value="@c.CategoryId">@c.CategoryName</option>
+        }
+    </select>
+
+    <hr />
+    <b>Available Sizes</b><br />
+
+    @{
+        var sizeSpec = Model.Specifications
+            .FirstOrDefault(s => s.SpecName.ToLower() == "size");
+    }
+
+    @if (sizeSpec != null)
+    {
+        foreach (var size in sizeSpec.Options.Split(','))
+        {
+            <input type="checkbox"
+                   name="SelectedSizes"
+                   value="@size.Trim()" /> @size <br />
+        }
+    }
+
+    <br />
+    <button type="submit">Save</button>
+</form>

@@ -15,6 +15,7 @@ namespace MIEL.web.Data
         public DbSet<userModel> users_TB { get; set; }
 
         // Add this line for Category table
+        public DbSet<Product> Products_TB { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<CategorySpecification> Specifications { get; set; }
     }
