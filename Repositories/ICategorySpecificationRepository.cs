@@ -1,6 +1,6 @@
 ﻿using MIEL.web.Models.EntityModels;
 using System.Collections.Generic;
-using MIEL.web.Models.EntityModels;
+using MIEL.web.Models;
 
 public interface ICategorySpecificationRepository
 {
@@ -12,4 +12,5 @@ public interface ICategorySpecificationRepository
     void Update(CategorySpecification spec);
 
     void Delete(int id);
+    List<CategorySpecification> GetAll();
 }

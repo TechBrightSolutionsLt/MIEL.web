@@ -2,6 +2,7 @@
 using MIEL.web.Models.EntityModels;
 using System.Collections.Generic;
 using System.Linq;
+using MIEL.web.Models;
 
 public class CategorySpecificationRepository : ICategorySpecificationRepository
 {
@@ -54,5 +55,9 @@ public class CategorySpecificationRepository : ICategorySpecificationRepository
             _context.Specifications.Remove(data);
             _context.SaveChanges();
         }
+    }
+    public List<CategorySpecification> GetAll()
+    {
+        return _context.Specifications.ToList();
     }
 }
