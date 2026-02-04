@@ -11,5 +11,6 @@ namespace MIEL.web.Models.EntityModels
         public string SpecName { get; set; }
         public int CategoryId { get; set; }
         public string? Options { get; set; }
+        public string? OptionType { get; set; }
     }
 }
