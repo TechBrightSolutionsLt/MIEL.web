@@ -1,7 +1,6 @@
 ﻿using MIEL.web.Models.EntityModels;
 using MIEL.web.Repositories;
 using System.Collections.Generic;
-using YourNamespace.Models;
 
 public class CategorySpecifications
 {

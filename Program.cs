@@ -14,6 +14,7 @@ builder.Services.AddSession(options =>
 });
 
 // Add services to the container.
+//builder.Services.AddControllersWithViews();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDBContext>(Options => Options.UseSqlServer(builder.Configuration.GetConnectionString("MielConnectionString")));
@@ -21,7 +22,7 @@ builder.Services.AddDbContext<AppDBContext>(Options => Options.UseSqlServer(buil
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICategorySpecificationRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategorySpecificationRepository, CategorySpecificationRepository>();
 builder.Services.AddScoped<CategorySpecifications>();
 
 var app = builder.Build();

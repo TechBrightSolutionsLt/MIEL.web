@@ -48,8 +48,11 @@ namespace MIEL.web.Controllers
 
 
         [HttpPost]
-        public IActionResult SaveSpecification(CategorySpecificationVM model)
+        public IActionResult SaveSpecification([FromBody] CategorySpecificationVM model)
         {
+            if (string.IsNullOrWhiteSpace(model.SpecName))
+                return Json(false);
+
             var entity = new CategorySpecification
             {
                 Id = model.Id,
@@ -58,7 +61,6 @@ namespace MIEL.web.Controllers
             };
 
             _categoryService.SaveSpecification(entity);
-
             return Json(true);
         }
 

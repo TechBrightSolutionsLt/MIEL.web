@@ -1,6 +1,6 @@
 ﻿using MIEL.web.Models.EntityModels;
 using System.Collections.Generic;
-using YourNamespace.Models;
+using MIEL.web.Models.EntityModels;
 
 public interface ICategorySpecificationRepository
 {

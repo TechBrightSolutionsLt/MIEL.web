@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using YourNamespace.Models;
+using MIEL.web.Models.EntityModels;
 
 namespace MIEL.web.Models.ViewModel
 {

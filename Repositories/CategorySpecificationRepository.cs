@@ -2,13 +2,12 @@
 using MIEL.web.Models.EntityModels;
 using System.Collections.Generic;
 using System.Linq;
-using YourNamespace.Models;
 
-public class CategoryRepository : ICategorySpecificationRepository
+public class CategorySpecificationRepository : ICategorySpecificationRepository
 {
     private readonly AppDBContext _context;
 
-    public CategoryRepository(AppDBContext context)
+    public CategorySpecificationRepository(AppDBContext context)
     {
         _context = context;
     }
