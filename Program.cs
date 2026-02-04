@@ -24,6 +24,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICategorySpecificationRepository, CategorySpecificationRepository>();
 builder.Services.AddScoped<CategorySpecifications>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ProductService>();
 
