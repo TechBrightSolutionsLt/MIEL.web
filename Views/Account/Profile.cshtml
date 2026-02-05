@@ -1,0 +1,103 @@
+﻿@model MIEL.web.Models.ViewModel.UserProfileVM
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<h2>My Profile</h2>
+
+@if (ViewBag.Success != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Success
+    </div>
+}
+
+<form asp-action="Profile" method="post" style="max-width:600px; margin:auto;">
+    <div class="form-group">
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MobileNumber"></label>
+        <input asp-for="MobileNumber" class="form-control" />
+        <span asp-validation-for="MobileNumber" class="text-danger"></span>
+    </div>
+
+    <!-- Gender Field -->
+    <div class="form-group">
+        <label asp-for="Gender"></label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">Select Gender</option>
+
+            @* Male *@
+            @if (Model.Gender == "Male")
+            {
+                <option value="Male" selected>Male</option>
+            }
+            else
+            {
+                <option value="Male">Male</option>
+            }
+
+            @* Female *@
+            @if (Model.Gender == "Female")
+            {
+                <option value="Female" selected>Female</option>
+            }
+            else
+            {
+                <option value="Female">Female</option>
+            }
+
+            @* Other *@
+            @if (Model.Gender != "Male" && Model.Gender != "Female" && !string.IsNullOrEmpty(Model.Gender))
+            {
+                <option value="Other" selected>Other</option>
+            }
+            else
+            {
+                <option value="Other">Other</option>
+            }
+        </select>
+
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Address"></label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="City"></label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Postcode"></label>
+        <input asp-for="Postcode" class="form-control" />
+        <span asp-validation-for="Postcode" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block">Update Profile</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
