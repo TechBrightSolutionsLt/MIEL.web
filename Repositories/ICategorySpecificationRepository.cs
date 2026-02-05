@@ -12,5 +12,5 @@ public interface ICategorySpecificationRepository
     void Update(CategorySpecification spec);
 
     void Delete(int id);
-    List<CategorySpecification> GetAll();
+   
 }
