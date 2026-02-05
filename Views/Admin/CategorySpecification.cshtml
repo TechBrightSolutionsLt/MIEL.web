@@ -21,6 +21,7 @@
                 <label class="form-label">Select Category</label>
 
                 <select asp-for="SelectedCategoryId"
+                        name="SelectedCategoryId"
                         asp-items="Model.Categories"
                         id="SelectedCategoryId"
                         class="form-select">
@@ -30,14 +31,29 @@
 
             <!-- SPEC INPUT -->
             <div class="mb-4">
+
                 <label class="form-label">Specification Name</label>
+                <input type="text"
+                       id="SpecName"
+                       name="SpecName"
+                       class="form-control mb-2"
+                       placeholder="e.g. Length, Fabric, Sleeve Type" />
+
+
+                <label class="form-label">Options</label>
+                <textarea id="Option"
+                          name="Options"
+                          class="form-control mb-2"
+                          placeholder="Ex: S,M,L,XL"></textarea>
+
+                <label class="form-label">Option Type</label>
+                <select id="OptionType" name="OptionType" class="form-select mb-3">
+                    <option value="">-- Select Option Type --</option>
+                    <option value="Textbox">Textbox</option>
+                    <option value="Checkbox">Checkbox</option>
+                </select>
 
                 <div class="d-flex gap-2">
-                    <input type="text"
-                           id="SpecName"
-                           class="form-control"
-                           placeholder="e.g. Length, Fabric, Sleeve Type" />
-
                     <button type="submit"
                             id="btnSave"
                             class="btn btn-primary">
@@ -46,6 +62,7 @@
                 </div>
 
                 <input type="hidden" id="Id" value="0" />
+
             </div>
 
             <!-- TABLE -->
@@ -78,24 +95,22 @@
 
         let isEditing = false;
 
-        /* ============================
-           FORM SUBMIT
-        ============================ */
-
         document.getElementById("specForm")
         .addEventListener("submit", function (e) {
             e.preventDefault();
             saveSpecification();
         });
 
-        /* ============================
-           CATEGORY CHANGE
-        ============================ */
-
-        document.getElementById("SelectedCategoryId")
+               document.getElementById("SelectedCategoryId")
         .addEventListener("change", function () {
 
-            if (isEditing) return;
+            isEditing = false;   // reset editing mode
+
+            document.getElementById("Id").value = 0;
+            document.getElementById("SpecName").value = "";
+            document.getElementById("Option").value = "";
+            document.getElementById("OptionType").value = "";
+            document.getElementById("btnSave").innerText = "Add";
 
             let categoryId = this.value;
 
@@ -105,10 +120,6 @@
                 document.querySelector("#specTable tbody").innerHTML = "";
             }
         });
-
-        /* ============================
-           LOAD SPECIFICATIONS
-        ============================ */
 
         function loadSpecifications(categoryId) {
 
@@ -121,39 +132,39 @@
                     data.forEach(item => {
 
                         rows += `
-                            <tr>
-                                <td>
-                                    <button type="button"
-                                            class="btn btn-link p-0 text-decoration-none"
-                                            onclick="editSpec(${item.id}, '${item.specName}')">
-                                        ${item.specName}
-                                    </button>
-                                </td>
+                        <tr>
+                            <td>
+                                <button type="button"
+                                    class="btn btn-link p-0 text-decoration-none"
+                                    onclick='editSpec(${item.id},
+                                        "${item.specName}",
+                                        "${item.options ?? ""}",
+                                        "${item.optionType ?? ""}")'>
+                                    ${item.specName}
+                                </button>
+                            </td>
 
-                                <td>
-                                    <button class="btn btn-danger btn-sm"
-                                            onclick="deleteSpec(${item.id})">
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                    onclick="deleteSpec(${item.id})">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>`;
                     });
 
                     document.querySelector("#specTable tbody").innerHTML = rows;
                 });
         }
 
-        /* ============================
-           SAVE
-        ============================ */
-
         function saveSpecification() {
 
             let model = {
-                Id: parseInt(document.getElementById("Id").value),
-                SpecName: document.getElementById("SpecName").value,
-                SelectedCategoryId: parseInt(document.getElementById("SelectedCategoryId").value)
+                Id: parseInt(document.getElementById("Id").value || 0),
+                SpecName: document.getElementById("SpecName").value || "",
+                Options: document.getElementById("Option").value || "",
+                OptionType: document.getElementById("OptionType").value || "",
+                SelectedCategoryId: parseInt(document.getElementById("SelectedCategoryId").value || 0)
             };
 
             if (!model.SelectedCategoryId) {
@@ -166,33 +177,46 @@
                 return;
             }
 
+            if (model.OptionType === "") {
+                alert("Select option type");
+                return;
+            }
+
             fetch("@Url.Action("SaveSpecification", "CategorySpecification")", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(model)
-            })
-            .then(() => {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(model)
+                })
+                .then(res => res.json())
+                .then(response => {
 
-                isEditing = false;
+                    if (!response.success) {
+                        alert(response.message);
+                        return;
+                    }
 
-                document.getElementById("Id").value = 0;
-                document.getElementById("SpecName").value = "";
-                document.getElementById("btnSave").innerText = "Add";
+                    isEditing = false;
 
-                loadSpecifications(model.SelectedCategoryId);
-            });
+                    document.getElementById("Id").value = 0;
+                    document.getElementById("SpecName").value = "";
+                    document.getElementById("Option").value = "";
+                    document.getElementById("OptionType").value = "";
+
+                    document.getElementById("btnSave").innerText = "Add";
+
+                    loadSpecifications(model.SelectedCategoryId);
+                });
+
         }
 
-        /* ============================
-           EDIT
-        ============================ */
-
-        function editSpec(id, name) {
+        function editSpec(id, specName, options, optionType) {
 
             isEditing = true;
 
             document.getElementById("Id").value = id;
-            document.getElementById("SpecName").value = name;
+            document.getElementById("SpecName").value = specName || "";
+            document.getElementById("Option").value = options || "";
+            document.getElementById("OptionType").value = optionType || "";
 
             document.getElementById("btnSave").innerText = "Update";
         }

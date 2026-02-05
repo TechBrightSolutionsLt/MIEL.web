@@ -15,7 +15,13 @@ builder.Services.AddSession(options =>
 
 // Add services to the container.
 //builder.Services.AddControllersWithViews();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
+
+
 
 builder.Services.AddDbContext<AppDBContext>(Options => Options.UseSqlServer(builder.Configuration.GetConnectionString("MielConnectionString")));
 
