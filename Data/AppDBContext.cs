@@ -23,5 +23,9 @@ namespace MIEL.web.Data
         public DbSet<CategorySpecification> Specifications { get; set; }
         // 👉 THIS LINE MUST EXIST
         public DbSet<ProductMaster> ProductMasters { get; set; }
+
+        public DbSet<ProductImage> ProductImages { get; set; }
+
+
     }
 }
