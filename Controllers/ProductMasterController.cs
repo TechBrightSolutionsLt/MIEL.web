@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MIEL.web.Data;
-using MIEL.web.Models.ViewModels;
+using MIEL.web.Models.EntityModels;
+using MIEL.web.Models.ViewModel;
 using System;
 using System.Linq;
 
@@ -17,7 +18,7 @@ namespace MIEL.web.Controllers
 
         public IActionResult Index()
         {
-            var model = new CategoryMasterVM
+            var model = new ProductMasterVM
             {
                 Categories = _db.Categories.ToList()
             };
@@ -25,7 +26,6 @@ namespace MIEL.web.Controllers
             return View(model);
         }
 
-        
         [HttpPost]
         public JsonResult GetSpecifications(int categoryId)
         {
@@ -40,6 +40,29 @@ namespace MIEL.web.Controllers
                             .ToList();
 
             return Json(specs);
+        }
+
+        [HttpPost]
+        public IActionResult SaveProduct(ProductMasterVM model)
+        {
+            var product = new ProductMaster
+            {
+                CategoryId = model.SelectedCategoryId,
+                ProductCode = model.ProductCode,
+                ProductName = model.ProductName,
+                Brand = model.Brand,
+                ProductDescription = model.ProductDescription,
+                Occasion = model.Occasion,
+                ComboPackage = model.ComboPackage,
+                HSNNo = model.HSNNo,
+                CreatedDate = DateTime.Now
+            };
+
+            _db.ProductMasters.Add(product);
+            _db.SaveChanges();
+
+            TempData["msg"] = "Product Saved Successfully!";
+            return RedirectToAction("Index");
         }
 
     }
