@@ -46,7 +46,7 @@ namespace MIEL.web.Controllers
             // Redirect based on role
             return user.RoleId switch
             {
-                1 => RedirectToAction("AdminDashboard", "Admin"),
+                1 => RedirectToAction("Admin", "Home"),
                 2 => RedirectToAction("Profile", "Account"),
                 _ => RedirectToAction("Index", "Home")
             };
