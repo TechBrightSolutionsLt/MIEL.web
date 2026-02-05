@@ -26,8 +26,6 @@ builder.Services.AddScoped<ICategorySpecificationRepository, CategorySpecificati
 builder.Services.AddScoped<CategorySpecifications>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<CategoryService>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ProductService>();
 
 var app = builder.Build();
 app.UseSession();
