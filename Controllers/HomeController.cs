@@ -3,19 +3,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using MIEL.web.Models;
 
+using MIEL.web.Data;
+using MIEL.web.Models.EntityModels;
+
 namespace MIEL.web.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppDBContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, AppDBContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
+            ViewBag.BannerImages = _context.ImageItems
+                                          .OrderByDescending(x => x.Id)
+                                          .ToList();
             return View();
         }
 

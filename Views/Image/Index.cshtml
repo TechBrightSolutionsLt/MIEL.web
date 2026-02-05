@@ -1,0 +1,133 @@
+﻿@{
+    ViewData["Title"] = "Banner insert";
+    Layout = "_AdminLayout";
+}
+@model IEnumerable<ImageItem>
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Image Upload</h2>
+
+    <div class="row">
+        <!-- LEFT : UPLOAD FORM -->
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+                <form asp-action="Upload"
+                      method="post"
+                      enctype="multipart/form-data"
+                      id="imageForm">
+
+                    <div class="mb-3">
+                        <label class="form-label">Add Image</label>
+                        <input type="file"
+                               class="form-control"
+                               name="imageFile"
+                               id="imageFile"
+                               accept="image/*"
+                               onchange="previewImage(event)" />
+                    </div>
+
+                    <button type="submit"
+                            id="submitBtn"
+                            class="btn btn-primary">
+                        Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT : PREVIEW -->
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3 text-center">
+                <label class="fw-bold">Preview</label>
+
+                <img id="preview"
+                     class="img-fluid mt-2 mb-2"
+                     style="max-height:300px;border:1px solid #ccc;" />
+
+                <small style="color:red;">
+                    Recommended size: 928 × 500
+                </small>
+                <br />
+                <small id="imgSize"></small>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <h3 class="mb-3">Uploaded Images</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered table-striped align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Image</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@item.ImagePath"
+                                     class="img-thumbnail"
+                                     style="max-width:120px;" />
+                            </td>
+                            <td>
+                                <a asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Are you sure?')">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let isValidImageSize = false;
+    const REQUIRED_WIDTH = 928;
+    const REQUIRED_HEIGHT = 500;
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            const img = new Image();
+            img.onload = function () {
+                document.getElementById('preview').src = reader.result;
+                document.getElementById('imgSize').innerText =
+                    `Selected image size: ${img.width} × ${img.height}`;
+
+                if (img.width === REQUIRED_WIDTH && img.height === REQUIRED_HEIGHT) {
+                    isValidImageSize = true;
+                    document.getElementById('imgSize').style.color = 'green';
+                } else {
+                    isValidImageSize = false;
+                    document.getElementById('imgSize').style.color = 'red';
+                    alert(`Invalid image size!\nRequired: ${REQUIRED_WIDTH} × ${REQUIRED_HEIGHT}`);
+                }
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById('imageForm').addEventListener('submit', function (e) {
+        if (!isValidImageSize) {
+            e.preventDefault();
+            alert(`Please upload an image of size ${REQUIRED_WIDTH} × ${REQUIRED_HEIGHT}.`);
+        }
+    });
+</script>

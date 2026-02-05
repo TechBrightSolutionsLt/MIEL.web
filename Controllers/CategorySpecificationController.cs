@@ -40,6 +40,8 @@ namespace MIEL.web.Controllers
             {
                 Id = x.Id,
                 SpecName = x.SpecName,
+                Options = x.Options,
+                OptionType = x.OptionType,
                 SelectedCategoryId = x.CategoryId
             }).ToList();
 
@@ -50,19 +52,26 @@ namespace MIEL.web.Controllers
         [HttpPost]
         public IActionResult SaveSpecification([FromBody] CategorySpecificationVM model)
         {
+            if (model == null)
+                return Json(new { success = false, message = "Model is null" });
+
             if (string.IsNullOrWhiteSpace(model.SpecName))
-                return Json(false);
+                return Json(new { success = false, message = "SpecName empty" });
 
             var entity = new CategorySpecification
             {
                 Id = model.Id,
                 SpecName = model.SpecName,
-                CategoryId = model.SelectedCategoryId
+                CategoryId = model.SelectedCategoryId,
+                Options = model.Options,
+                OptionType = model.OptionType
             };
 
             _categoryService.SaveSpecification(entity);
-            return Json(true);
+
+            return Json(new { success = true });
         }
+
 
         [HttpPost]
         public IActionResult DeleteSpecification(int id)
