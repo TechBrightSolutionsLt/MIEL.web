@@ -22,12 +22,12 @@ namespace MIEL.web.Migrations
                 type: "nvarchar(max)",
                 nullable: true);
 
-            //migrationBuilder.AddColumn<int>(
-            //    name: "Flag",
-            //    table: "ProductImages",
-            //    type: "int",
-            //    nullable: false,
-            //    defaultValue: 0);
+            migrationBuilder.AddColumn<int>(
+                name: "Flag",
+                table: "ProductImages",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
         }
 
         /// <inheritdoc />
