@@ -49,9 +49,6 @@ namespace MIEL.web.Repositories
         {
             _context.SaveChanges();
         }
-        public List<Category> GetALL()
-        {
-            return _context.Categories.ToList();
-        }
+      
     }
 }

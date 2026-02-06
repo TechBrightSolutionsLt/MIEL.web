@@ -55,8 +55,5 @@ public class CategorySpecificationRepository : ICategorySpecificationRepository
             _context.SaveChanges();
         }
     }
-    public List<CategorySpecification> GetAll()
-    {
-        return _context.Specifications.ToList();
-    }
+  
 }
