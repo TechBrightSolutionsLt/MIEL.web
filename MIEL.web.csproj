@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\proimg\" />
   </ItemGroup>
 
 </Project>

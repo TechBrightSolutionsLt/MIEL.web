@@ -1,0 +1,288 @@
+﻿@{
+    ViewData["Title"] = "Supplier insert";
+    Layout = "_AdminLayout";
+}
+
+@model MIEL.web.Models.EntityModels.Supplier
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Add Supplier</h2>
+
+    <div class="card shadow-sm p-4">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            <!-- BASIC DETAILS -->
+            <h5 class="mb-3 text-primary">Basic Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Supplier Code</label>
+                    <input asp-for="Code" class="form-control" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Supplier Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Type</label>
+                    <select asp-for="Type" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option>Manufacturer</option>
+                        <option>Trader</option>
+                        <option>Service</option>
+                    </select>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    <select asp-for="Status" class="form-select">
+                        <option>Active</option>
+                        <option>Inactive</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ADDRESS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Address Details</h5>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Country</label>
+                        <input asp-for="Country" class="form-control" value="India" readonly />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">State</label>
+                        <input asp-for="State" id="state" class="form-control" placeholder="Type State" autocomplete="off" />
+                        <span asp-validation-for="State" class="text-danger"></span>
+                        <div id="stateList" class="list-group"></div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">City</label>
+                        <input asp-for="City" id="city" class="form-control" placeholder="Type City" autocomplete="off" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+                        <div id="cityList" class="list-group"></div>
+                    </div>
+
+                </div>
+
+
+            <div class="mb-3">
+                <textarea asp-for="Address" class="form-control" rows="3" placeholder="Address"></textarea>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="PostalCode" class="form-control" placeholder="Postal Code" />
+                    <span asp-validation-for="PostalCode" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- CONTACT -->
+            <hr />
+            <h5 class="mb-3 text-primary">Contact Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Phone" class="form-control" placeholder="Phone" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Email" class="form-control" placeholder="Email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <input asp-for="GSTIN" class="form-control" placeholder="GST Identification Number" />
+                <span asp-validation-for="GSTIN" class="text-danger"></span>
+            </div>
+
+            <!-- BANK DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Bank Details (Optional)</h5>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <input asp-for="BankName" class="form-control" placeholder="Bank Name" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input asp-for="AccountNumber" class="form-control" placeholder="Account Number" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input asp-for="IFSC" class="form-control" placeholder="IFSC Code" />
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-danger btn-sm">Save</button>
+            </div>
+
+        </form>
+    </div>
+    <hr class="my-4" />
+
+    <h4 class="mb-3">Supplier List</h4>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>GSTIN</th>
+                            <th style="width:160px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.SupplierList != null)
+                        {
+                            foreach (var s in ViewBag.SupplierList)
+                            {
+                                <tr>
+                                    <td>@s.Code</td>
+                                    <td>@s.Name</td>
+                                    <td>@s.Type</td>
+                                    <td>
+                                        <span class="badge @(s.Status == "Active" ? "bg-success" : "bg-secondary")">
+                                            @s.Status
+                                        </span>
+                                    </td>
+                                    <td>@s.Phone</td>
+                                    <td>@s.Email</td>
+                                    <td>@s.GSTIN</td>
+                                    <td>
+                                        <a asp-action="Edit"
+                                           asp-route-id="@s.SupplierId"
+                                           class="btn btn-warning btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@s.SupplierId"
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Are you sure?')">
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                title: "Success!",
+                text: "@TempData["SuccessMessage"]",
+                icon: "success",
+                confirmButtonText: "OK"
+            });
+        </script>
+    }
+
+    <script>
+
+        function searchLocation(query, type, resultBox, country = "India") {
+
+            if (query.length < 3) {
+                document.getElementById(resultBox).innerHTML = "";
+                return;
+            }
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query},${country}&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+
+                    let suggestions = "";
+
+                    data.forEach(item => {
+
+                        if (type === "state" && item.address.state) {
+                            suggestions += `<a href="#" class="list-group-item list-group-item-action" onclick="selectValue('${item.address.state}','stateList','state')">${item.address.state}</a>`;
+                        }
+
+                        if (type === "city" && (item.address.city || item.address.town)) {
+
+                            let city = item.address.city || item.address.town;
+
+                            suggestions += `<a href="#" class="list-group-item list-group-item-action" onclick="selectValue('${city}','cityList','city')">${city}</a>`;
+                        }
+
+                    });
+
+                    document.getElementById(resultBox).innerHTML = suggestions;
+                });
+        }
+
+        function selectValue(value, listId, inputId) {
+            document.getElementById(inputId).value = value;
+            document.getElementById(listId).innerHTML = "";
+        }
+
+        document.getElementById("state").addEventListener("keyup", function () {
+            searchLocation(this.value, "state", "stateList");
+        });
+
+        document.getElementById("city").addEventListener("keyup", function () {
+
+            let selectedState = document.getElementById("state").value;
+
+            if (selectedState === "") {
+                Swal.fire({
+                    title: "Warning",
+                    text: "Please select State first",
+                    icon: "warning",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            searchLocation(this.value + "," + selectedState, "city", "cityList");
+        });
+
+    </script>
+}
+
+
+
+

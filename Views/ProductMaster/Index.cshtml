@@ -11,11 +11,13 @@
     <div class="alert alert-success">@TempData["msg"]</div>
 }
 
-<form method="post" asp-action="SaveProduct">
+@* <form method="post" asp-action="SaveProduct"> *@
+    <form method="post" asp-action="SaveProduct" enctype="multipart/form-data">
+
 
     <!-- ================= PRODUCT BOX ================= -->
     <div class="card p-3 mb-4">
-        <h4>Product Box</h4>
+        <h4>Product Details</h4>
 
         <label><b>Product Code</b></label>
         <input asp-for="ProductCode" class="form-control" required />
@@ -60,7 +62,7 @@
 
     <!-- ================= CATEGORY BOX ================= -->
     <div class="card p-3 mb-4">
-        <h4>Category Box</h4>
+        <h4>Category Details</h4>
 
         <label><b>Category</b></label>
         <select asp-for="SelectedCategoryId" id="ddlCategory" class="form-control" required>
@@ -84,6 +86,28 @@
             </div>
         </div>
     </div>
+
+    <div class="card p-3 mb-4">
+        <h4>Product Images</h4>
+
+        <label><b>Image 1</b></label>
+        <input asp-for="Image" type="file" class="form-control" required />
+        <br />
+
+        <label><b>Image 2</b></label>
+        <input asp-for="Image2" type="file" class="form-control" />
+        <br />
+
+        <label><b>Image 3</b></label>
+        <input asp-for="Image3" type="file" class="form-control" />
+        <br />
+
+        <label><b>Image 4</b></label>
+        <input asp-for="Image4" type="file" class="form-control" />
+    </div>
+
+
+
 
     <button type="submit" class="btn btn-primary">Save Product</button>
 
