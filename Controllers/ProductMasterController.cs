@@ -83,7 +83,7 @@ namespace MIEL.web.Controllers
                         file.CopyTo(stream);
                     }
 
-                    var productImage = new ProductImage
+                    var productImage = new ProductImages
                     {
                         ProductId = product.ProductId,
                         ImgPath = "/proimg/" + fileName,

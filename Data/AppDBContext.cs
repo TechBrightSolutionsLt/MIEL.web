@@ -24,7 +24,7 @@ namespace MIEL.web.Data
         // 👉 THIS LINE MUST EXIST
         public DbSet<ProductMaster> ProductMasters { get; set; }
 
-        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ProductImages> ProductImages { get; set; }
 
         public DbSet<procolrsizevarnt> ProColorSizeVariants { get; set; }
 

@@ -4,6 +4,7 @@ using MIEL.web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MIEL.web.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260206035421_tablecreti3")]
+    partial class tablecreti3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,7 +87,7 @@ namespace MIEL.web.Migrations
                     b.ToTable("Specifications");
                 });
 
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImages", b =>
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImage", b =>
                 {
                     b.Property<int>("ImgId")
                         .ValueGeneratedOnAdd()
@@ -326,7 +329,7 @@ namespace MIEL.web.Migrations
                     b.ToTable("users_TB");
                 });
 
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImages", b =>
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImage", b =>
                 {
                     b.HasOne("MIEL.web.Models.EntityModels.ProductMaster", "ProductMaster")
                         .WithMany()
