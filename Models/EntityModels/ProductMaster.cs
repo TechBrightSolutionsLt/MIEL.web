@@ -38,5 +38,10 @@ namespace MIEL.web.Models.EntityModels
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public int SupplierId { get; set; }
+        public string? BarcodeNo { get; set; }
+
+        public string? SizeChartImg { get; set; }
+        public string sizechartPath { get; set; }
+
     }
 }
