@@ -28,6 +28,9 @@ namespace MIEL.web.Models.ViewModel
         public IFormFile Image2 { get; set; }
         public IFormFile Image3 { get; set; }
         public IFormFile Image4 { get; set; }
+        public string BarcodeNo { get; set; }
+
+        public IFormFile SizeChartImg { get; set; }
 
     }
 }

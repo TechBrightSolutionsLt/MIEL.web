@@ -1,0 +1,282 @@
+﻿@model MIEL.web.Models.EntityModels.Customer
+
+@{
+    ViewData["Title"] = "Create Customer";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Create Customer</h2>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="card shadow-sm p-4">
+        <form asp-action="Create" method="post">
+           @*  @Html.AntiForgeryToken() *@
+
+            <!-- BASIC DETAILS -->
+            <h5 class="mb-3 text-primary">Basic Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Customer Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Customer Type</label>
+                    <select asp-for="Type" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option>Individual</option>
+                        <option>Business</option>
+                    </select>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- CONTACT DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Contact Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mobile</label>
+                    <input asp-for="Mobile" class="form-control" />
+                    <span asp-validation-for="Mobile" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="EmailId" class="form-control" />
+                    <span asp-validation-for="EmailId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ADDRESS DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Address Details</h5>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <input asp-for="Street" class="form-control" placeholder="Street" />
+                    <span asp-validation-for="Street" class="text-danger"></span>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <input asp-for="BuildingName" class="form-control" placeholder="Building Name" />
+                    <span asp-validation-for="BuildingName" class="text-danger"></span>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <input asp-for="BuildingNo" class="form-control" placeholder="Building No" />
+                    <span asp-validation-for="BuildingNo" class="text-danger"></span>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <input asp-for="Landmark" class="form-control" placeholder="Landmark" />
+                    <span asp-validation-for="Landmark" class="text-danger"></span>
+
+                </div>
+                <div class="col-md-6 mb-3">
+                    
+                    <input asp-for="State" id="state" class="form-control"
+                           placeholder="Type State" autocomplete="off" />
+                    <div id="stateList" class="list-group"></div>
+                </div>
+            </div>
+                <div class="row">
+               <div class="col-md-6 mb-3">
+                    
+                    <input asp-for="City" id="city" class="form-control"
+                           placeholder="Type City" autocomplete="off" />
+                    <div id="cityList" class="list-group"></div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Pin" class="form-control" placeholder="PIN Code" />
+                    <span asp-validation-for="Pin" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Coordinates" class="form-control" placeholder="Coordinates (Lat, Long)" />
+                    <span asp-validation-for="Coordinates" class="text-danger"></span>
+
+                </div>
+            </div>
+
+            <!-- BUSINESS DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Business Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="GstNo" class="form-control" placeholder="GST Number" />
+                    <span asp-validation-for="GstNo" class="text-danger"></span>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="CreditLimit" class="form-control" placeholder="Credit Limit" />
+                    <span asp-validation-for="CreditLimit" class="text-danger"></span>
+
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-primary px-4">Save</button>
+                @* <a asp-action="Index" class="btn btn-secondary ms-2 px-4">Back</a> *@
+            </div>
+
+        </form>
+    </div>
+
+    <!-- ================= CUSTOMER GRID ================= -->
+    <hr class="my-4" />
+    <h4 class="mb-3">Customer List</h4>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                            <th>GST No</th>
+                            <th>Credit Limit</th>
+                            <th>Address</th>
+                            <th style="width:160px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.CustomerList != null)
+                        {
+                            foreach (var c in ViewBag.CustomerList)
+                            {
+                                <tr>
+                                    <td>@c.Name</td>
+                                    <td>@c.Type</td>
+                                    <td>@c.Mobile</td>
+                                    <td>@c.EmailId</td>
+                                    <td>@c.GstNo</td>
+                                    <td>@(c.CreditLimit?.ToString("C") ?? "-")</td>
+                                    <td>
+                                        @c.BuildingNo @c.BuildingName, @c.Street, @c.Landmark, @c.City - @c.Pin, @c.State
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@c.CustomerId" class="btn btn-warning btn-sm">Edit</a>
+                                        <a asp-action="Delete" asp-route-id="@c.CustomerId" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                title: "Success!",
+                text: "@TempData["SuccessMessage"]",
+                icon: "success",
+                confirmButtonText: "OK"
+            });
+        </script>
+    }
+    <script>
+        let selectedState = "";
+
+        // ---------- STATE AUTOCOMPLETE ----------
+        document.getElementById("state").addEventListener("input", async function () {
+            const query = this.value.trim();
+            const list = document.getElementById("stateList");
+            list.innerHTML = "";
+
+            if (query.length < 2) return;
+
+            // Public API for AU states
+            const res = await fetch("https://countriesnow.space/api/v0.1/countries/states", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ country: "Australia" })
+            });
+
+            const data = await res.json();
+            const states = data.data.states
+                .map(s => s.name)
+                .filter(s => s.toLowerCase().includes(query.toLowerCase()));
+
+            states.forEach(state => {
+                const item = document.createElement("a");
+                item.className = "list-group-item list-group-item-action";
+                item.textContent = state;
+                item.onclick = () => {
+                    document.getElementById("state").value = state;
+                    selectedState = state;
+                    list.innerHTML = "";
+                    document.getElementById("city").value = "";
+                };
+                list.appendChild(item);
+            });
+        });
+
+        // ---------- CITY AUTOCOMPLETE ----------
+        document.getElementById("city").addEventListener("input", async function () {
+            const query = this.value.trim();
+            const list = document.getElementById("cityList");
+            list.innerHTML = "";
+
+            if (!selectedState || query.length < 2) return;
+
+            const res = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    country: "Australia",
+                    state: selectedState
+                })
+            });
+
+            const data = await res.json();
+            const cities = data.data.filter(c =>
+                c.toLowerCase().includes(query.toLowerCase())
+            );
+
+            cities.forEach(city => {
+                const item = document.createElement("a");
+                item.className = "list-group-item list-group-item-action";
+                item.textContent = city;
+                item.onclick = () => {
+                    document.getElementById("city").value = city;
+                    list.innerHTML = "";
+                };
+                list.appendChild(item);
+            });
+        });
+
+        // ---------- CLOSE DROPDOWNS ----------
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest("#state")) document.getElementById("stateList").innerHTML = "";
+            if (!e.target.closest("#city")) document.getElementById("cityList").innerHTML = "";
+        });
+    </script>
+
+
+}

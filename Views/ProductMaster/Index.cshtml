@@ -12,7 +12,8 @@
 }
 
 @* <form method="post" asp-action="SaveProduct"> *@
-    <form method="post" asp-action="SaveProduct" enctype="multipart/form-data">
+<form method="post" asp-action="SaveProduct" enctype="multipart/form-data">
+
 
 
     <!-- ================= PRODUCT BOX ================= -->
@@ -59,6 +60,14 @@
         <label><b>HSN No</b></label>
         <input asp-for="HSNNo" class="form-control" />
     </div>
+    <label><b>Barcode No</b></label>
+    <input asp-for="BarcodeNo" class="form-control" />
+    <br />
+
+    <label><b>Size Chart Image</b></label>
+    <input asp-for="SizeChartImg" type="file" class="form-control" />
+    <br />
+
 
     <!-- ================= CATEGORY BOX ================= -->
     <div class="card p-3 mb-4">
