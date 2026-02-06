@@ -40,8 +40,8 @@ namespace MIEL.web.Controllers
             {
                 Id = x.Id,
                 SpecName = x.SpecName,
-                Options = x.Options,
-                OptionType = x.OptionType,
+               // Options = x.Options,
+               // OptionType = x.OptionType,
                 SelectedCategoryId = x.CategoryId
             }).ToList();
 
@@ -63,8 +63,8 @@ namespace MIEL.web.Controllers
                 Id = model.Id,
                 SpecName = model.SpecName,
                 CategoryId = model.SelectedCategoryId,
-                Options = model.Options,
-                OptionType = model.OptionType
+              //  Options = model.Options,
+               // OptionType = model.OptionType
             };
 
             _categoryService.SaveSpecification(entity);

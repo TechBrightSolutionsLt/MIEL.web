@@ -1,0 +1,150 @@
+﻿@model MIEL.web.Models.EntityModels.Supplier
+
+@{
+    ViewData["Title"] = "Edit Supplier";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Edit Supplier</h2>
+
+    <div class="card shadow-sm p-4">
+        
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden ID field (VERY IMPORTANT) -->
+            <input type="hidden" asp-for="SupplierId" />
+
+            <!-- BASIC DETAILS -->
+            <h5 class="mb-3 text-primary">Basic Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Supplier Code</label>
+                    <input asp-for="Code" class="form-control" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Supplier Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Type</label>
+                    <select asp-for="Type" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option>Manufacturer</option>
+                        <option>Trader</option>
+                        <option>Service</option>
+                    </select>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    <select asp-for="Status" class="form-select">
+                        <option>Active</option>
+                        <option>Inactive</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ADDRESS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Address Details</h5>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <input asp-for="Country" class="form-control" placeholder="Country" />
+                    <span asp-validation-for="Country" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <input asp-for="State" class="form-control" placeholder="State" />
+                    <span asp-validation-for="State" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <input asp-for="City" class="form-control" placeholder="City" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <textarea asp-for="Address" class="form-control" rows="3" placeholder="Address"></textarea>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="PostalCode" class="form-control" placeholder="Postal Code" />
+                    <span asp-validation-for="PostalCode" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- CONTACT -->
+            <hr />
+            <h5 class="mb-3 text-primary">Contact Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Phone" class="form-control" placeholder="Phone" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Email" class="form-control" placeholder="Email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <input asp-for="GSTIN" class="form-control" placeholder="GST Identification Number" />
+                <span asp-validation-for="GSTIN" class="text-danger"></span>
+            </div>
+
+            <!-- BANK DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Bank Details (Optional)</h5>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <input asp-for="BankName" class="form-control" placeholder="Bank Name" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <input asp-for="AccountNumber" class="form-control" placeholder="Account Number" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <input asp-for="IFSC" class="form-control" placeholder="IFSC Code" />
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="text-end mt-4">
+                <a asp-action="Create" class="btn btn-secondary btn-sm">Back</a>
+
+                <button type="submit" class="btn btn-primary btn-sm">
+                    Update Supplier
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

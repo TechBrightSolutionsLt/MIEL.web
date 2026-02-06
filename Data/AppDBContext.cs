@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MIEL.web.Models.EntityModels;
 using MIEL.web.Models;
+using MIEL.web.Models.EntityModels;
 
 namespace MIEL.web.Data
 {
@@ -26,6 +26,9 @@ namespace MIEL.web.Data
 
         public DbSet<ProductImage> ProductImages { get; set; }
 
+
+
+        public DbSet<Supplier> Suppliers { get; set; }
 
     }
 }
