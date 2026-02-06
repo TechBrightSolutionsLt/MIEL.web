@@ -48,7 +48,7 @@ namespace MIEL.web.Controllers
             if (!ModelState.IsValid)
                 return View("Index", model);
 
-            // Save Product
+            // Save Product first
             var product = new ProductMaster
             {
                 CategoryId = model.SelectedCategoryId,
@@ -63,36 +63,48 @@ namespace MIEL.web.Controllers
             };
 
             _db.ProductMasters.Add(product);
-            _db.SaveChanges();
+            _db.SaveChanges();   // IMPORTANT: so ProductId is generated
 
-            // Save uploaded image
-            if (model.Image != null && model.Image.Length > 0)
+            // Create upload folder
+            var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/proimg");
+            if (!Directory.Exists(uploadDir))
+                Directory.CreateDirectory(uploadDir);
+
+            // Local helper method to avoid repeating code
+            void SaveImage(IFormFile file)
             {
-                var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/proimg");
-                if (!Directory.Exists(uploadDir))
-                    Directory.CreateDirectory(uploadDir);
-
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.Image.FileName);
-                var filePath = Path.Combine(uploadDir, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (file != null && file.Length > 0)
                 {
-                    model.Image.CopyTo(stream);
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadDir, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+
+                    var productImage = new ProductImage
+                    {
+                        ProductId = product.ProductId,
+                        ImgPath = "/proimg/" + fileName
+                    };
+
+                    _db.ProductImages.Add(productImage);
                 }
-
-                // Save image path in ProductImages table
-                var productImage = new ProductImage
-                {
-                    ProductId = product.ProductId,
-                    ImgPath = "/proimg/" + fileName
-                };
-
-                _db.ProductImages.Add(productImage);
-                _db.SaveChanges();
             }
 
-            TempData["msg"] = "Product and Image Saved Successfully!";
+            // Save all 4 images
+            SaveImage(model.Image);
+            SaveImage(model.Image2);
+            SaveImage(model.Image3);
+            SaveImage(model.Image4);
+
+            _db.SaveChanges(); // Save all images together
+
+            TempData["msg"] = "Product and Images Saved Successfully!";
             return RedirectToAction("Index");
         }
+
     }
+
 }

@@ -25,6 +25,9 @@ namespace MIEL.web.Models.ViewModel
         // 3 separate file uploads
         // Single image
         public IFormFile Image { get; set; }
+        public IFormFile Image2 { get; set; }
+        public IFormFile Image3 { get; set; }
+        public IFormFile Image4 { get; set; }
 
     }
 }
