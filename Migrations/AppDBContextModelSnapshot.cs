@@ -240,6 +240,30 @@ namespace MIEL.web.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.procolrsizevarnt", b =>
+                {
+                    b.Property<int>("varientid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("varientid"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("colour")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("varientid");
+
+                    b.ToTable("ProColorSizeVariants");
+                });
+
             modelBuilder.Entity("MIEL.web.Models.EntityModels.userModel", b =>
                 {
                     b.Property<int>("CustomerId")

@@ -26,6 +26,7 @@ namespace MIEL.web.Data
 
         public DbSet<ProductImage> ProductImages { get; set; }
 
+        public DbSet<procolrsizevarnt> ProColorSizeVariants { get; set; }
 
 
         public DbSet<Supplier> Suppliers { get; set; }
