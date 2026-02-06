@@ -48,7 +48,7 @@ namespace MIEL.web.Controllers
             if (!ModelState.IsValid)
                 return View("Index", model);
 
-            // Save Product first
+            // -------- 1) Save Product first --------
             var product = new ProductMaster
             {
                 CategoryId = model.SelectedCategoryId,
@@ -63,15 +63,15 @@ namespace MIEL.web.Controllers
             };
 
             _db.ProductMasters.Add(product);
-            _db.SaveChanges();   // IMPORTANT: so ProductId is generated
+            _db.SaveChanges();   // IMPORTANT — generates ProductId
 
-            // Create upload folder
+            // -------- 2) Prepare image folder --------
             var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/proimg");
             if (!Directory.Exists(uploadDir))
                 Directory.CreateDirectory(uploadDir);
 
-            // Local helper method to avoid repeating code
-            void SaveImage(IFormFile file)
+            // -------- 3) Helper method with FLAG --------
+            void SaveImage(IFormFile file, int flag)
             {
                 if (file != null && file.Length > 0)
                 {
@@ -86,18 +86,19 @@ namespace MIEL.web.Controllers
                     var productImage = new ProductImage
                     {
                         ProductId = product.ProductId,
-                        ImgPath = "/proimg/" + fileName
+                        ImgPath = "/proimg/" + fileName,
+                        Flag = flag        // 👉 IMPORTANT
                     };
 
                     _db.ProductImages.Add(productImage);
                 }
             }
 
-            // Save all 4 images
-            SaveImage(model.Image);
-            SaveImage(model.Image2);
-            SaveImage(model.Image3);
-            SaveImage(model.Image4);
+            // -------- 4) Save 4 images with correct flag --------
+            SaveImage(model.Image, 1);   // ✅ MAIN IMAGE
+            SaveImage(model.Image2, 0);
+            SaveImage(model.Image3, 0);
+            SaveImage(model.Image4, 0);
 
             _db.SaveChanges(); // Save all images together
 
@@ -105,6 +106,6 @@ namespace MIEL.web.Controllers
             return RedirectToAction("Index");
         }
 
-    }
 
+    }
 }

@@ -15,5 +15,7 @@ namespace MIEL.web.Models.EntityModels
 
         [Required]
         public string ImgPath { get; set; }
+        public int Flag { get; set; }   // 1 = main image, 0 = others
+
     }
 }
