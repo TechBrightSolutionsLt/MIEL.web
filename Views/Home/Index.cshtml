@@ -14,20 +14,21 @@
 
 <div id="header-carousel" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner">
-        @if (bannerImages == null || !bannerImages.Any())
-        {
-            <!-- existing static carousel items here -->
-        }
+
+        @* ===== CASE 1: ADMIN IMAGES EXIST ===== *@
         @if (bannerImages != null && bannerImages.Any())
         {
             bool first = true;
 
             foreach (var item in bannerImages)
             {
-                <div class="carousel-item @(first ? "active" : "")" style="height: 500px;">
-                    <img class="img-fluid" src="@item.ImagePath" alt="Banner Image">
+                <div class="carousel-item @(first ? "active" : "")" style="height:500px;">
+                    <img class="w-100"
+                         src="@item.ImagePath"
+                         style="height:500px; object-fit:cover; object-position: top;"
+                         alt="Banner Image">
                     <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                        <div class="p-3" style="max-width: 700px;">
+                        <div class="p-3" style="max-width:700px;">
                             <h3 class="display-4 text-white font-weight-semi-bold mb-4">
                                 Welcome
                             </h3>
@@ -39,9 +40,23 @@
                 first = false;
             }
         }
-       
+        else
+        {
+            @* ===== CASE 2: NO ADMIN IMAGES (DEFAULT FALLBACK) ===== *@
+            <div class="carousel-item active" style="height:500px;">
+                <img class="img-fluid w-100 h-100"
+                     style="object-fit:cover"
+                     src="~/img/carousel-1.jpg"
+                     alt="Default Banner">
+            </div>
 
-        
+            <div class="carousel-item" style="height:500px;">
+                <img class="img-fluid w-100 h-100"
+                     style="object-fit:cover"
+                     src="~/img/carousel-2.jpg"
+                     alt="Default Banner">
+            </div>
+        }
 
     </div>
     <a class="carousel-control-prev" href="#header-carousel" data-slide="prev">
@@ -178,22 +193,15 @@
         }
     });
 </script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        // Count admin images from server
-        const adminImageCount = @(bannerImages != null ? bannerImages.Count : 0);
-
-        if (adminImageCount > 0) {
-            const allItems = document.querySelectorAll("#header-carousel .carousel-item");
-
-            // Hide items AFTER admin images (these are static ones)
-            allItems.forEach((item, index) => {
-                if (index >= adminImageCount) {
-                    item.style.display = "none";
-                }
-            });
+    <style>
+        #header-carousel .carousel-item {
+            height: 500px;
         }
 
-    });
-</script>
+        #header-carousel .banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 🔥 fills banner nicely */
+            object-position: center;
+        }
+    </style>
