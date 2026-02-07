@@ -1,0 +1,172 @@
+﻿@model MIEL.web.Models.ViewModel.ProductListVM
+
+<div class="container py-5">
+    <div class="row">
+
+        <!-- LEFT : PRODUCT IMAGES -->
+        <div class="col-md-5">
+
+            <!-- MAIN IMAGE -->
+            <div class="main-image zoom-main mb-3">
+                <img id="mainProductImage"
+                     src="@Model.ImagePath"
+                     alt="@Model.ProductName" />
+            </div>
+
+            <!-- THUMBNAILS -->
+            @if (Model.Images != null && Model.Images.Any())
+            {
+                <div class="thumbnail-row">
+                    <img src="@Model.ImagePath"
+                         class="thumb-img active"
+                         onclick="changeImage(this)" />
+
+                    @foreach (var img in Model.Images)
+                    {
+                        <img src="@img"
+                             class="thumb-img"
+                             onclick="changeImage(this)" />
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT : PRODUCT INFO -->
+        <div class="col-md-7">
+            <h2 class="product-title">@Model.ProductName</h2>
+            <p class="product-brand">@Model.Brand</p>
+
+            <hr />
+
+            <p class="product-description">
+                @Model.ProductDescription
+            </p>
+
+            <button class="btn btn-dark mt-3 px-4"
+                    onclick="addToCart(@Model.ProductId)">
+                Add to Cart
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<style>
+    .main-image {
+        border: 1px solid #eee;
+        padding: 10px;
+        border-radius: 12px;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .zoom-main img {
+        width: 100%;
+        height: 380px;
+        object-fit: contain;
+        transition: transform 0.6s ease;
+        cursor: zoom-in;
+    }
+
+    .zoom-main:hover img {
+        transform: scale(1.5);
+    }
+
+    /* Thumbnails */
+    .thumbnail-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .thumb-img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #f8f8f8;
+        padding: 5px;
+        transition: all 0.3s ease;
+    }
+
+        .thumb-img:hover {
+            border-color: #000;
+            transform: scale(1.05);
+        }
+
+        .thumb-img.active {
+            border-color: #000;
+        }
+
+    /* Text */
+    .product-title {
+        font-weight: 700;
+        font-size: 26px;
+    }
+
+    .product-brand {
+        font-size: 14px;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .product-description {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #444;
+    }
+
+    /* Mobile */
+    @@media (max-width: 768px) {
+        .zoom-main:hover img
+
+    {
+        transform: none;
+    }
+
+    }
+</style>
+<script>
+    // Change main image
+    function changeImage(el) {
+        document.getElementById("mainProductImage").src = el.src;
+
+        document.querySelectorAll(".thumb-img")
+            .forEach(img => img.classList.remove("active"));
+
+        el.classList.add("active");
+    }
+
+    // Add to Cart (AJAX)
+    function addToCart(productId) {
+
+        fetch('/Cart/AddToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: 1
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart');
+            } else {
+                alert(data.message || 'Failed to add product');
+            }
+        })
+        .catch(() => {
+            alert('Error while adding to cart');
+        });
+    }
+</script>
+
+
+

@@ -41,7 +41,7 @@ namespace MIEL.web.Controllers
                 Id = x.Id,
                 SpecName = x.SpecName,
                // Options = x.Options,
-               // OptionType = x.OptionType,
+               // OptionType = "Textbox",
                 SelectedCategoryId = x.CategoryId
             }).ToList();
 
@@ -64,7 +64,7 @@ namespace MIEL.web.Controllers
                 SpecName = model.SpecName,
                 CategoryId = model.SelectedCategoryId,
               //  Options = model.Options,
-               // OptionType = model.OptionType
+                OptionType = "Textbox"
             };
 
             _categoryService.SaveSpecification(entity);

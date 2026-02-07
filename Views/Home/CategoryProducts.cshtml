@@ -1,0 +1,110 @@
+﻿@model List<MIEL.web.Models.ViewModel.ProductListVM>
+
+<div class="container py-5">
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="product-card">
+
+                    <a href="@Url.Action("ProductDetails", "Home", new { id = item.ProductId })"
+                       class="product-link">
+
+                        <div class="product-img zoom-container">
+                            <img src="@item.ImagePath"
+                                 alt="@item.ProductName" />
+                        </div>
+
+                        <div class="product-info text-center">
+                            <h6 class="product-name">@item.ProductName</h6>
+                            <span class="product-brand">@item.Brand</span>
+                        </div>
+
+                    </a>
+
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+
+
+
+
+
+    .product-brand {
+        font-size: 13px;
+        color: #777;
+    }
+
+    .product-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .product-card {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+    /* IMAGE */
+    .product-img {
+        height: 260px;
+        background: #f7f7f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .zoom-container {
+        overflow: hidden;
+    }
+
+        .zoom-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.6s ease;
+        }
+
+        .zoom-container:hover img {
+            transform: scale(1.25);
+            cursor: zoom-in;
+        }
+
+    /* INFO */
+    .product-info {
+        padding: 15px;
+    }
+
+    .product-name {
+        font-weight: 600;
+        font-size: 15px;
+        color: #222;
+        margin-bottom: 4px;
+    }
+
+
+
+    /* MOBILE SAFE */
+    @@media (max-width: 768px) {
+        .zoom-container:hover img
+
+    {
+        transform: none;
+    }
+
+    }
+</style>
