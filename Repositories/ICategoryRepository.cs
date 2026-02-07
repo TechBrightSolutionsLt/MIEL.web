@@ -12,6 +12,6 @@ namespace MIEL.web.Repositories
         void Update(Category category);
         void Delete(int id);
         void Save();
-        List<Category> GetALL();
+       
     }
 }

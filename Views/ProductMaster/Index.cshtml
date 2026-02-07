@@ -1,0 +1,186 @@
+﻿@model MIEL.web.Models.ViewModel.ProductMasterVM
+@{
+    ViewData["Title"] = "Product Master";
+    Layout = "_AdminLayout";
+}
+
+<h2>Product Master</h2>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-success">@TempData["msg"]</div>
+}
+
+@* <form method="post" asp-action="SaveProduct"> *@
+<form method="post" asp-action="SaveProduct" enctype="multipart/form-data">
+
+
+
+    <!-- ================= PRODUCT BOX ================= -->
+    <div class="card p-3 mb-4">
+        <h4>Product Details</h4>
+
+        <label><b>Product Code</b></label>
+        <input asp-for="ProductCode" class="form-control" required />
+        <br />
+
+        <label><b>Product Name</b></label>
+        <input asp-for="ProductName" class="form-control" required />
+        <br />
+
+        <label><b>Brand</b></label>
+        <input asp-for="Brand" class="form-control" required />
+        <br />
+
+        <label><b>Product Description</b></label>
+        <textarea asp-for="ProductDescription" class="form-control" rows="4"></textarea>
+        <br />
+
+        <label><b>Occasion</b></label>
+        <select asp-for="Occasion" class="form-control" required>
+            <option value="">-- Select Occasion --</option>
+            <option>Wedding</option>
+            <option>Party</option>
+            <option>Casual</option>
+            <option>Festival</option>
+            <option>Office</option>
+        </select>
+        <br />
+
+        <label><b>Combo Packages</b></label>
+        <select asp-for="ComboPackage" class="form-control">
+            <option value="">-- Select Package --</option>
+            <option>Single</option>
+            <option>Combo 2</option>
+            <option>Combo 3</option>
+            <option>Family Pack</option>
+        </select>
+        <br />
+
+        <label><b>HSN No</b></label>
+        <input asp-for="HSNNo" class="form-control" />
+    </div>
+    <label><b>Barcode No</b></label>
+    <input asp-for="BarcodeNo" class="form-control" />
+    <br />
+
+    <label><b>Size Chart Image</b></label>
+    <input asp-for="SizeChartImg" type="file" class="form-control" />
+    <br />
+
+
+    <!-- ================= CATEGORY BOX ================= -->
+    <div class="card p-3 mb-4">
+        <h4>Category Details</h4>
+
+        <label><b>Category</b></label>
+        <select asp-for="SelectedCategoryId" id="ddlCategory" class="form-control" required>
+            <option value="">-- Select Category --</option>
+            @foreach (var cat in Model.Categories)
+            {
+                <option value="@cat.CategoryId">@cat.CategoryName</option>
+            }
+        </select>
+        <br />
+
+        <h5>Selected Category Specifications</h5>
+
+        <div class="card" style="border:1px solid #ddd; padding:15px; border-radius:8px;">
+            <div class="card-header" style="background:#f5f5f5; padding:8px;">
+                <b>Specifications</b>
+            </div>
+
+            <div class="card-body" id="specContainer" style="margin-top:10px;">
+                <p class="text-muted">Select a category to load specifications.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3 mb-4">
+        <h4>Product Images</h4>
+
+        <label><b>Image 1</b></label>
+        <input asp-for="Image" type="file" class="form-control" required />
+        <br />
+
+        <label><b>Image 2</b></label>
+        <input asp-for="Image2" type="file" class="form-control" />
+        <br />
+
+        <label><b>Image 3</b></label>
+        <input asp-for="Image3" type="file" class="form-control" />
+        <br />
+
+        <label><b>Image 4</b></label>
+        <input asp-for="Image4" type="file" class="form-control" />
+    </div>
+
+
+
+
+    <button type="submit" class="btn btn-primary">Save Product</button>
+
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $("#ddlCategory").change(function () {
+
+            var catId = $(this).val();
+
+            if (catId == "") {
+                $("#specContainer").html(
+                  "<p class='text-muted'>Select a category to load specifications.</p>"
+                );
+                return;
+            }
+
+            $.ajax({
+                url: "/ProductMaster/GetSpecifications",
+                type: "POST",
+                data: { categoryId: catId },
+                success: function (data) {
+
+                    $("#specContainer").empty();
+
+                    if (data.length == 0) {
+                        $("#specContainer").html(
+                          "<p class='text-danger'>No specifications found.</p>"
+                        );
+                        return;
+                    }
+
+                    $.each(data, function (i, item) {
+
+                        var html = "<div class='mb-3'>";
+
+                        html += "<label><b>" + item.specName + "</b></label><br>";
+
+                        if (item.optionType == "Textbox") {
+                            html += "<input type='text' class='form-control' " +
+                                    "name='Specs[" + item.specName + "]' />";
+                        }
+                        else if (item.optionType == "Checkbox") {
+
+                            if (item.options) {
+                                var opts = item.options.split(",");
+
+                                for (var j = 0; j < opts.length; j++) {
+                                    html += "<input type='checkbox' " +
+                                            "name='Specs[" + item.specName + "]' " +
+                                            "value='" + opts[j] + "' /> " +
+                                            opts[j] + " &nbsp;&nbsp;";
+                                }
+                            }
+                        }
+
+                        html += "</div>";
+                        $("#specContainer").append(html);
+                    });
+                }
+            });
+        });
+    </script>
+}

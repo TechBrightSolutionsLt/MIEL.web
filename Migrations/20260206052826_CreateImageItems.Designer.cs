@@ -4,6 +4,7 @@ using MIEL.web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MIEL.web.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260206052826_CreateImageItems")]
+    partial class CreateImageItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,86 +87,50 @@ namespace MIEL.web.Migrations
                     b.ToTable("Specifications");
                 });
 
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImage", b =>
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.Product", b =>
                 {
-                    b.Property<int>("ImgId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImgId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Flag")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImgPath")
+                    b.Property<string>("AvailableSize")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ImgId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductImages");
-                });
-
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductMaster", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
-
-                    b.Property<string>("BarcodeNo")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Brand")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ComboPackage")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("HSNNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Occasion")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ProductCode")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ProductDescription")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProductName")
+                    b.Property<string>("PackageDetails")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SizeChartImg")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
+                    b.Property<string>("StitchingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
 
-                    b.ToTable("ProductMasters");
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Products_TB");
                 });
 
             modelBuilder.Entity("MIEL.web.Models.EntityModels.Supplier", b =>
@@ -240,30 +207,6 @@ namespace MIEL.web.Migrations
                     b.ToTable("Suppliers");
                 });
 
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.procolrsizevarnt", b =>
-                {
-                    b.Property<int>("varientid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("varientid"));
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("colour")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("size")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("varientid");
-
-                    b.ToTable("ProColorSizeVariants");
-                });
-
             modelBuilder.Entity("MIEL.web.Models.EntityModels.userModel", b =>
                 {
                     b.Property<int>("CustomerId")
@@ -326,15 +269,15 @@ namespace MIEL.web.Migrations
                     b.ToTable("users_TB");
                 });
 
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImage", b =>
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.Product", b =>
                 {
-                    b.HasOne("MIEL.web.Models.EntityModels.ProductMaster", "ProductMaster")
+                    b.HasOne("MIEL.web.Models.EntityModels.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductMaster");
+                    b.Navigation("Category");
                 });
 #pragma warning restore 612, 618
         }
