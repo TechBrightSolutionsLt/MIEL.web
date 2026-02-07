@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
-using MIEL.web.Models.ViewModel;
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace MIEL.web.Controllers
 {
@@ -17,15 +17,27 @@ namespace MIEL.web.Controllers
             _db = db;
         }
 
+        // ================= INDEX =================
         public IActionResult Index()
         {
-            var model = new ProductMasterVM
-            {
-                Categories = _db.Categories.ToList()
-            };
-            return View(model);
+            return View();
         }
 
+        [HttpGet]
+        public JsonResult GetAll()
+        {
+            var cats = _db.Categories
+                .Select(c => new {
+                    categoryId = c.CategoryId,
+                    categoryName = c.CategoryName
+                })
+                .ToList();
+
+            return Json(cats);
+        }
+
+
+        // ================= LOAD CATEGORY SPECS =================
         [HttpPost]
         public JsonResult GetSpecifications(int categoryId)
         {
@@ -33,94 +45,131 @@ namespace MIEL.web.Controllers
                 .Where(s => s.CategoryId == categoryId)
                 .Select(s => new
                 {
+                    id = s.Id,                 // IMPORTANT
                     specName = s.SpecName,
-                    options = s.Options,
-                    optionType = s.OptionType
+                    optionType = s.OptionType,
+                    options = s.Options
                 })
                 .ToList();
 
             return Json(specs);
         }
 
+        // ================= SAVE PRODUCT (MAIN SAVE BUTTON) =================
         [HttpPost]
-        public IActionResult SaveProduct(ProductMasterVM model)
+        public IActionResult SaveProduct()
         {
-            if (!ModelState.IsValid)
+            try
             {
-                model.Categories = _db.Categories.ToList(); // IMPORTANT
-                return View("Index", model);
-            }
-
-            // -------- 1) Save Product first --------
-            var product = new ProductMaster
-            {
-                CategoryId = model.SelectedCategoryId,
-                ProductCode = model.ProductCode,
-                ProductName = model.ProductName,
-                Brand = model.Brand,
-                ProductDescription = model.ProductDescription,
-                Occasion = model.Occasion,
-                ComboPackage = model.ComboPackage,
-                HSNNo = model.HSNNo,
-                BarcodeNo = model.BarcodeNo,          // ✅ NEW
-                CreatedDate = DateTime.Now
-            };
-
-            _db.ProductMasters.Add(product);
-            _db.SaveChanges();   // Generates ProductId
-
-            // -------- 2) Prepare image folder --------
-            var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/proimg");
-            if (!Directory.Exists(uploadDir))
-                Directory.CreateDirectory(uploadDir);
-
-            // -------- 3) Save Size Chart Image --------
-            if (model.SizeChartImg != null && model.SizeChartImg.Length > 0)
-            {
-                var sizeImgName = "size_" + Guid.NewGuid() + Path.GetExtension(model.SizeChartImg.FileName);
-                var sizeImgPath = Path.Combine(uploadDir, sizeImgName);
-
-                using (var stream = new FileStream(sizeImgPath, FileMode.Create))
+                // ---------- 1. SAVE PRODUCT ----------
+                var product = new ProductMaster
                 {
-                    model.SizeChartImg.CopyTo(stream);
+                    CategoryId = Convert.ToInt32(Request.Form["SelectedCategoryId"]),
+                    ProductCode = Request.Form["ProductCode"],
+                    ProductName = Request.Form["ProductName"],
+                    Brand = Request.Form["Brand"],
+                    ProductDescription = Request.Form["ProductDescription"],
+                    Occasion = Request.Form["Occasion"],
+                    ComboPackage = Request.Form["ComboPackage"],
+                    HSNNo = Request.Form["HSNNo"],
+                    BarcodeNo = Request.Form["BarcodeNo"],
+                    CreatedDate = DateTime.Now
+                };
+
+                _db.ProductMasters.Add(product);
+                _db.SaveChanges(); // 🔑 ProductId generated
+
+
+                // ---------- 2. IMAGE FOLDER ----------
+                var uploadDir = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/proimg"
+                );
+
+                if (!Directory.Exists(uploadDir))
+                    Directory.CreateDirectory(uploadDir);
+
+
+                // ---------- 3. SAVE PRODUCT IMAGES ----------
+                void SaveImage(IFormFile file, int flag)
+                {
+                    if (file != null && file.Length > 0)
+                    {
+                        var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                        var path = Path.Combine(uploadDir, fileName);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            file.CopyTo(stream);
+                        }
+
+                        _db.ProductImages.Add(new ProductImages
+                        {
+                            ProductId = product.ProductId,
+                            ImgPath = "/proimg/" + fileName,
+                            Flag = flag
+                        });
+                    }
                 }
 
-                product.SizeChartImg = "/proimg/" + sizeImgName;
-                _db.SaveChanges();   // update product
-            }
+                SaveImage(Request.Form.Files["Image"], 1);   // MAIN
+                SaveImage(Request.Form.Files["Image2"], 0);
+                SaveImage(Request.Form.Files["Image3"], 0);
+                SaveImage(Request.Form.Files["Image4"], 0);
 
-            // -------- 4) Helper method for product images --------
-            void SaveImage(IFormFile file, int flag)
-            {
-                if (file != null && file.Length > 0)
+                _db.SaveChanges();
+
+
+                // ---------- 4. SAVE COLOR & SIZE VARIANTS ----------
+                var colours = Request.Form["colour[]"];
+                var sizes = Request.Form["size[]"];
+
+                for (int i = 0; i < colours.Count; i++)
                 {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    var filePath = Path.Combine(uploadDir, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
-
-                    _db.ProductImages.Add(new ProductImages
+                    _db.ProColorSizeVariants.Add(new procolrsizevarnt
                     {
                         ProductId = product.ProductId,
-                        ImgPath = "/proimg/" + fileName,
-                        Flag = flag
+                        colour = colours[i],
+                        size = sizes[i]
                     });
                 }
+
+                _db.SaveChanges();
+
+
+                // ---------- 5. SAVE PRODUCT SPECIFICATIONS ----------
+                var specs = Request.Form
+                    .Where(x => x.Key.StartsWith("Specs["))
+                    .ToList();
+
+                foreach (var spec in specs)
+                {
+                    var specIdStr = spec.Key
+                        .Replace("Specs[", "")
+                        .Replace("]", "");
+
+                    if (!int.TryParse(specIdStr, out int specId))
+                        continue;
+
+                    _db.productspecifications.Add(new productspecification
+                    {
+                        ProductId = product.ProductId,
+                        Id = specId,                    // FK → Specifications.Id
+                        specificationvalue = spec.Value
+                    });
+                }
+
+                _db.SaveChanges();
+
+
+                TempData["msg"] = "Product saved successfully!";
+                return RedirectToAction("Index");
             }
-
-            // -------- 5) Save product images --------
-            SaveImage(model.Image, 1);   // MAIN IMAGE
-            SaveImage(model.Image2, 0);
-            SaveImage(model.Image3, 0);
-            SaveImage(model.Image4, 0);
-
-            _db.SaveChanges();
-
-            TempData["msg"] = "Product, Images & Size Chart Saved Successfully!";
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                TempData["msg"] = "Error: " + ex.Message;
+                return RedirectToAction("Index");
+            }
         }
     }
 }

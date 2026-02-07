@@ -25,6 +25,32 @@ namespace MIEL.web.Migrations
             //    });
 
             //migrationBuilder.CreateTable(
+            //    name: "Customers",
+            //    columns: table => new
+            //    {
+            //        CustomerId = table.Column<int>(type: "int", nullable: false)
+            //            .Annotation("SqlServer:Identity", "1, 1"),
+            //        Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+            //        Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        Mobile = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        EmailId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        BuildingName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        BuildingNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        Landmark = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        Coordinates = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        State = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        Pin = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+            //        GstNo = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+            //        CreditLimit = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+            //    },
+            //    constraints: table =>
+            //    {
+            //        table.PrimaryKey("PK_Customers", x => x.CustomerId);
+            //    });
+
+            //migrationBuilder.CreateTable(
             //    name: "ImageItems",
             //    columns: table => new
             //    {
@@ -37,20 +63,20 @@ namespace MIEL.web.Migrations
             //        table.PrimaryKey("PK_ImageItems", x => x.Id);
             //    });
 
-            migrationBuilder.CreateTable(
-                name: "ProColorSizeVariants",
-                columns: table => new
-                {
-                    varientid = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    colour = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    size = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProColorSizeVariants", x => x.varientid);
-                });
+            //migrationBuilder.CreateTable(
+            //    name: "ProColorSizeVariants",
+            //    columns: table => new
+            //    {
+            //        varientid = table.Column<int>(type: "int", nullable: false)
+            //            .Annotation("SqlServer:Identity", "1, 1"),
+            //        ProductId = table.Column<int>(type: "int", nullable: false),
+            //        colour = table.Column<string>(type: "nvarchar(max)", nullable: false),
+            //        size = table.Column<string>(type: "nvarchar(max)", nullable: false)
+            //    },
+            //    constraints: table =>
+            //    {
+            //        table.PrimaryKey("PK_ProColorSizeVariants", x => x.varientid);
+            //    });
 
             //migrationBuilder.CreateTable(
             //    name: "ProductMasters",
@@ -75,6 +101,21 @@ namespace MIEL.web.Migrations
             //    {
             //        table.PrimaryKey("PK_ProductMasters", x => x.ProductId);
             //    });
+
+            migrationBuilder.CreateTable(
+                name: "productspecifications",
+                columns: table => new
+                {
+                    sId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    specificationvalue = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_productspecifications", x => x.sId);
+                });
 
             //migrationBuilder.CreateTable(
             //    name: "Specifications",
@@ -176,13 +217,19 @@ namespace MIEL.web.Migrations
             //    name: "Categories");
 
             //migrationBuilder.DropTable(
+            //    name: "Customers");
+
+            //migrationBuilder.DropTable(
             //    name: "ImageItems");
 
-            migrationBuilder.DropTable(
-                name: "ProColorSizeVariants");
+            //migrationBuilder.DropTable(
+            //    name: "ProColorSizeVariants");
 
             //migrationBuilder.DropTable(
             //    name: "ProductImages");
+
+            migrationBuilder.DropTable(
+                name: "productspecifications");
 
             //migrationBuilder.DropTable(
             //    name: "Specifications");
@@ -190,11 +237,11 @@ namespace MIEL.web.Migrations
             //migrationBuilder.DropTable(
             //    name: "Suppliers");
 
-            migrationBuilder.DropTable(
-                name: "users_TB");
+            //migrationBuilder.DropTable(
+            //    name: "users_TB");
 
-            migrationBuilder.DropTable(
-                name: "ProductMasters");
+            //migrationBuilder.DropTable(
+            //    name: "ProductMasters");
         }
     }
 }

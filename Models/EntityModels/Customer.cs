@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace MIEL.web.Models.EntityModels
 {
@@ -51,7 +52,8 @@ namespace MIEL.web.Models.EntityModels
 
         [Required(ErrorMessage = "Credit Limit is required")]
         [Range(0.01, 999999999, ErrorMessage = "Credit Limit must be greater than 0")]
-       
-        public decimal? CreditLimit { get; set; }
+        [Precision(18, 2)]
+        public decimal CreditLimit { get; set; }
+
     }
 }

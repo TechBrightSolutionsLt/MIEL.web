@@ -15,6 +15,6 @@ namespace MIEL.web.Models.EntityModels
         [ForeignKey("Specifications")]
         public int Id { get; set; }
         public string specificationvalue { get; set; }
-        public string spImgPath { get; set; }
+       
     }
 }

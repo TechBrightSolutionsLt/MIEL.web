@@ -1,5 +1,4 @@
-﻿@model MIEL.web.Models.ViewModel.ProductMasterVM
-@{
+﻿@{
     ViewData["Title"] = "Product Master";
     Layout = "_AdminLayout";
 }
@@ -11,112 +10,95 @@
     <div class="alert alert-success">@TempData["msg"]</div>
 }
 
-@* <form method="post" asp-action="SaveProduct"> *@
-<form method="post" asp-action="SaveProduct" enctype="multipart/form-data">
+<form method="post" action="/ProductMaster/SaveProduct" enctype="multipart/form-data">
 
-
-
-    <!-- ================= PRODUCT BOX ================= -->
+    <!-- ================= PRODUCT DETAILS ================= -->
     <div class="card p-3 mb-4">
         <h4>Product Details</h4>
 
-        <label><b>Product Code</b></label>
-        <input asp-for="ProductCode" class="form-control" required />
-        <br />
+        <label>Product Code</label>
+        <input type="text" name="ProductCode" class="form-control" required />
 
-        <label><b>Product Name</b></label>
-        <input asp-for="ProductName" class="form-control" required />
-        <br />
+        <label class="mt-2">Product Name</label>
+        <input type="text" name="ProductName" class="form-control" required />
 
-        <label><b>Brand</b></label>
-        <input asp-for="Brand" class="form-control" required />
-        <br />
+        <label class="mt-2">Brand</label>
+        <input type="text" name="Brand" class="form-control" required />
 
-        <label><b>Product Description</b></label>
-        <textarea asp-for="ProductDescription" class="form-control" rows="4"></textarea>
-        <br />
+        <label class="mt-2">Description</label>
+        <textarea name="ProductDescription" class="form-control"></textarea>
 
-        <label><b>Occasion</b></label>
-        <select asp-for="Occasion" class="form-control" required>
-            <option value="">-- Select Occasion --</option>
+        <label class="mt-2">Occasion</label>
+        <select name="Occasion" class="form-control">
             <option>Wedding</option>
             <option>Party</option>
             <option>Casual</option>
             <option>Festival</option>
-            <option>Office</option>
         </select>
-        <br />
 
-        <label><b>Combo Packages</b></label>
-        <select asp-for="ComboPackage" class="form-control">
-            <option value="">-- Select Package --</option>
+        <label class="mt-2">Combo Package</label>
+        <select name="ComboPackage" class="form-control">
             <option>Single</option>
             <option>Combo 2</option>
             <option>Combo 3</option>
-            <option>Family Pack</option>
         </select>
-        <br />
 
-        <label><b>HSN No</b></label>
-        <input asp-for="HSNNo" class="form-control" />
+        <label class="mt-2">HSN No</label>
+        <input type="text" name="HSNNo" class="form-control" />
+
+        <label class="mt-2">Barcode No</label>
+        <input type="text" name="BarcodeNo" class="form-control" />
     </div>
-    <label><b>Barcode No</b></label>
-    <input asp-for="BarcodeNo" class="form-control" />
-    <br />
 
-    <label><b>Size Chart Image</b></label>
-    <input asp-for="SizeChartImg" type="file" class="form-control" />
-    <br />
-
-
-    <!-- ================= CATEGORY BOX ================= -->
+    <!-- ================= CATEGORY DETAILS ================= -->
     <div class="card p-3 mb-4">
         <h4>Category Details</h4>
 
-        <label><b>Category</b></label>
-        <select asp-for="SelectedCategoryId" id="ddlCategory" class="form-control" required>
+        <label>Category</label>
+        <select name="SelectedCategoryId" id="ddlCategory" class="form-control" required>
             <option value="">-- Select Category --</option>
-            @foreach (var cat in Model.Categories)
-            {
-                <option value="@cat.CategoryId">@cat.CategoryName</option>
-            }
         </select>
-        <br />
 
-        <h5>Selected Category Specifications</h5>
-
-        <div class="card" style="border:1px solid #ddd; padding:15px; border-radius:8px;">
-            <div class="card-header" style="background:#f5f5f5; padding:8px;">
-                <b>Specifications</b>
-            </div>
-
-            <div class="card-body" id="specContainer" style="margin-top:10px;">
-                <p class="text-muted">Select a category to load specifications.</p>
-            </div>
+        <h5 class="mt-3">Specifications</h5>
+        <div id="specContainer" class="border p-3">
+            <span class="text-muted">Select category to load specs</span>
         </div>
     </div>
 
+    <!-- ================= COLOR & SIZE ================= -->
+    <div class="card p-3 mb-4">
+        <h4>Color & Size Variants</h4>
+
+        <table class="table table-bordered" id="variantTable">
+            <thead>
+                <tr>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <button type="button" class="btn btn-secondary" onclick="addVariant()">+ Add Variant</button>
+    </div>
+
+    <!-- ================= IMAGES ================= -->
     <div class="card p-3 mb-4">
         <h4>Product Images</h4>
 
-        <label><b>Image 1</b></label>
-        <input asp-for="Image" type="file" class="form-control" required />
-        <br />
+        <label>Main Image</label>
+        <input type="file" name="Image" class="form-control" required />
 
-        <label><b>Image 2</b></label>
-        <input asp-for="Image2" type="file" class="form-control" />
-        <br />
+        <label class="mt-2">Image 2</label>
+        <input type="file" name="Image2" class="form-control" />
 
-        <label><b>Image 3</b></label>
-        <input asp-for="Image3" type="file" class="form-control" />
-        <br />
+        <label class="mt-2">Image 3</label>
+        <input type="file" name="Image3" class="form-control" />
 
-        <label><b>Image 4</b></label>
-        <input asp-for="Image4" type="file" class="form-control" />
+        <label class="mt-2">Image 4</label>
+        <input type="file" name="Image4" class="form-control" />
     </div>
-
-
-
 
     <button type="submit" class="btn btn-primary">Save Product</button>
 
@@ -126,61 +108,56 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        $("#ddlCategory").change(function () {
-
-            var catId = $(this).val();
-
-            if (catId == "") {
-                $("#specContainer").html(
-                  "<p class='text-muted'>Select a category to load specifications.</p>"
-                );
-                return;
-            }
-
-            $.ajax({
-                url: "/ProductMaster/GetSpecifications",
-                type: "POST",
-                data: { categoryId: catId },
-                success: function (data) {
-
-                    $("#specContainer").empty();
-
-                    if (data.length == 0) {
-                        $("#specContainer").html(
-                          "<p class='text-danger'>No specifications found.</p>"
-                        );
-                        return;
-                    }
-
-                    $.each(data, function (i, item) {
-
-                        var html = "<div class='mb-3'>";
-
-                        html += "<label><b>" + item.specName + "</b></label><br>";
-
-                        if (item.optionType == "Textbox") {
-                            html += "<input type='text' class='form-control' " +
-                                    "name='Specs[" + item.specName + "]' />";
-                        }
-                        else if (item.optionType == "Checkbox") {
-
-                            if (item.options) {
-                                var opts = item.options.split(",");
-
-                                for (var j = 0; j < opts.length; j++) {
-                                    html += "<input type='checkbox' " +
-                                            "name='Specs[" + item.specName + "]' " +
-                                            "value='" + opts[j] + "' /> " +
-                                            opts[j] + " &nbsp;&nbsp;";
-                                }
-                            }
-                        }
-
-                        html += "</div>";
-                        $("#specContainer").append(html);
-                    });
-                }
+        // Load categories
+        $(document).ready(function () {
+            $.get("/Category/GetAll", function (data) {
+                $.each(data, function (i, c) {
+                    $("#ddlCategory").append(`<option value="${c.categoryId}">${c.categoryName}</option>`);
+                });
             });
         });
+
+        $(document).ready(function () { debugger;
+            $.get("/ProductMaster/GetAll", function (data) {
+                $("#ddlCategory").empty()
+                    .append('<option value="">-- Select Category --</option>');
+
+                $.each(data, function (i, c) {
+                    $("#ddlCategory").append(
+                        `<option value="${c.categoryId}">${c.categoryName}</option>`
+                    );
+                });
+            });
+        });
+ 
+
+
+        // Load specs
+        $("#ddlCategory").change(function () {
+            var catId = $(this).val();
+            $("#specContainer").empty();
+
+            if (catId === "") return;
+
+            $.post("/ProductMaster/GetSpecifications", { categoryId: catId }, function (data) {
+                $.each(data, function (i, s) {
+                    $("#specContainer").append(`
+                        <label>${s.specName}</label>
+                        <input type="text" name="Specs[${s.id}]" class="form-control mb-2" />
+                    `);
+                });
+            });
+        });
+
+        // Variants
+        function addVariant() {
+            $("#variantTable tbody").append(`
+                <tr>
+                    <td><input type="text" name="colour[]" class="form-control" required /></td>
+                    <td><input type="text" name="size[]" class="form-control" required /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="$(this).closest('tr').remove()">X</button></td>
+                </tr>
+            `);
+        }
     </script>
 }
