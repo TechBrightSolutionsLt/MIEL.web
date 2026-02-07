@@ -7,6 +7,11 @@
 @{
     var bannerImages = ViewBag.BannerImages as List<ImageItem>;
 }
+@using MIEL.web.Models.ViewModel
+@{
+    var categories = ViewBag.indexcategoryVM as List<indexcategoryVM>;
+}
+
 <div id="header-carousel" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner">
         @if (bannerImages == null || !bannerImages.Any())
@@ -82,64 +87,41 @@
 <!-- Featured End -->
 
 
+
 <!-- Categories Start -->
 <div class="container-fluid pt-5">
     <div class="row px-xl-5 pb-3">
-        <div class="col-lg-4 col-md-6 pb-4" >
-            <div class="cat-item">
-                <a href="#" class="cat-img">
-                    <img src="~/img/1.JPG" alt="">
-                </a>
-                <h3>Kurthis</h3>
-            </div>
-        </div>
 
-        <div class="col-lg-4 col-md-6 pb-4">
-            <div class="cat-item">
-                <a href="#" class="cat-img">
-                    <img src="~/img/2.JPG" alt="">
-                </a>
-                <h3>Salwar Suit</h3>
-            </div>
-        </div>
+        @if (categories != null && categories.Any())
+        {
+            foreach (var item in categories)
+            {
+                <div class="col-lg-4 col-md-6 pb-4">
+                    <div class="cat-item">
+                        <a href="@Url.Action("CategoryProducts", "Home",
+                                                           new { categoryId = item.CategoryId })"
+                   class="cat-img">
 
-        <div class="col-lg-4 col-md-6 pb-4">
-            <div class="cat-item">
-                <a href="#" class="cat-img">
-                    <img src="~/img/4.JPG" alt="">
+                            <img src="@(string.IsNullOrEmpty(item.ImagePath)
+                                                         ? Url.Content("~/img/no-image.png")
+                                                         : item.ImagePath)"
+                         alt="@item.CategoryName" />
                 </a>
-                <h3>Kurthas</h3>
-            </div>
-        </div>
 
-        <div class="col-lg-4 col-md-6 pb-4">
-            <div class="cat-item">
-                <a href="#" class="cat-img">
-                    <img src="~/img/7.jpg" alt="">
-                </a>
-                <h3>Salwar Party Wear</h3>
+                        <h3>@item.CategoryName</h3>
+                    </div>
+                </div>
+                }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p>No categories found</p>
             </div>
-        </div>
+        }
 
-        <div class="col-lg-4 col-md-6 pb-4">
-            <div class="cat-item">
-                <a href="#" class="cat-img">
-                    <img src="~/img/6.JPG" alt="">
-                </a>
-                <h3>Sarees</h3>
-            </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6 pb-4">
-            <div class="cat-item">
-                <a href="#" class="cat-img">
-                    <img src="~/img/10.jpg" alt="">
-                </a>
-                <h3>Kurthis Party Wear</h3>
-            </div>
-        </div>
     </div>
-</div>
+
 <!-- Categories End -->
 
 
