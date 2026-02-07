@@ -102,7 +102,7 @@ namespace MIEL.web.Controllers
                         file.CopyTo(stream);
                     }
 
-                    _db.ProductImages.Add(new ProductImage
+                    _db.ProductImages.Add(new ProductImages
                     {
                         ProductId = product.ProductId,
                         ImgPath = "/proimg/" + fileName,
