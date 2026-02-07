@@ -15,9 +15,10 @@ namespace MIEL.web.Models.EntityModels
         
         [Required]
         public string Type { get; set; }
-
-        [Required(ErrorMessage = "Phone number is required")]
-        [RegularExpression(@"^[0-9]{10,}$", ErrorMessage = "Please enter at least 10 digits")]
+        [Required(ErrorMessage = "Mobile number is required")]
+        [RegularExpression(@"^(04\d{8}|\+614\d{8})$",
+            ErrorMessage = "Enter a valid Australian mobile number (04XXXXXXXX or +614XXXXXXXX)")]
+    
         public string Mobile { get; set; }
 
 

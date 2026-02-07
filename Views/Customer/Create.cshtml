@@ -59,19 +59,22 @@
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <input asp-for="Street" class="form-control" placeholder="Street" />
+                    <label class="form-label">Street</label>
+                    <input asp-for="Street" class="form-control" />
                     <span asp-validation-for="Street" class="text-danger"></span>
 
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <input asp-for="BuildingName" class="form-control" placeholder="Building Name" />
+                    <label class="form-label">Building Name</label>
+                    <input asp-for="BuildingName" class="form-control" />
                     <span asp-validation-for="BuildingName" class="text-danger"></span>
 
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <input asp-for="BuildingNo" class="form-control" placeholder="Building No" />
+                    <label class="form-label">Building No</label>
+                    <input asp-for="BuildingNo" class="form-control" />
                     <span asp-validation-for="BuildingNo" class="text-danger"></span>
 
                 </div>
@@ -79,12 +82,13 @@
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <input asp-for="Landmark" class="form-control" placeholder="Landmark" />
+                    <label class="form-label">Landmark</label>
+                    <input asp-for="Landmark" class="form-control" />
                     <span asp-validation-for="Landmark" class="text-danger"></span>
 
                 </div>
                 <div class="col-md-6 mb-3">
-                    
+                    <label class="form-label">State</label>
                     <input asp-for="State" id="state" class="form-control"
                            placeholder="Type State" autocomplete="off" />
                     <div id="stateList" class="list-group"></div>
@@ -92,17 +96,19 @@
             </div>
                 <div class="row">
                <div class="col-md-6 mb-3">
-                    
+                    <label class="form-label">City</label>
                     <input asp-for="City" id="city" class="form-control"
                            placeholder="Type City" autocomplete="off" />
                     <div id="cityList" class="list-group"></div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Pin" class="form-control" placeholder="PIN Code" />
+                    <label class="form-label">Pin</label>
+                    <input asp-for="Pin" class="form-control" />
                     <span asp-validation-for="Pin" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Coordinates" class="form-control" placeholder="Coordinates (Lat, Long)" />
+                    <label class="form-label">Coordinates</label>
+                    <input asp-for="Coordinates" class="form-control" />
                     <span asp-validation-for="Coordinates" class="text-danger"></span>
 
                 </div>
@@ -114,13 +120,15 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <input asp-for="GstNo" class="form-control" placeholder="GST Number" />
+                    <label class="form-label">GST Number</label>
+                    <input asp-for="GstNo" class="form-control" />
                     <span asp-validation-for="GstNo" class="text-danger"></span>
 
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <input asp-for="CreditLimit" class="form-control" placeholder="Credit Limit" />
+                    <label class="form-label">Credit Limit</label>
+                    <input asp-for="CreditLimit" class="form-control" />
                     <span asp-validation-for="CreditLimit" class="text-danger"></span>
 
                 </div>

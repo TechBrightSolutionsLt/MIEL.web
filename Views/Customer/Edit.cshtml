@@ -70,40 +70,48 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Street" class="form-control" placeholder="Street" />
+                    <label class="form-label">Street</label>
+                    <input asp-for="Street" class="form-control" />
                     <span asp-validation-for="Street" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <input asp-for="BuildingName" class="form-control" placeholder="Building Name" />
+                    <label class="form-label">Building Name</label>
+                    <input asp-for="BuildingName" class="form-control" />
                     <span asp-validation-for="BuildingName" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <input asp-for="BuildingNo" class="form-control" placeholder="Building No" />
+                    <label class="form-label">Building No</label>
+                    <input asp-for="BuildingNo" class="form-control" />
                     <span asp-validation-for="BuildingNo" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Landmark" class="form-control" placeholder="Landmark" />
+                    <label class="form-label">Landmark</label>
+                    <input asp-for="Landmark" class="form-control" />
                     <span asp-validation-for="Landmark" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Coordinates" class="form-control" placeholder="Coordinates (Lat, Long)" />
+                    <label class="form-label">Coordinates</label>
+                    <input asp-for="Coordinates" class="form-control"/>
                     <span asp-validation-for="Coordinates" class="text-danger"></span>
                 </div>
                 <!-- STATE DROPDOWN -->
                 <div class="col-md-6 mb-3">
-                    <input asp-for="State" class="form-control" placeholder="State" />
+                    <label class="form-label">State</label>
+                    <input asp-for="State" class="form-control"/>
                     <span asp-validation-for="State" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <input asp-for="City" class="form-control" placeholder="City" />
+                    <label class="form-label">City</label>
+                    <input asp-for="City" class="form-control" />
                     <span asp-validation-for="City" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Pin" class="form-control" placeholder="PIN Code" />
+                    <label class="form-label">Pin</label>
+                    <input asp-for="Pin" class="form-control" />
                     <span asp-validation-for="Pin" class="text-danger"></span>
                 </div>
             </div>
@@ -114,12 +122,14 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <input asp-for="GstNo" class="form-control" placeholder="GST Number" />
+                    <label class="form-label">GST No</label>
+                    <input asp-for="GstNo" class="form-control" />
                     <span asp-validation-for="GstNo" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <input asp-for="CreditLimit" class="form-control" placeholder="Credit Limit" />
+                    <label class="form-label">Credit Limit</label>
+                    <input asp-for="CreditLimit" class="form-control" />
                     <span asp-validation-for="CreditLimit" class="text-danger"></span>
                 </div>
             </div>
