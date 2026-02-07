@@ -33,5 +33,6 @@ namespace MIEL.web.Data
 
 
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<MainCategory> MainCategories { get; set; }
     }
 }
