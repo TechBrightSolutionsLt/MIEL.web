@@ -1,0 +1,143 @@
+﻿@model MIEL.web.Models.EntityModels.Customer
+
+@{
+    ViewData["Title"] = "Edit Customer";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Edit Customer</h2>
+
+    <!-- ✅ Success Message Alert -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm p-4">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- REQUIRED -->
+            <input type="hidden" asp-for="CustomerId" />
+
+            <!-- BASIC DETAILS -->
+            <h5 class="mb-3 text-primary">Basic Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Customer Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Customer Type</label>
+                    <select asp-for="Type" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option>Individual</option>
+                        <option>Business</option>
+                    </select>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- CONTACT DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Contact Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mobile</label>
+                    <input asp-for="Mobile" class="form-control" />
+                    <span asp-validation-for="Mobile" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="EmailId" class="form-control" />
+                    <span asp-validation-for="EmailId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ADDRESS DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Address Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Street" class="form-control" placeholder="Street" />
+                    <span asp-validation-for="Street" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="BuildingName" class="form-control" placeholder="Building Name" />
+                    <span asp-validation-for="BuildingName" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="BuildingNo" class="form-control" placeholder="Building No" />
+                    <span asp-validation-for="BuildingNo" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Landmark" class="form-control" placeholder="Landmark" />
+                    <span asp-validation-for="Landmark" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Coordinates" class="form-control" placeholder="Coordinates (Lat, Long)" />
+                    <span asp-validation-for="Coordinates" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="City" class="form-control" placeholder="City" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+
+                <!-- STATE DROPDOWN -->
+                <div class="col-md-6 mb-3">
+                    <input asp-for="State" class="form-control" placeholder="State" />
+                    <span asp-validation-for="State" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="Pin" class="form-control" placeholder="PIN Code" />
+                    <span asp-validation-for="Pin" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- BUSINESS DETAILS -->
+            <hr />
+            <h5 class="mb-3 text-primary">Business Details</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input asp-for="GstNo" class="form-control" placeholder="GST Number" />
+                    <span asp-validation-for="GstNo" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <input asp-for="CreditLimit" class="form-control" placeholder="Credit Limit" />
+                    <span asp-validation-for="CreditLimit" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-primary px-4">Update</button>
+                <a asp-action="Create" class="btn btn-secondary ms-2 px-4">Back</a>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
