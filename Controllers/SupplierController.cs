@@ -21,10 +21,13 @@ namespace MIEL.web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Supplier supplier)
         {
+
             if (ModelState.IsValid)
             {
+
                 _context.Suppliers.Add(supplier);
                 _context.SaveChanges();
                 TempData["SuccessMessage"] = "Supplier saved successfully!";
