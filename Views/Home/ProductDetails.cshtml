@@ -3,11 +3,11 @@
 <div class="container py-5">
     <div class="row">
 
-        <!-- LEFT : PRODUCT IMAGES -->
+        <!-- LEFT SIDE : IMAGES -->
         <div class="col-md-5">
 
             <!-- MAIN IMAGE -->
-            <div class="main-image zoom-main mb-3">
+            <div class="main-image zoom-container">
                 <img id="mainProductImage"
                      src="@Model.ImagePath"
                      alt="@Model.ProductName" />
@@ -19,58 +19,111 @@
                 <div class="thumbnail-row">
                     <img src="@Model.ImagePath"
                          class="thumb-img active"
-                         onclick="changeImage(this)" />
+                         onmouseover="changeImage(this)" />
 
                     @foreach (var img in Model.Images)
                     {
                         <img src="@img"
                              class="thumb-img"
-                             onclick="changeImage(this)" />
+                             onmouseover="changeImage(this)" />
                     }
                 </div>
             }
         </div>
 
-        <!-- RIGHT : PRODUCT INFO -->
+        <!-- RIGHT SIDE : PRODUCT DETAILS -->
         <div class="col-md-7">
+
             <h2 class="product-title">@Model.ProductName</h2>
             <p class="product-brand">@Model.Brand</p>
 
-            <hr />
+            <!-- COLOR OPTIONS -->
+            @if (Model.Variants != null && Model.Variants.Any())
+            {
+                var colors = Model.Variants.Select(v => v.Color).Distinct().ToList();
 
-            <p class="product-description">
-                @Model.ProductDescription
-            </p>
+                <div class="variant-box">
+                    <h6>Color</h6>
+                    <div class="variant-options">
+                        @foreach (var color in colors)
+                        {
+                            <span class="variant-pill">@color</span>
+                        }
+                    </div>
+                </div>
+            }
 
-            <button class="btn btn-dark mt-3 px-4"
-                    onclick="addToCart(@Model.ProductId)">
-                Add to Cart
-            </button>
+            <!-- SIZE OPTIONS -->
+            @if (Model.Variants != null && Model.Variants.Any())
+            {
+                var sizes = Model.Variants.Select(v => v.Size).Distinct().ToList();
+
+                <div class="variant-box">
+                    <h6>Size</h6>
+                    <div class="variant-options">
+                        @foreach (var size in sizes)
+                        {
+                            <span class="variant-pill">@size</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- BUTTONS -->
+            <div class="btn-row mt-4">
+                <button class="btn btn-outline-dark me-3"
+                        onclick="addToCart(@Model.ProductId)">
+                    Add to Cart
+                </button>
+
+                <button class="btn btn-buy">
+                    Buy Now
+                </button>
+            </div>
+
+            <!-- PRODUCT HIGHLIGHTS -->
+            @if (Model.Specificationsnew != null && Model.Specificationsnew.Any())
+            {
+                <div class="highlight-box mt-5">
+                    <div class="highlight-header">
+                        <h5>Product Highlights</h5>
+                    </div>
+
+                    <div class="highlight-body">
+                        @foreach (var spec in Model.Specificationsnew)
+                        {
+                            <div class="highlight-row">
+                                <strong>@spec.SpecName</strong> : @spec.SpecValue
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+
         </div>
-
     </div>
 </div>
 
-
 <style>
+    /* Main image */
     .main-image {
         border: 1px solid #eee;
-        padding: 10px;
-        border-radius: 12px;
+        padding: 12px;
+        border-radius: 10px;
         background: #fff;
         overflow: hidden;
     }
 
-    .zoom-main img {
-        width: 100%;
-        height: 380px;
-        object-fit: contain;
-        transition: transform 0.6s ease;
-        cursor: zoom-in;
-    }
+        .main-image img {
+            width: 100%;
+            height: 420px;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
 
-    .zoom-main:hover img {
-        transform: scale(1.5);
+    .zoom-container:hover img {
+        transform: scale(1.4);
     }
 
     /* Thumbnails */
@@ -78,62 +131,111 @@
         display: flex;
         gap: 10px;
         margin-top: 12px;
+        flex-wrap: wrap;
     }
 
     .thumb-img {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
         object-fit: contain;
-        border: 2px solid transparent;
-        border-radius: 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
         cursor: pointer;
-        background: #f8f8f8;
-        padding: 5px;
-        transition: all 0.3s ease;
+        padding: 4px;
+        transition: all 0.2s;
     }
 
-        .thumb-img:hover {
-            border-color: #000;
-            transform: scale(1.05);
-        }
-
+        .thumb-img:hover,
         .thumb-img.active {
             border-color: #000;
+            transform: scale(1.05);
         }
 
     /* Text */
     .product-title {
         font-weight: 700;
-        font-size: 26px;
+        font-size: 24px;
+        margin-bottom: 5px;
     }
 
     .product-brand {
-        font-size: 14px;
-        color: #777;
+        color: #888;
+        font-size: 13px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        margin-bottom: 20px;
     }
 
-    .product-description {
-        font-size: 15px;
-        line-height: 1.7;
-        color: #444;
+    /* Variants */
+    .variant-box {
+        margin-bottom: 20px;
+    }
+
+    .variant-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .variant-pill {
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        background: #fff;
+    }
+
+        .variant-pill.active {
+            background: #000;
+            color: #fff;
+        }
+
+    /* Buttons */
+    .btn-row {
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-buy {
+        background: #d32f2f;
+        color: #fff;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    /* Highlights */
+    .highlight-box {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 15px;
+        background: #fff;
+    }
+
+    .highlight-title {
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .highlight-table td {
+        border: none;
+        padding: 8px 0;
+        font-size: 14px;
     }
 
     /* Mobile */
     @@media (max-width: 768px) {
-        .zoom-main:hover img
-
-    {
-        transform: none;
-    }
-
+        .zoom-container:hover img {
+            transform: none;
+        }
     }
 </style>
+
 <script>
-    // Change main image
     function changeImage(el) {
-        document.getElementById("mainProductImage").src = el.src;
+        var mainImg = document.getElementById("mainProductImage");
+        mainImg.src = el.src;
 
         document.querySelectorAll(".thumb-img")
             .forEach(img => img.classList.remove("active"));
@@ -141,14 +243,21 @@
         el.classList.add("active");
     }
 
-    // Add to Cart (AJAX)
-    function addToCart(productId) {
+    // Variant selection
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".variant-pill").forEach(el => {
+            el.addEventListener("click", function () {
+                this.parentElement.querySelectorAll(".variant-pill")
+                    .forEach(p => p.classList.remove("active"));
+                this.classList.add("active");
+            });
+        });
+    });
 
+    function addToCart(productId) {
         fetch('/Cart/AddToCart', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 productId: productId,
                 quantity: 1
@@ -158,15 +267,7 @@
         .then(data => {
             if (data.success) {
                 alert('Product added to cart');
-            } else {
-                alert(data.message || 'Failed to add product');
             }
-        })
-        .catch(() => {
-            alert('Error while adding to cart');
         });
     }
 </script>
-
-
-
