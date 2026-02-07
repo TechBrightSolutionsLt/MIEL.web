@@ -122,6 +122,5 @@ namespace MIEL.web.Controllers
             TempData["msg"] = "Product, Images & Size Chart Saved Successfully!";
             return RedirectToAction("Index");
         }
-
     }
 }
