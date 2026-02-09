@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Product Master List";
+    Layout = "_AdminLayout";
+}
+@model IEnumerable<dynamic>
+
+<h2>Product List</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.ProductName</td>
+                <td>@p.CategoryName</td>
+                <td>@p.Brand</td>
+                <td>@p.CreatedDate.ToShortDateString()</td>
+                <td>
+                    <a href="/ProductMaster/Edit/@p.ProductId"
+                       class="btn btn-sm btn-primary">Edit</a>
+
+                    <a href="/ProductMaster/Delete/@p.ProductId"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this product?');">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                title: "Success!",
+                text: "@TempData["SuccessMessage"]",
+                icon: "success",
+                confirmButtonText: "OK"
+            });
+        </script>
+    }
+}

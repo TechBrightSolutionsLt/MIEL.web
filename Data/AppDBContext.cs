@@ -15,7 +15,7 @@ namespace MIEL.web.Data
         public DbSet<userModel> users_TB { get; set; }
 
         // Add this line for Category table
-      
+
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<ImageItem> ImageItems { get; set; }
@@ -33,6 +33,28 @@ namespace MIEL.web.Data
 
 
         public DbSet<Customer> Customers { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProductImages>()
+                .HasOne(p => p.ProductMaster)
+                .WithMany()
+                .HasForeignKey(p => p.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<procolrsizevarnt>()
+                .HasOne<ProductMaster>()
+                .WithMany()
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<productspecification>()
+                .HasOne<ProductMaster>()
+                .WithMany()
+                .HasForeignKey(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
         public DbSet<MainCategory> MainCategories { get; set; }
     }
 }

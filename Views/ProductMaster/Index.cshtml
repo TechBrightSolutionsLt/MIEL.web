@@ -4,6 +4,8 @@
 }
 
 <h2>Product Master</h2>
+<a href="/ProductMaster/List">View Products</a>
+
 
 @if (TempData["msg"] != null)
 {
@@ -161,3 +163,21 @@
         }
     </script>
 }
+
+
+        
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                title: "Success!",
+                text: "@TempData["SuccessMessage"]",
+                icon: "success",
+                confirmButtonText: "OK"
+            });
+        </script>
+    }
+        
