@@ -1,7 +1,7 @@
 ﻿@model MIEL.web.Models.ViewModels.CategoryMasterVM
 
 @{
-    ViewData["Title"] = "Category Master";
+    ViewData["Title"] = "Sub Category Master";
     Layout = "_AdminLayout";
 }
 
@@ -23,12 +23,26 @@
                 <input type="hidden" asp-for="Category.CategoryId" />
 
                 <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <label asp-for="Category.MainCategoryId" class="form-label fw-bold"></label>
+
+                        <select asp-for="Category.MainCategoryId"
+                                asp-items="Model.MainCategoryList"
+                                class="form-select">
+                            <option value="">-- Select Main Category --</option>
+                        </select>
+
+                        <span asp-validation-for="Category.MainCategoryId" class="text-danger"></span>
+                    </div>
 
                     <div class="col-md-6">
                         <label asp-for="Category.CategoryName" class="form-label fw-bold"></label>
-                        <input asp-for="Category.CategoryName" class="form-control" placeholder="Enter Category Name" />
+                        <input asp-for="Category.CategoryName" class="form-control" placeholder="Enter Sub Category Name" />
                         <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
                     </div>
+
+
+
 
                     <div class="col-md-3 mt-3 mt-md-0">
                         <button type="submit" class="btn btn-success w-100">
@@ -64,6 +78,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Category Name</th>
+                        <th>Sub Category Name</th>
                         <th width="200">Actions</th>
                     </tr>
                 </thead>
@@ -72,6 +87,7 @@
                     @foreach (var item in Model.Categories)
                     {
                         <tr>
+                            <td>@item.MainCategory?.MainCategoryName</td>
                             <td>@item.CategoryName</td>
 
                             <td>

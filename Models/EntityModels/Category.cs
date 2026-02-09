@@ -1,14 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using MIEL.web.Models.EntityModels;
+using System.ComponentModel.DataAnnotations;
 
-namespace MIEL.web.Models.EntityModels
+public class Category
 {
-    public class Category
-    {
-        [Key]
-        public int CategoryId { get; set; }
+    public int CategoryId { get; set; }
 
-        [Required(ErrorMessage = "Category Name is required")]
-        [StringLength(100)]
-        public string CategoryName { get; set; }
-    }
+    [Required(ErrorMessage = "Category name is required")]
+    public string CategoryName { get; set; }
+
+    public int? MainCategoryId { get; set; }
+
+    [ValidateNever] // ⭐⭐⭐ THIS FIXES ModelState
+    public MainCategory MainCategory { get; set; }
 }
