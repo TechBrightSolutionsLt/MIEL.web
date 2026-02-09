@@ -47,10 +47,33 @@ namespace MIEL.web.Controllers
           .ToList();
 
             ViewBag.indexcategoryVM = categories;
+            ViewBag.MainCategories = _context.MainCategories
+      .Select(m => new
+      {
+          m.MainCategoryId,
+          m.MainCategoryName
+      })
+      .ToList();
 
             return View();
+           
+        }
+        [HttpGet]
+        public IActionResult GetSubCategories(int categoryId)
+        {
+            var subCategories = _context.Categories
+                .Where(c => c.MainCategoryId == categoryId)
+                .Select(c => new
+                {
+                    subCategoryId = c.CategoryId,
+                    subCategoryName = c.CategoryName
+                })
+                .ToList();
+
+            return Json(subCategories);
         }
 
+     
         public IActionResult CategoryProducts(int categoryId)
         {
             var products = _context.ProductMasters
