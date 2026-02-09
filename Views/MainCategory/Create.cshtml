@@ -7,14 +7,14 @@
 
 <div class="container-fluid">
 
-    <h3 class="mb-4 text-primary">Add Main Category</h3>
+    <h3 class="mb-4 text-primary">Add Category</h3>
 
     <div class="row">
         <!-- FORM SECTION -->
         <div class="col-md-4">
             <form asp-action="Create" method="post">
                 <div class="mb-3">
-                    <label class="form-label">Main Category Name</label>
+                    <label class="form-label">Category Name</label>
                     <input asp-for="MainCategoryName" class="form-control" />
                     <span asp-validation-for="MainCategoryName" class="text-danger"></span>
                 </div>
