@@ -104,6 +104,37 @@
         </div>
     </div>
 
+    <!-- ================= SIZE CHART ================= -->
+    <div class="card p-3 mb-4">
+        <h4>Size Chart</h4>
+
+        @if (!string.IsNullOrEmpty(Model.Product.sizechartPath))
+        {
+            <p>Current Size Chart:</p>
+
+            @if (Model.Product.sizechartPath.EndsWith(".pdf"))
+            {
+                <a href="@Model.Product.sizechartPath"
+                   target="_blank"
+                   class="btn btn-info">
+                    View Size Chart (PDF)
+                </a>
+            }
+            else
+            {
+                <img id="sizeChartPreview"
+                     src="@Model.Product.sizechartPath"
+                     class="img-thumbnail"
+                     style="height:200px;" />
+            }
+        }
+
+        <input type="file"
+               name="SizeChartImg"
+               class="form-control mt-2"
+               onchange="previewImage(this, 'sizeChartPreview')" />
+    </div>
+
 <button class="btn btn-success mt-3">Update</button>
 </form>
 

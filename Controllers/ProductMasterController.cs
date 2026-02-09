@@ -92,6 +92,32 @@ namespace MIEL.web.Controllers
                 if (!Directory.Exists(uploadDir))
                     Directory.CreateDirectory(uploadDir);
 
+                // ---------- SAVE SIZE CHART ----------
+                var sizeChartFile = Request.Form.Files["SizeChartImg"];
+
+                if (sizeChartFile != null && sizeChartFile.Length > 0)
+                {
+                    var sizeChartDir = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot/sizecharts"
+                    );
+
+                    if (!Directory.Exists(sizeChartDir))
+                        Directory.CreateDirectory(sizeChartDir);
+
+                    var fileName = Guid.NewGuid() + Path.GetExtension(sizeChartFile.FileName);
+                    var path = Path.Combine(sizeChartDir, fileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        sizeChartFile.CopyTo(stream);
+                    }
+
+                    product.sizechartPath = "/sizecharts/" + fileName;
+                    _db.SaveChanges();
+                }
+
+
 
                 // ---------- 3. SAVE PRODUCT IMAGES ----------
                 void SaveImage(IFormFile file, int flag)
@@ -124,20 +150,20 @@ namespace MIEL.web.Controllers
 
 
                 // ---------- 4. SAVE COLOR & SIZE VARIANTS ----------
-                var colours = Request.Form["colour[]"];
-                var sizes = Request.Form["size[]"];
+                //var colours = Request.Form["colour[]"];
+                //var sizes = Request.Form["size[]"];
 
-                for (int i = 0; i < colours.Count; i++)
-                {
-                    _db.ProColorSizeVariants.Add(new procolrsizevarnt
-                    {
-                        ProductId = product.ProductId,
-                        colour = colours[i],
-                        size = sizes[i]
-                    });
-                }
+                //for (int i = 0; i < colours.Count; i++)
+                //{
+                //    _db.ProColorSizeVariants.Add(new procolrsizevarnt
+                //    {
+                //        ProductId = product.ProductId,
+                //        colour = colours[i],
+                //        size = sizes[i]
+                //    });
+                //}
 
-                _db.SaveChanges();
+                //_db.SaveChanges();
 
 
                 // ---------- 5. SAVE PRODUCT SPECIFICATIONS ----------
@@ -169,7 +195,7 @@ namespace MIEL.web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["msg"] = "Error: " + ex.Message;
+                TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
                 return RedirectToAction("Index");
             }
         }
@@ -187,7 +213,8 @@ namespace MIEL.web.Controllers
                         .Select(c => c.CategoryName)
                         .FirstOrDefault(),
                     p.Brand,
-                    p.CreatedDate
+                    p.CreatedDate,
+                    p.sizechartPath
                 })
                 .ToList();
 
@@ -263,6 +290,45 @@ namespace MIEL.web.Controllers
             }
 
             _db.SaveChanges();
+
+
+            // ---------- UPDATE SIZE CHART ----------
+            var sizeChartFile = Request.Form.Files["SizeChartImg"];
+
+            if (sizeChartFile != null && sizeChartFile.Length > 0)
+            {
+                var sizeChartDir = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/sizecharts"
+                );
+
+                if (!Directory.Exists(sizeChartDir))
+                    Directory.CreateDirectory(sizeChartDir);
+
+                // delete old file
+                if (!string.IsNullOrEmpty(product.sizechartPath))
+                {
+                    var oldPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot",
+                        product.sizechartPath.TrimStart('/')
+                    );
+
+                    if (System.IO.File.Exists(oldPath))
+                        System.IO.File.Delete(oldPath);
+                }
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(sizeChartFile.FileName);
+                var path = Path.Combine(sizeChartDir, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    sizeChartFile.CopyTo(stream);
+                }
+
+                product.sizechartPath = "/sizecharts/" + fileName;
+                _db.SaveChanges();
+            }
 
             // ---------- 2. UPDATE SPECIFICATIONS ----------
             var specs = Request.Form

@@ -11,6 +11,50 @@
 @{
     var categories = ViewBag.indexcategoryVM as List<indexcategoryVM>;
 }
+@{
+    var mainCategories = ViewBag.MainCategories;
+}
+
+<!-- MAIN CATEGORY MENU -->
+<div class="container-fluid bg-light border-bottom">
+    <div class="row px-xl-5">
+        <div class="col-12">
+            <ul class="nav justify-content-center py-2" id="mainCategories">
+                @if (mainCategories != null)
+                {
+                    foreach (var item in mainCategories)
+                    {
+                        <li class="nav-item mx-3 position-relative">
+                            <a href="javascript:void(0)"
+                               class="nav-link text-dark fw-bold main-cat"
+                               data-id="@item.MainCategoryId">
+                                @item.MainCategoryName
+                            </a>
+
+                            <!-- subcategory placeholder -->
+                            <ul class="nav flex-column subcat-container position-absolute bg-white border shadow-sm d-none" style="top:100%; left:0;">
+                                <!-- loaded dynamically -->
+                            </ul>
+                        </li>
+                    }
+                }
+            </ul>
+
+
+        </div>
+    </div>
+</div>
+
+<!-- SUBCATEGORY BAR -->
+<div class="container-fluid bg-white border-bottom">
+    <div class="row px-xl-5">
+        <div class="col-12">
+            <ul class="nav justify-content-center py-2" id="subCategories">
+                <!-- subcategories load here -->
+            </ul>
+        </div>
+    </div>
+</div>
 
 <div id="header-carousel" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner">
@@ -204,4 +248,111 @@
             object-fit: cover; /* 🔥 fills banner nicely */
             object-position: center;
         }
+
+        /* ===== MAIN CATEGORY BAR ===== */
+        #mainCategories {
+            background: #f8f5f0;
+            border-bottom: 1px solid #e0dcd5;
+            font-family: 'Georgia', serif;
+        }
+
+            #mainCategories .nav-link {
+                color: #8b6f47;
+                
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                padding: 10px 18px;
+                transition: all 0.3s ease;
+            }
+
+                #mainCategories .nav-link:hover {
+                     color: #d4a373;
+                     /* classic gold-brown */
+                }
+
+        /* ===== SUBCATEGORY BAR ===== */
+        #subCategories {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e2dc;
+            min-height: 45px;
+            font-family: 'Georgia', serif;
+        }
+
+            #subCategories .nav-link {
+                color: #a0522d;
+                
+                font-weight: 500;
+                padding: 8px 14px;
+                transition: all 0.25s ease;
+            }
+
+                #subCategories .nav-link:hover {
+                    color: #8b6f47;
+                    border-bottom: 2px solid #8b6f47;
+                }
+                .subcat-container {
+    min-width: 150px;
+    z-index: 1000;
+}
+
+.subcat-container .nav-link {
+    white-space: nowrap;
+    color: #5a534a;
+}
+
+.subcat-container .nav-link:hover {
+    color: #8b6f47;
+    background-color: #f8f5f0;
+}
+
+
     </style>
+    <script>
+
+                  document.addEventListener("DOMContentLoaded", function () {
+
+            document.querySelectorAll(".main-cat").forEach(cat => {
+
+                cat.addEventListener("mouseenter", function () {
+                    const categoryId = this.getAttribute("data-id");
+
+                    // find the subcategory container inside this li
+                    const subContainer = this.closest("li").querySelector(".subcat-container");
+
+                    fetch('/Home/GetSubCategories?categoryId=' + categoryId)
+                        .then(res => res.json())
+                        .then(data => {
+                            subContainer.innerHTML = "";
+
+                            if (data.length === 0) {
+                                subContainer.innerHTML =
+                                    '<li class="nav-item text-muted px-2">No subcategories</li>';
+                            } else {
+                                data.forEach(sub => {
+                                    subContainer.innerHTML += `
+                                        <li class="nav-item px-2">
+                                            <a href="/Home/CategoryProducts?categoryId=${sub.subCategoryId}"
+                                               class="nav-link p-1">
+                                                ${sub.subCategoryName}
+                                            </a>
+                                        </li>`;
+                                });
+                            }
+
+                            // show the container
+                            subContainer.classList.remove("d-none");
+                        });
+                });
+
+                // hide when leaving the category
+                cat.closest("li").addEventListener("mouseleave", function () {
+                    const subContainer = this.querySelector(".subcat-container");
+                    if (subContainer) subContainer.classList.add("d-none");
+                });
+            });
+        });
+
+    </script>
+
+
