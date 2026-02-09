@@ -1,43 +1,49 @@
 ﻿@model MIEL.web.Models.ViewModel.ProductListVM
 
 <div class="container py-5">
-    <div class="row">
+    <div class="row align-items-start">
 
-        <!-- LEFT SIDE : IMAGES -->
-        <div class="col-md-5">
+        <!-- THUMBNAILS -->
+        <div class="col-lg-1 col-md-2">
+            <div class="thumbnail-column">
+                <img src="@Model.ImagePath"
+                     class="thumb-img active"
+                     onmouseover="changeImage(this)" />
 
-            <!-- MAIN IMAGE -->
-            <div class="main-image zoom-container">
-                <img id="mainProductImage"
-                     src="@Model.ImagePath"
-                     alt="@Model.ProductName" />
-            </div>
-
-            <!-- THUMBNAILS -->
-            @if (Model.Images != null && Model.Images.Any())
-            {
-                <div class="thumbnail-row">
-                    <img src="@Model.ImagePath"
-                         class="thumb-img active"
-                         onmouseover="changeImage(this)" />
-
-                    @foreach (var img in Model.Images)
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    foreach (var img in Model.Images)
                     {
                         <img src="@img"
                              class="thumb-img"
                              onmouseover="changeImage(this)" />
                     }
-                </div>
-            }
+                }
+            </div>
         </div>
 
-        <!-- RIGHT SIDE : PRODUCT DETAILS -->
-        <div class="col-md-7">
+        <!-- MAIN IMAGE -->
+        <div class="col-lg-4 col-md-5">
+            <div class="main-image" id="mainImageContainer">
+                <img id="mainProductImage"
+                     src="@Model.ImagePath"
+                     alt="@Model.ProductName" />
+                <div id="zoomLens"></div>
+            </div>
+        </div>
+
+        <!-- ZOOM RESULT -->
+        <div class="col-lg-4 d-none d-lg-block">
+            <div id="zoomResult"></div>
+        </div>
+
+        <!-- PRODUCT DETAILS -->
+        <div class="col-lg-3 col-md-5">
 
             <h2 class="product-title">@Model.ProductName</h2>
             <p class="product-brand">@Model.Brand</p>
 
-            <!-- COLOR OPTIONS -->
+            <!-- COLOR -->
             @if (Model.Variants != null && Model.Variants.Any())
             {
                 var colors = Model.Variants.Select(v => v.Color).Distinct().ToList();
@@ -53,7 +59,7 @@
                 </div>
             }
 
-            <!-- SIZE OPTIONS -->
+            <!-- SIZE -->
             @if (Model.Variants != null && Model.Variants.Any())
             {
                 var sizes = Model.Variants.Select(v => v.Size).Distinct().ToList();
@@ -81,23 +87,18 @@
                 </button>
             </div>
 
-            <!-- PRODUCT HIGHLIGHTS -->
+            <!-- HIGHLIGHTS -->
             @if (Model.Specificationsnew != null && Model.Specificationsnew.Any())
             {
                 <div class="highlight-box mt-5">
-                    <div class="highlight-header">
-                        <h5>Product Highlights</h5>
-                    </div>
+                    <h5>Product Highlights</h5>
 
-                    <div class="highlight-body">
-                        @foreach (var spec in Model.Specificationsnew)
-                        {
-                            <div class="highlight-row">
-                                <strong>@spec.SpecName</strong> : @spec.SpecValue
-                            </div>
-                        }
-
-                    </div>
+                    @foreach (var spec in Model.Specificationsnew)
+                    {
+                        <div class="highlight-row">
+                            <strong>@spec.SpecName</strong> : @spec.SpecValue
+                        </div>
+                    }
                 </div>
             }
 
@@ -106,56 +107,61 @@
 </div>
 
 <style>
-    /* Main image */
-    .main-image {
-        border: 1px solid #eee;
-        padding: 12px;
-        border-radius: 10px;
-        background: #fff;
-        overflow: hidden;
-    }
-
-        .main-image img {
-            width: 100%;
-            height: 420px;
-            object-fit: contain;
-            transition: transform 0.4s ease;
-        }
-
-    .zoom-container:hover img {
-        transform: scale(1.4);
-    }
-
-    /* Thumbnails */
-    .thumbnail-row {
+    .thumbnail-column {
         display: flex;
+        flex-direction: column;
         gap: 10px;
-        margin-top: 12px;
-        flex-wrap: wrap;
     }
 
     .thumb-img {
         width: 70px;
         height: 70px;
-        object-fit: contain;
+        object-fit: cover;
         border: 1px solid #ddd;
-        border-radius: 6px;
         cursor: pointer;
-        padding: 4px;
-        transition: all 0.2s;
+        padding: 3px;
     }
 
-        .thumb-img:hover,
-        .thumb-img.active {
-            border-color: #000;
-            transform: scale(1.05);
-        }
+    .thumb-img.active {
+        border: 2px solid #000;
+    }
 
-    /* Text */
+    .main-image {
+        position: relative;
+        width: 100%;
+        height: 480px;
+        border: 1px solid #eee;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #zoomLens {
+        position: absolute;
+        border: 1px solid #000;
+        width: 180px;
+        height: 180px;
+        display: none;
+        background: rgba(255,255,255,0.4);
+        cursor: crosshair;
+    }
+
+    #zoomResult {
+        width: 100%;
+        height: 480px;
+        border: 1px solid #eee;
+        background-repeat: no-repeat;
+        background-size: 1200px 1600px;
+    }
+
     .product-title {
         font-weight: 700;
-        font-size: 24px;
-        margin-bottom: 5px;
+        font-size: 26px;
     }
 
     .product-brand {
@@ -165,7 +171,6 @@
         margin-bottom: 20px;
     }
 
-    /* Variants */
     .variant-box {
         margin-bottom: 20px;
     }
@@ -185,15 +190,9 @@
         background: #fff;
     }
 
-        .variant-pill.active {
-            background: #000;
-            color: #fff;
-        }
-
-    /* Buttons */
-    .btn-row {
-        display: flex;
-        align-items: center;
+    .variant-pill.active {
+        background: #000;
+        color: #fff;
     }
 
     .btn-buy {
@@ -205,7 +204,6 @@
         font-weight: 600;
     }
 
-    /* Highlights */
     .highlight-box {
         border: 1px solid #eee;
         border-radius: 8px;
@@ -213,49 +211,79 @@
         background: #fff;
     }
 
-    .highlight-title {
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-
-    .highlight-table td {
-        border: none;
-        padding: 8px 0;
+    .highlight-row {
+        margin-bottom: 8px;
         font-size: 14px;
     }
 
-    /* Mobile */
-    @@media (max-width: 768px) {
-        .zoom-container:hover img {
-            transform: none;
+    @@media (max-width: 992px) {
+        #zoomResult {
+            display: none;
         }
     }
 </style>
 
 <script>
-    function changeImage(el) {
-        var mainImg = document.getElementById("mainProductImage");
-        mainImg.src = el.src;
+    const img = document.getElementById("mainProductImage");
+    const lens = document.getElementById("zoomLens");
+    const result = document.getElementById("zoomResult");
 
+    function initZoom() {
+        result.style.backgroundImage = `url('${img.src}')`;
+
+        const cx = result.offsetWidth / lens.offsetWidth;
+        const cy = result.offsetHeight / lens.offsetHeight;
+
+        result.style.backgroundSize =
+            (img.width * cx) + "px " +
+            (img.height * cy) + "px";
+    }
+
+    function moveLens(e) {
+        const rect = img.getBoundingClientRect();
+
+        let x = e.clientX - rect.left - lens.offsetWidth / 2;
+        let y = e.clientY - rect.top - lens.offsetHeight / 2;
+
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
+        if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
+
+        lens.style.left = x + "px";
+        lens.style.top = y + "px";
+
+        const cx = result.offsetWidth / lens.offsetWidth;
+        const cy = result.offsetHeight / lens.offsetHeight;
+
+        result.style.backgroundPosition =
+            "-" + (x * cx) + "px -" + (y * cy) + "px";
+    }
+
+    img.addEventListener("mouseenter", () => {
+        lens.style.display = "block";
+        initZoom();
+    });
+
+    img.addEventListener("mousemove", moveLens);
+    lens.addEventListener("mousemove", moveLens);
+
+    img.addEventListener("mouseleave", () => {
+        lens.style.display = "none";
+    });
+
+    function changeImage(el) {
         document.querySelectorAll(".thumb-img")
             .forEach(img => img.classList.remove("active"));
 
         el.classList.add("active");
+        img.src = el.src;
+
+        setTimeout(initZoom, 100);
     }
 
-    // Variant selection
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".variant-pill").forEach(el => {
-            el.addEventListener("click", function () {
-                this.parentElement.querySelectorAll(".variant-pill")
-                    .forEach(p => p.classList.remove("active"));
-                this.classList.add("active");
-            });
-        });
-    });
-
     function addToCart(productId) {
-        fetch('/Cart/AddToCart', {
+        fetch('/Home/AddToCart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -266,8 +294,31 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert('Product added to cart');
+
+                // update cart badge count
+                const cartCount = document.getElementById("cartCount");
+                if (cartCount) {
+                    let count = parseInt(cartCount.textContent) || 0;
+                    cartCount.textContent = count + 1;
+
+                    // small animation
+                    cartCount.style.transform = "scale(1.3)";
+                    setTimeout(() => {
+                        cartCount.style.transform = "scale(1)";
+                    }, 200);
+                }
             }
         });
     }
+
+
+    document.querySelectorAll(".variant-pill").forEach(el => {
+        el.addEventListener("click", function () {
+            this.parentElement.querySelectorAll(".variant-pill")
+                .forEach(p => p.classList.remove("active"));
+            this.classList.add("active");
+        });
+    });
+
+    window.onload = initZoom;
 </script>

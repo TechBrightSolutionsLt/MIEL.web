@@ -4,6 +4,7 @@ using MIEL.web.Models;
 
 using MIEL.web.Data;
 using MIEL.web.Models.ViewModel;
+using Newtonsoft.Json;
 
 namespace MIEL.web.Controllers
 {
@@ -130,7 +131,50 @@ namespace MIEL.web.Controllers
         }
 
 
+        [HttpPost]
+        public IActionResult AddToCart([FromBody] CartItem item)
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart;
 
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                cart = new List<CartItem>();
+            }
+            else
+            {
+                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            }
+
+            var existing = cart.FirstOrDefault(x => x.ProductId == item.ProductId);
+            if (existing != null)
+            {
+                existing.Quantity += item.Quantity;
+            }
+            else
+            {
+                cart.Add(item);
+            }
+
+            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public IActionResult GetCartCount()
+        {
+            int count = 0;
+
+            var cart = HttpContext.Session.GetString("Cart");
+            if (!string.IsNullOrEmpty(cart))
+            {
+                var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cart);
+                count = cartItems.Sum(x => x.Quantity);
+            }
+
+            return Json(new { count });
+        }
 
 
         public IActionResult Privacy()
