@@ -181,6 +181,47 @@ namespace MIEL.web.Controllers
         }
 
 
+        public IActionResult Cart()
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+
+            List<CartItem> cart = new List<CartItem>();
+
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            }
+
+            return View(cart);
+        }
+        [HttpPost]
+        public IActionResult UpdateCartQty([FromBody] CartItem model)
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = new List<CartItem>();
+
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            }
+
+            var item = cart.FirstOrDefault(x => x.ProductId == model.ProductId);
+
+            if (item != null)
+            {
+                item.Quantity += model.Change;
+
+                if (item.Quantity <= 0)
+                {
+                    cart.Remove(item);
+                }
+            }
+
+            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+
+            return Json(new { success = true });
+        }
+
         public IActionResult Privacy()
         {
             return View();
