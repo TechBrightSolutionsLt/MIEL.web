@@ -13,7 +13,9 @@
             <th>Category</th>
             <th>Brand</th>
             <th>Date</th>
+            <th>Size Chart</th>
             <th>Action</th>
+            
         </tr>
     </thead>
     <tbody>
@@ -24,6 +26,16 @@
                 <td>@p.CategoryName</td>
                 <td>@p.Brand</td>
                 <td>@p.CreatedDate.ToShortDateString()</td>
+                <td>
+                    @if (p.sizechartPath != null)
+                    {
+                        <a href="@p.sizechartPath" target="_blank">View</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No Size Chart</span>
+                    }
+                </td>
                 <td>
                     <a href="/ProductMaster/Edit/@p.ProductId"
                        class="btn btn-sm btn-primary">Edit</a>

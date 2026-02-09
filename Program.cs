@@ -32,6 +32,10 @@ builder.Services.AddScoped<ICategorySpecificationRepository, CategorySpecificati
 builder.Services.AddScoped<CategorySpecifications>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = 100_000_000; // 100 MB
+});
 
 var app = builder.Build();
 app.UseSession();
