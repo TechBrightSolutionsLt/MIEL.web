@@ -47,6 +47,76 @@
     <input type="text" name="colour[]" value="@v.colour" />
     <input type="text" name="size[]" value="@v.size" />
 }
+    <div class="card p-3 mb-4">
+        <h4 class="mb-3">Product Images</h4>
+
+        @{
+            var mainImg = Model.Images.FirstOrDefault(x => x.Flag == 1);
+            var otherImgs = Model.Images.Where(x => x.Flag == 0).ToList();
+        }
+
+        <!-- MAIN IMAGE -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label class="fw-bold">Main Image</label>
+
+                @if (mainImg != null)
+                {
+                    <img id="mainPreview"
+                         src="@mainImg.ImgPath"
+                         class="img-thumbnail d-block mt-2"
+                         style="height:150px;width:150px;object-fit:cover;" />
+
+                    <input type="hidden"
+                           name="OldMainImageId"
+                           value="@mainImg.ImgId" />
+                }
+
+                <input type="file"
+                       name="Image"
+                       class="form-control mt-2"
+                       onchange="previewImage(this, 'mainPreview')" />
+            </div>
+        </div>
+
+        <!-- OTHER IMAGES -->
+        <div class="row">
+            @for (int i = 0; i < otherImgs.Count; i++)
+            {
+                <div class="col-md-3 text-center mb-3">
+                    <label class="fw-bold">Image @(i + 2)</label>
+
+                    <img id="preview@(i)"
+                         src="@otherImgs[i].ImgPath"
+                         class="img-thumbnail d-block mx-auto mt-2"
+                         style="height:120px;width:120px;object-fit:cover;" />
+
+                    <input type="hidden"
+                           name="OldImageIds"
+                           value="@otherImgs[i].ImgId" />
+
+                    <input type="file"
+                           name="Image@(i + 2)"
+                           class="form-control mt-2"
+                           onchange="previewImage(this, 'preview@(i)')" />
+                </div>
+            }
+        </div>
+    </div>
 
 <button class="btn btn-success mt-3">Update</button>
 </form>
+
+
+<script>
+    function previewImage(input, imgId) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById(imgId).src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
