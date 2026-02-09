@@ -79,6 +79,8 @@ namespace MIEL.web.Controllers
 
                 _db.ProductMasters.Add(product);
                 _db.SaveChanges(); // 🔑 ProductId generated
+                TempData["SuccessMessage"] = "Product Created successfully!";
+
 
 
                 // ---------- 2. IMAGE FOLDER ----------
@@ -163,7 +165,6 @@ namespace MIEL.web.Controllers
                 _db.SaveChanges();
 
 
-                TempData["msg"] = "Product saved successfully!";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -224,6 +225,7 @@ namespace MIEL.web.Controllers
             product.CategoryId = Convert.ToInt32(Request.Form["CategoryId"]);
 
             _db.SaveChanges();
+            TempData["SuccessMessage"] = "Product Updated successfully!";
 
             // ---------- 2. UPDATE SPECIFICATIONS ----------
             var specs = Request.Form
@@ -272,7 +274,6 @@ namespace MIEL.web.Controllers
 
             _db.SaveChanges();
 
-            TempData["msg"] = "Product updated successfully";
             return RedirectToAction("List");
         }
 
@@ -318,7 +319,7 @@ namespace MIEL.web.Controllers
 
             _db.SaveChanges();
 
-            TempData["msg"] = "Product deleted successfully!";
+            TempData["SuccessMessage"] = "Product Deleted successfully!";
             return RedirectToAction("List");
         }
 
