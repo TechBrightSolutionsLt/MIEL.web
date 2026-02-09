@@ -150,20 +150,20 @@ namespace MIEL.web.Controllers
 
 
                 // ---------- 4. SAVE COLOR & SIZE VARIANTS ----------
-                var colours = Request.Form["colour[]"];
-                var sizes = Request.Form["size[]"];
+                //var colours = Request.Form["colour[]"];
+                //var sizes = Request.Form["size[]"];
 
-                for (int i = 0; i < colours.Count; i++)
-                {
-                    _db.ProColorSizeVariants.Add(new procolrsizevarnt
-                    {
-                        ProductId = product.ProductId,
-                        colour = colours[i],
-                        size = sizes[i]
-                    });
-                }
+                //for (int i = 0; i < colours.Count; i++)
+                //{
+                //    _db.ProColorSizeVariants.Add(new procolrsizevarnt
+                //    {
+                //        ProductId = product.ProductId,
+                //        colour = colours[i],
+                //        size = sizes[i]
+                //    });
+                //}
 
-                _db.SaveChanges();
+                //_db.SaveChanges();
 
 
                 // ---------- 5. SAVE PRODUCT SPECIFICATIONS ----------
