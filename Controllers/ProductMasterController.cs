@@ -206,7 +206,12 @@ namespace MIEL.web.Controllers
                                     .ToList(),
                 Variants = _db.ProColorSizeVariants
                                     .Where(v => v.ProductId == id)
-                                    .ToList()
+                                    .ToList(),
+                Images = _db.ProductImages
+                    .Where(i => i.ProductId == id)
+                    .OrderByDescending(i => i.Flag)
+                    .ToList()
+
 
             };
 
@@ -226,6 +231,38 @@ namespace MIEL.web.Controllers
 
             _db.SaveChanges();
             TempData["SuccessMessage"] = "Product Updated successfully!";
+
+
+            // =====================================================
+            // 🔥 IMAGE UPDATE CODE GOES HERE (YOUR CODE)
+            // =====================================================
+
+            var uploadDir = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot/proimg"
+            );
+
+            if (!Directory.Exists(uploadDir))
+                Directory.CreateDirectory(uploadDir);
+
+            // ---------- MAIN IMAGE ----------
+            var mainFile = Request.Form.Files["Image"];
+            if (mainFile != null && mainFile.Length > 0)
+            {
+                var oldMainId = Convert.ToInt32(Request.Form["OldMainImageId"]);
+                var oldMain = _db.ProductImages
+                                 .First(x => x.ImgId == oldMainId);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(mainFile.FileName);
+                var path = Path.Combine(uploadDir, fileName);
+
+                using var stream = new FileStream(path, FileMode.Create);
+                mainFile.CopyTo(stream);
+
+                oldMain.ImgPath = "/proimg/" + fileName;
+            }
+
+            _db.SaveChanges();
 
             // ---------- 2. UPDATE SPECIFICATIONS ----------
             var specs = Request.Form
