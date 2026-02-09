@@ -74,6 +74,9 @@
                     </div>
                 </div>
             }
+            <div id="sizeError" style="color:red; font-size:13px; display:none;">
+                Please select a size
+            </div>
 
             <!-- BUTTONS -->
             <div class="btn-row mt-4">
@@ -224,101 +227,122 @@
 </style>
 
 <script>
-    const img = document.getElementById("mainProductImage");
-    const lens = document.getElementById("zoomLens");
-    const result = document.getElementById("zoomResult");
+    document.addEventListener("DOMContentLoaded", function () {
 
-    function initZoom() {
-        result.style.backgroundImage = `url('${img.src}')`;
+        const img = document.getElementById("mainProductImage");
+        const lens = document.getElementById("zoomLens");
+        const result = document.getElementById("zoomResult");
 
-        const cx = result.offsetWidth / lens.offsetWidth;
-        const cy = result.offsetHeight / lens.offsetHeight;
+        let selectedSize = null;
 
-        result.style.backgroundSize =
-            (img.width * cx) + "px " +
-            (img.height * cy) + "px";
-    }
+        // ---------------- ZOOM ----------------
+        function initZoom() {
+            if (!img || !lens || !result) return;
 
-    function moveLens(e) {
-        const rect = img.getBoundingClientRect();
+            result.style.backgroundImage = `url('${img.src}')`;
 
-        let x = e.clientX - rect.left - lens.offsetWidth / 2;
-        let y = e.clientY - rect.top - lens.offsetHeight / 2;
+            const cx = result.offsetWidth / lens.offsetWidth;
+            const cy = result.offsetHeight / lens.offsetHeight;
 
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
-        if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
+            result.style.backgroundSize =
+                (img.width * cx) + "px " +
+                (img.height * cy) + "px";
+        }
 
-        lens.style.left = x + "px";
-        lens.style.top = y + "px";
+        function moveLens(e) {
+            const rect = img.getBoundingClientRect();
 
-        const cx = result.offsetWidth / lens.offsetWidth;
-        const cy = result.offsetHeight / lens.offsetHeight;
+            let x = e.clientX - rect.left - lens.offsetWidth / 2;
+            let y = e.clientY - rect.top - lens.offsetHeight / 2;
 
-        result.style.backgroundPosition =
-            "-" + (x * cx) + "px -" + (y * cy) + "px";
-    }
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
+            if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
 
-    img.addEventListener("mouseenter", () => {
-        lens.style.display = "block";
+            lens.style.left = x + "px";
+            lens.style.top = y + "px";
+
+            const cx = result.offsetWidth / lens.offsetWidth;
+            const cy = result.offsetHeight / lens.offsetHeight;
+
+            result.style.backgroundPosition =
+                "-" + (x * cx) + "px -" + (y * cy) + "px";
+        }
+
+        if (img) {
+            img.addEventListener("mouseenter", () => {
+                lens.style.display = "block";
+                initZoom();
+            });
+
+            img.addEventListener("mousemove", moveLens);
+            lens.addEventListener("mousemove", moveLens);
+
+            img.addEventListener("mouseleave", () => {
+                lens.style.display = "none";
+            });
+        }
+
+        window.changeImage = function (el) {
+            document.querySelectorAll(".thumb-img")
+                .forEach(img => img.classList.remove("active"));
+
+            el.classList.add("active");
+            img.src = el.src;
+
+            setTimeout(initZoom, 100);
+        };
+
+        // ---------------- SIZE SELECTION ----------------
+        document.querySelectorAll(".variant-pill").forEach(el => {
+            el.addEventListener("click", function () {
+
+                this.parentElement.querySelectorAll(".variant-pill")
+                    .forEach(p => p.classList.remove("active"));
+
+                this.classList.add("active");
+
+                selectedSize = this.innerText;
+
+                const err = document.getElementById("sizeError");
+                if (err) err.style.display = "none";
+            });
+        });
+
+        // ---------------- ADD TO CART ----------------
+        window.addToCart = function (productId) {
+
+            if (!selectedSize) {
+                const err = document.getElementById("sizeError");
+                if (err) err.style.display = "block";
+                return;
+            }
+
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: 1,
+                    size: selectedSize
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    fetch('/Home/GetCartCount')
+                        .then(res => res.json())
+                        .then(c => {
+                            const cartCount = document.getElementById("cartCount");
+                            if (cartCount) {
+                                cartCount.textContent = c.count;
+                            }
+                        });
+                }
+            });
+        };
+
         initZoom();
     });
-
-    img.addEventListener("mousemove", moveLens);
-    lens.addEventListener("mousemove", moveLens);
-
-    img.addEventListener("mouseleave", () => {
-        lens.style.display = "none";
-    });
-
-    function changeImage(el) {
-        document.querySelectorAll(".thumb-img")
-            .forEach(img => img.classList.remove("active"));
-
-        el.classList.add("active");
-        img.src = el.src;
-
-        setTimeout(initZoom, 100);
-    }
-
-    function addToCart(productId) {
-        fetch('/Home/AddToCart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                productId: productId,
-                quantity: 1
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-
-                // update cart badge count
-                const cartCount = document.getElementById("cartCount");
-                if (cartCount) {
-                    let count = parseInt(cartCount.textContent) || 0;
-                    cartCount.textContent = count + 1;
-
-                    // small animation
-                    cartCount.style.transform = "scale(1.3)";
-                    setTimeout(() => {
-                        cartCount.style.transform = "scale(1)";
-                    }, 200);
-                }
-            }
-        });
-    }
-
-
-    document.querySelectorAll(".variant-pill").forEach(el => {
-        el.addEventListener("click", function () {
-            this.parentElement.querySelectorAll(".variant-pill")
-                .forEach(p => p.classList.remove("active"));
-            this.classList.add("active");
-        });
-    });
-
-    window.onload = initZoom;
 </script>

@@ -146,7 +146,11 @@ namespace MIEL.web.Controllers
                 cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
             }
 
-            var existing = cart.FirstOrDefault(x => x.ProductId == item.ProductId);
+
+            var existing = cart.FirstOrDefault(x =>
+     x.ProductId == item.ProductId && x.Size == item.Size
+ );
+
             if (existing != null)
             {
                 existing.Quantity += item.Quantity;
