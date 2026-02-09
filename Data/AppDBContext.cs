@@ -33,7 +33,12 @@ namespace MIEL.web.Data
 
 
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<PurchaseMaster> PurchaseMasters { get; set; }
+        public DbSet<PurchaseItem> PurchaseItems { get; set; }
+        public DbSet<VariantPrice> VariantPrices { get; set; }
 
+       
+        public DbSet<InventoryBatch> InventoryBatch { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProductImages>()
@@ -53,6 +58,10 @@ namespace MIEL.web.Data
                 .WithMany()
                 .HasForeignKey(s => s.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<procolrsizevarnt>()
+    .HasIndex(x => new { x.ProductId, x.colour, x.size })
+    .IsUnique();
         }
 
         public DbSet<MainCategory> MainCategories { get; set; }
