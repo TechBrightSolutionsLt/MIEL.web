@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
+using MIEL.web.Models.ViewModel;
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 
 namespace MIEL.web.Controllers
 {
@@ -171,5 +172,159 @@ namespace MIEL.web.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        // ================= LIST =================
+        public IActionResult List()
+        {
+            var products = _db.ProductMasters
+                .Select(p => new
+                {
+                    p.ProductId,
+                    p.ProductName,
+                    CategoryName = _db.Categories
+                        .Where(c => c.CategoryId == p.CategoryId)
+                        .Select(c => c.CategoryName)
+                        .FirstOrDefault(),
+                    p.Brand,
+                    p.CreatedDate
+                })
+                .ToList();
+
+            return View(products);
+        }
+
+        // ================= EDIT =================
+        public IActionResult Edit(int id)
+        {
+            var vm = new ProductEditVM
+            {
+                Product = _db.ProductMasters.First(p => p.ProductId == id),
+                Categories = _db.Categories.ToList(),
+                Specifications = _db.productspecifications
+                                    .Where(s => s.ProductId == id)
+                                    .ToList(),
+                Variants = _db.ProColorSizeVariants
+                                    .Where(v => v.ProductId == id)
+                                    .ToList()
+
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public IActionResult Update()
+        {
+            int productId = Convert.ToInt32(Request.Form["ProductId"]);
+
+            // ---------- 1. UPDATE PRODUCT ----------
+            var product = _db.ProductMasters.First(p => p.ProductId == productId);
+
+            product.ProductName = Request.Form["ProductName"];
+            product.CategoryId = Convert.ToInt32(Request.Form["CategoryId"]);
+
+            _db.SaveChanges();
+
+            // ---------- 2. UPDATE SPECIFICATIONS ----------
+            var specs = Request.Form
+                .Where(x => x.Key.StartsWith("Specs["))
+                .ToList();
+
+            foreach (var spec in specs)
+            {
+                int specId = int.Parse(
+                    spec.Key.Replace("Specs[", "").Replace("]", "")
+                );
+
+                var ps = _db.productspecifications
+                    .FirstOrDefault(x => x.ProductId == productId && x.Id == specId);
+
+                if (ps != null)
+                {
+                    ps.specificationvalue = spec.Value;
+                }
+            }
+
+            _db.SaveChanges();
+
+            // ---------- 3. UPDATE COLOR–SIZE VARIANTS ----------
+            // Remove existing variants
+            var oldVariants = _db.ProColorSizeVariants
+                .Where(v => v.ProductId == productId)
+                .ToList();
+
+            _db.ProColorSizeVariants.RemoveRange(oldVariants);
+            _db.SaveChanges();
+
+            // Insert new variants
+            var colours = Request.Form["colour[]"];
+            var sizes = Request.Form["size[]"];
+
+            for (int i = 0; i < colours.Count; i++)
+            {
+                _db.ProColorSizeVariants.Add(new procolrsizevarnt
+                {
+                    ProductId = productId,
+                    colour = colours[i],
+                    size = sizes[i]
+                });
+            }
+
+            _db.SaveChanges();
+
+            TempData["msg"] = "Product updated successfully";
+            return RedirectToAction("List");
+        }
+
+
+        // ================= DELETE =================
+        public IActionResult Delete(int id)
+        {
+            var product = _db.ProductMasters.FirstOrDefault(p => p.ProductId == id);
+            if (product == null)
+                return NotFound();
+
+            // ---------- DELETE IMAGES (DB + FILES) ----------
+            var images = _db.ProductImages.Where(i => i.ProductId == id).ToList();
+
+            foreach (var img in images)
+            {
+                var fullPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    img.ImgPath.TrimStart('/')
+                );
+
+                if (System.IO.File.Exists(fullPath))
+                    System.IO.File.Delete(fullPath);
+            }
+
+            _db.ProductImages.RemoveRange(images);
+
+            // ---------- DELETE VARIANTS ----------
+            var variants = _db.ProColorSizeVariants
+                .Where(v => v.ProductId == id)
+                .ToList();
+            _db.ProColorSizeVariants.RemoveRange(variants);
+
+            // ---------- DELETE SPECIFICATIONS ----------
+            var specs = _db.productspecifications
+                .Where(s => s.ProductId == id)
+                .ToList();
+            _db.productspecifications.RemoveRange(specs);
+
+            // ---------- DELETE PRODUCT ----------
+            _db.ProductMasters.Remove(product);
+
+            _db.SaveChanges();
+
+            TempData["msg"] = "Product deleted successfully!";
+            return RedirectToAction("List");
+        }
+
+
+
+
+
     }
 }

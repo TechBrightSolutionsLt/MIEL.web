@@ -1,0 +1,52 @@
+﻿@model MIEL.web.Models.ViewModel.ProductEditVM;
+@{
+    ViewData["Title"] = "Product Master Edit";
+    Layout = "_AdminLayout";
+}
+
+
+<h2>Edit Product</h2>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-success">@TempData["msg"]</div>
+}
+<form method="post" action="/ProductMaster/Update" enctype="multipart/form-data">
+
+<input type="hidden" name="ProductId" value="@Model.Product.ProductId" />
+
+<label>Product Name</label>
+<input type="text" name="ProductName"
+       value="@Model.Product.ProductName"
+       class="form-control" />
+
+<label>Category</label>
+    <select name="CategoryId" class="form-control">
+        @foreach (var c in Model.Categories)
+        {
+            <option value="@c.CategoryId"
+                    selected="@(c.CategoryId == Model.Product.CategoryId)">
+                @c.CategoryName
+            </option>
+        }
+    </select>
+
+<h4>Specifications</h4>
+@foreach (var s in Model.Specifications)
+{
+    <label>@s.Id</label>
+    <input type="text"
+           name="Specs[@s.Id]"
+           value="@s.specificationvalue"
+           class="form-control mb-2" />
+}
+
+<h4>Variants</h4>
+@foreach (var v in Model.Variants)
+{
+    <input type="text" name="colour[]" value="@v.colour" />
+    <input type="text" name="size[]" value="@v.size" />
+}
+
+<button class="btn btn-success mt-3">Update</button>
+</form>
