@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"] - Miel Collections</title>
+    <title>@ViewData["Title"] - MIEL COLLECTIONS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Favicon -->
@@ -94,10 +94,11 @@
                     <i class="fas fa-heart text-primary"></i>
                     <span class="badge">0</span>
                 </a>
-                <a href="#" class="btn border">
+                <a href="/Home/Cart" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">0</span>
+                    <span class="badge" id="cartCount">0</span>
                 </a>
+
             </div>
         </div>
     </div>
@@ -109,7 +110,7 @@
                 <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0">
                     <a asp-controller="Home" asp-action="Index" class="text-decoration-none d-block d-lg-none">
                         <h1 class="m-0 display-5 font-weight-semi-bold">
-                            <span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper
+                            <span class="text-primary font-weight-bold border px-3 mr-1"></span>MIEL COLLECTIONS
                         </h1>
                     </a>
 
@@ -285,5 +286,18 @@
     <script src="~/js/main.js"></script>
 
     @RenderSection("Scripts", required: false)
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/Home/GetCartCount')
+                .then(res => res.json())
+                .then(data => {
+                    const cartCount = document.getElementById("cartCount");
+                    if (cartCount) {
+                        cartCount.textContent = data.count;
+                    }
+                });
+        });
+    </script>
+
 </body>
 </html>

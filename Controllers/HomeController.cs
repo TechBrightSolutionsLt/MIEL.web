@@ -4,6 +4,7 @@ using MIEL.web.Models;
 
 using MIEL.web.Data;
 using MIEL.web.Models.ViewModel;
+using Newtonsoft.Json;
 
 namespace MIEL.web.Controllers
 {
@@ -46,10 +47,33 @@ namespace MIEL.web.Controllers
           .ToList();
 
             ViewBag.indexcategoryVM = categories;
+            ViewBag.MainCategories = _context.MainCategories
+      .Select(m => new
+      {
+          m.MainCategoryId,
+          m.MainCategoryName
+      })
+      .ToList();
 
             return View();
+           
+        }
+        [HttpGet]
+        public IActionResult GetSubCategories(int categoryId)
+        {
+            var subCategories = _context.Categories
+                .Where(c => c.MainCategoryId == categoryId)
+                .Select(c => new
+                {
+                    subCategoryId = c.CategoryId,
+                    subCategoryName = c.CategoryName
+                })
+                .ToList();
+
+            return Json(subCategories);
         }
 
+     
         public IActionResult CategoryProducts(int categoryId)
         {
             var products = _context.ProductMasters
@@ -130,8 +154,96 @@ namespace MIEL.web.Controllers
         }
 
 
+        [HttpPost]
+        public IActionResult AddToCart([FromBody] CartItem item)
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart;
+
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                cart = new List<CartItem>();
+            }
+            else
+            {
+                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            }
 
 
+            var existing = cart.FirstOrDefault(x =>
+     x.ProductId == item.ProductId && x.Size == item.Size
+ );
+
+            if (existing != null)
+            {
+                existing.Quantity += item.Quantity;
+            }
+            else
+            {
+                cart.Add(item);
+            }
+
+            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public IActionResult GetCartCount()
+        {
+            int count = 0;
+
+            var cart = HttpContext.Session.GetString("Cart");
+            if (!string.IsNullOrEmpty(cart))
+            {
+                var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cart);
+                count = cartItems.Sum(x => x.Quantity);
+            }
+
+            return Json(new { count });
+        }
+
+
+        public IActionResult Cart()
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+
+            List<CartItem> cart = new List<CartItem>();
+
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            }
+
+            return View(cart);
+        }
+        [HttpPost]
+        public IActionResult UpdateCartQty([FromBody] CartItem model)
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = new List<CartItem>();
+
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            }
+
+            var item = cart.FirstOrDefault(x => x.ProductId == model.ProductId);
+
+            if (item != null)
+            {
+                item.Quantity += model.Change;
+
+                if (item.Quantity <= 0)
+                {
+                    cart.Remove(item);
+                }
+            }
+
+            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+
+            return Json(new { success = true });
+        }
 
         public IActionResult Privacy()
         {
