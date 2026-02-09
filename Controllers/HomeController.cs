@@ -25,25 +25,25 @@ namespace MIEL.web.Controllers
                                           .ToList();
 
             var categories = _context.Categories
-           .Select(c => new indexcategoryVM
-           {
-               CategoryId = c.CategoryId,
-               CategoryName = c.CategoryName,
+          .Select(c => new indexcategoryVM
+          {
+              CategoryId = c.CategoryId,
+              CategoryName = c.CategoryName,
 
-               ImagePath = _context.ProductImages
-                   .Where(pi =>
-                       pi.ProductId ==
-                       _context.ProductMasters
-                           .Where(p => p.CategoryId == c.CategoryId)
-                           .OrderByDescending(p => p.CreatedDate)
-                           .Select(p => p.ProductId)
-                           .FirstOrDefault()
-                   )
-                   .OrderByDescending(pi => pi.ImgId)   
-                   .Select(pi => pi.ImgPath)
-                   .FirstOrDefault()
-           })
-           .ToList();
+              ImagePath = _context.ProductImages
+                  .Where(pi =>
+                      pi.Flag == 1 &&                     // ? only main image
+                      pi.ProductId ==
+                          _context.ProductMasters
+                              .Where(p => p.CategoryId == c.CategoryId)
+                              .OrderByDescending(p => p.CreatedDate)
+                              .Select(p => p.ProductId)
+                              .FirstOrDefault()
+                  )
+                  .Select(pi => pi.ImgPath)
+                  .FirstOrDefault()
+          })
+          .ToList();
 
             ViewBag.indexcategoryVM = categories;
 
@@ -61,10 +61,10 @@ namespace MIEL.web.Controllers
                     Brand = p.Brand,
 
                     ImagePath = _context.ProductImages
-                        .Where(i => i.ProductId == p.ProductId)
-                        .OrderByDescending(i => i.ImgId)
-                        .Select(i => i.ImgPath)
-                        .FirstOrDefault()
+    .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
+    .Select(i => i.ImgPath)
+    .FirstOrDefault()
+
                 })
                 .ToList();
 
@@ -85,16 +85,40 @@ namespace MIEL.web.Controllers
                     Brand = p.Brand,
                     ProductDescription = p.ProductDescription,
 
+                    // Main image
                     ImagePath = _context.ProductImages
-                        .Where(i => i.ProductId == p.ProductId)
-                        .OrderByDescending(i => i.ImgId)
+                        .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
                         .Select(i => i.ImgPath)
                         .FirstOrDefault(),
 
+                    // Other images
                     Images = _context.ProductImages
-                        .Where(i => i.ProductId == p.ProductId)
-                        .OrderByDescending(i => i.ImgId)
+                        .Where(i => i.ProductId == p.ProductId && i.Flag == 0)
+                        .OrderBy(i => i.ImgId)
                         .Select(i => i.ImgPath)
+                        .ToList(),
+
+                    // Correct specification join
+                    Specificationsnew = (
+                        from ps in _context.productspecifications
+                        join s in _context.Specifications
+                            on ps.Id equals s.Id
+                        where ps.ProductId == p.ProductId
+                        select new SpecificationVM
+                        {
+                            SpecName = s.SpecName,
+                            SpecValue = ps.specificationvalue
+                        }
+                    ).ToList(),
+
+                    // Variants
+                    Variants = _context.ProColorSizeVariants
+                        .Where(v => v.ProductId == p.ProductId)
+                        .Select(v => new ColorSizeVM
+                        {
+                            Color = v.colour,
+                            Size = v.size
+                        })
                         .ToList()
                 })
                 .FirstOrDefault();
@@ -104,6 +128,7 @@ namespace MIEL.web.Controllers
 
             return View(product);
         }
+
 
 
 

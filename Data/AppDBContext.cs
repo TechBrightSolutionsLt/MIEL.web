@@ -55,5 +55,6 @@ namespace MIEL.web.Data
                 .OnDelete(DeleteBehavior.Cascade);
         }
 
+        public DbSet<MainCategory> MainCategories { get; set; }
     }
 }

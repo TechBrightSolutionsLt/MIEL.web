@@ -83,13 +83,15 @@
 
 
             <div class="mb-3">
-                <textarea asp-for="Address" class="form-control" rows="3" placeholder="Address"></textarea>
+                <label class="form-label">Address</label>
+                <textarea asp-for="Address" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <input asp-for="PostalCode" class="form-control" placeholder="Postal Code" />
+                    <label class="form-label">Postal Code</label>
+                    <input asp-for="PostalCode" class="form-control" />
                     <span asp-validation-for="PostalCode" class="text-danger"></span>
                 </div>
             </div>
@@ -100,17 +102,20 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Phone" class="form-control" placeholder="Phone" />
+                    <label class="form-label">Phone</label>
+                    <input asp-for="Phone" class="form-control" />
                     <span asp-validation-for="Phone" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <input asp-for="Email" class="form-control" placeholder="Email" />
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
             </div>
 
             <div class="mb-3">
-                <input asp-for="GSTIN" class="form-control" placeholder="GST Identification Number" />
+                <label class="form-label">GSTIN</label>
+                <input asp-for="GSTIN" class="form-control"/>
                 <span asp-validation-for="GSTIN" class="text-danger"></span>
             </div>
 
@@ -120,13 +125,19 @@
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <input asp-for="BankName" class="form-control" placeholder="Bank Name" />
+                    <label class="form-label">Bank Name</label>
+                    <input asp-for="BankName" class="form-control"/>
+                    <span asp-validation-for="BankName" class="text-danger"></span>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <input asp-for="AccountNumber" class="form-control" placeholder="Account Number" />
+                    <label class="form-label">Account Number</label>
+                    <input asp-for="AccountNumber" class="form-control"/>
+                    <span asp-validation-for="AccountNumber" class="text-danger"></span>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <input asp-for="IFSC" class="form-control" placeholder="IFSC Code" />
+                    <label class="form-label">IFSC</label>
+                    <input asp-for="IFSC" class="form-control" />
+                    <span asp-validation-for="IFSC" class="text-danger"></span>
                 </div>
             </div>
 

@@ -44,10 +44,16 @@
                         <i class="fas fa-columns me-2"></i> Banner Image
                     </a>
                 </li>
+                <li>
+                    <a asp-controller="MainCategory" asp-action="Create">
+                        <i class="fas fa-list me-2"></i>Categories
+                    </a>
+                </li>
+
 
                 <li>
                     <a asp-controller="CategoryMaster" asp-action="CategoryMaster">
-                        <i class="fas fa-list me-2"></i> Categories
+                        <i class="fas fa-list me-2"></i> Sub Categories
                     </a>
                 </li>
                 <li>
@@ -62,7 +68,7 @@
                 </li>
                 <li>
                     <a asp-controller="Supplier" asp-action="Create">
-                        <i class="fas fa-box me-2"></i> Supplier Master
+                        <i class="fas fa-dolly me-2"></i>  Supplier Master
                     </a>
                 </li>
 
@@ -71,6 +77,21 @@
                         <i class="fas fa-user me-2"></i>Customer Master
                     </a>
                 </li>
+
+                <li>
+                    <a asp-controller="Purchase" asp-action="Create">
+                        <i class="fas fa-truck-loading me-2"></i>Purchase
+                    </a>
+                </li>
+
+                <li>
+                    <a asp-controller="Sales" asp-action="Create">
+                        <i class="fas fa-shopping-cart me-2"></i>Sales
+                    </a>
+                </li>
+
+
+
                 <li>
                     <a asp-controller="Account" asp-action="Logout">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout

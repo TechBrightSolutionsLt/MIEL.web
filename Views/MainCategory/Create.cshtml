@@ -1,0 +1,93 @@
+﻿@model MIEL.web.Models.EntityModels.MainCategory
+@{
+    ViewData["Title"] = "Main Category";
+    Layout = "_AdminLayout";
+    var categories = ViewBag.Categories as List<MIEL.web.Models.EntityModels.MainCategory>;
+}
+
+<div class="container-fluid">
+
+    <h3 class="mb-4 text-primary">Add Category</h3>
+
+    <div class="row">
+        <!-- FORM SECTION -->
+        <div class="col-md-4">
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Category Name</label>
+                    <input asp-for="MainCategoryName" class="form-control" />
+                    <span asp-validation-for="MainCategoryName" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Save
+                </button>
+            </form>
+        </div>
+
+        <!-- LIST SECTION -->
+        <div class="my-4">
+            <h4 class="mt-1 text-warning">Category List</h4>
+
+            <table class="table table-bordered table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th style="width:160px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (categories != null && categories.Any())
+                    {
+                        foreach (var item in categories)
+                        {
+                            <tr>
+                                <td>@item.MainCategoryName</td>
+                                <td>
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.MainCategoryId"
+                                       class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.MainCategoryId"
+                                       class="btn btn-sm btn-danger ms-1"
+                                       onclick="return confirm('Are you sure you want to delete?');">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">
+                                No categories found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            Swal.fire({
+                title: "Success!",
+                text: "@TempData["SuccessMessage"]",
+                icon: "success",
+                confirmButtonText: "OK"
+            });
+        </script>
+    }
+}
