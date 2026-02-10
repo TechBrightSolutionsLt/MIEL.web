@@ -44,11 +44,15 @@ namespace MIEL.web.Controllers
                     productId = p.ProductId,
                     productName = p.ProductName
                 })
-                .Take(10) // limit results
+                .Take(10)
                 .ToList();
 
             return Json(products);
         }
+        
+
+
+
 
 
         [HttpGet]
