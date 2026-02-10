@@ -15,7 +15,10 @@ namespace MIEL.web.Models.EntityModels
         public string BatchNo { get; set; }
         public decimal GstPercent { get; set; }
         public decimal GstAmount { get; set; }
-       
+
+        public decimal DiscPercent { get; set; }
+        public decimal DiscAmount { get; set; }
+
         public decimal TaxableAmount { get; set; }
         public decimal NetAmount { get; set; }
     }

@@ -10,9 +10,10 @@ namespace MIEL.web.Models.EntityModels
 
         public string InvoiceNo { get; set; }
         public DateTime InvoiceDate { get; set; }
-
+        public decimal TotalDisc { get; set; }
         public decimal TotalTaxable { get; set; }
         public decimal TotalTax { get; set; }
+
         public decimal GrandTotal { get; set; }
     }
 }

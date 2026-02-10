@@ -11,7 +11,7 @@ namespace MIEL.web.Models.EntityModels
         public int varientid { get; set; }
 
         [Required]
-        [MaxLength(12)]
+        [MaxLength(20)]
       
         public string BatchNo { get; set; }
 
