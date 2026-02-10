@@ -105,7 +105,7 @@
     </div>
 
     <!-- ================= SIZE CHART ================= -->
-    <div class="card p-3 mb-4">
+    @* <div class="card p-3 mb-4">
         <h4>Size Chart</h4>
 
         @if (!string.IsNullOrEmpty(Model.Product.sizechartPath))
@@ -133,7 +133,61 @@
                name="SizeChartImg"
                class="form-control mt-2"
                onchange="previewImage(this, 'sizeChartPreview')" />
+    </div> *@
+
+    <!-- ================= SIZE CHART ================= -->
+    <div class="card p-3 mb-4">
+        <h4 class="mb-3">Size Chart</h4>
+
+        <div class="row align-items-center">
+            <!-- PREVIEW / LINK -->
+            <div class="col-md-4 text-center">
+                @if (!string.IsNullOrEmpty(Model.Product.sizechartPath))
+                {
+                    @if (Model.Product.sizechartPath.EndsWith(".pdf"))
+                    {
+                        <a href="@Model.Product.sizechartPath"
+                           target="_blank"
+                           class="btn btn-outline-primary mb-2">
+                            View Size Chart (PDF)
+                        </a>
+
+                        <img id="sizeChartPreview"
+                             class="img-thumbnail d-none mt-2"
+                             style="height:200px;" />
+                    }
+                    else
+                    {
+                        <img id="sizeChartPreview"
+                             src="@Model.Product.sizechartPath"
+                             class="img-thumbnail"
+                             style="height:200px;object-fit:contain;" />
+                    }
+                }
+                else
+                {
+                    <img id="sizeChartPreview"
+                         class="img-thumbnail d-none"
+                         style="height:200px;object-fit:contain;" />
+                }
+            </div>
+
+            <!-- UPLOAD -->
+            <div class="col-md-8">
+                <label class="fw-bold">Upload New Size Chart</label>
+                <input type="file"
+                       name="SizeChartImg"
+                       class="form-control"
+                       accept=".jpg,.jpeg,.png,.pdf"
+                       onchange="previewImage(this, 'sizeChartPreview')" />
+
+                <small class="text-muted d-block mt-2">
+                    Accepted formats: JPG, PNG, PDF
+                </small>
+            </div>
+        </div>
     </div>
+
 
 <button class="btn btn-success mt-3">Update</button>
 </form>
