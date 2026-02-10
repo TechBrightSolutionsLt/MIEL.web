@@ -23,19 +23,29 @@
         </div>
 
         <!-- MAIN IMAGE -->
-        <div class="col-lg-4 col-md-5">
+     @*    <div class="col-lg-4 col-md-5">
             <div class="main-image" id="mainImageContainer">
                 <img id="mainProductImage"
                      src="@Model.ImagePath"
                      alt="@Model.ProductName" />
                 <div id="zoomLens"></div>
             </div>
-        </div>
+        </div> *@
+        <div class="col-lg-4 col-md-5 position-relative">
+            <div class="main-image" id="mainImageContainer">
+                <img id="mainProductImage"
+                     src="@Model.ImagePath"
+                     alt="@Model.ProductName" />
+                <div id="zoomLens"></div>
+            </div>
 
-        <!-- ZOOM RESULT -->
-        <div class="col-lg-4 d-none d-lg-block">
+            <!-- ZOOM RESULT (floating) -->
             <div id="zoomResult"></div>
         </div>
+        <!-- ZOOM RESULT -->
+ @*        <div class="col-lg-4 d-none d-lg-block">
+            <div id="zoomResult"></div>
+        </div> *@
 
         <!-- PRODUCT DETAILS -->
         <div class="col-lg-3 col-md-5">
@@ -151,15 +161,25 @@
         height: 180px;
         display: none;
         background: rgba(255,255,255,0.4);
-        cursor: crosshair;
+        /* cursor: crosshair; */
+        pointer-events: none;
     }
 
+
+
+
     #zoomResult {
-        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 105%; /* pushes zoom to the right of image */
+        width: 380px;
         height: 480px;
         border: 1px solid #eee;
         background-repeat: no-repeat;
         background-size: 1200px 1600px;
+        display: none;
+        background-color: #fff;
+        z-index: 10;
     }
 
     .product-title {
@@ -219,11 +239,13 @@
         font-size: 14px;
     }
 
+  
     @@media (max-width: 992px) {
-        #zoomResult {
-            display: none;
-        }
-    }
+        #zoomResult
+
+    {
+        display: none !important;
+    }}
 </style>
 
 <script>
@@ -250,39 +272,46 @@
         }
 
         function moveLens(e) {
-            const rect = img.getBoundingClientRect();
+        const rect = img.getBoundingClientRect();
 
-            let x = e.clientX - rect.left - lens.offsetWidth / 2;
-            let y = e.clientY - rect.top - lens.offsetHeight / 2;
+        const imgWidth = rect.width;
+        const imgHeight = rect.height;
 
-            if (x < 0) x = 0;
-            if (y < 0) y = 0;
-            if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
-            if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
+        let x = e.clientX - rect.left - lens.offsetWidth / 2;
+        let y = e.clientY - rect.top - lens.offsetHeight / 2;
 
-            lens.style.left = x + "px";
-            lens.style.top = y + "px";
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > imgWidth - lens.offsetWidth) x = imgWidth - lens.offsetWidth;
+        if (y > imgHeight - lens.offsetHeight) y = imgHeight - lens.offsetHeight;
 
-            const cx = result.offsetWidth / lens.offsetWidth;
-            const cy = result.offsetHeight / lens.offsetHeight;
+        lens.style.left = x + "px";
+        lens.style.top = y + "px";
 
-            result.style.backgroundPosition =
-                "-" + (x * cx) + "px -" + (y * cy) + "px";
-        }
+        const cx = result.offsetWidth / lens.offsetWidth;
+        const cy = result.offsetHeight / lens.offsetHeight;
+
+        result.style.backgroundPosition =
+            "-" + (x * cx) + "px -" + (y * cy) + "px";
+    }
+
 
         if (img) {
-            img.addEventListener("mouseenter", () => {
-                lens.style.display = "block";
-                initZoom();
-            });
+        img.addEventListener("mouseenter", () => {
+            lens.style.display = "block";
+            result.style.display = "block";  // show zoom result
+            initZoom();
+        });
 
-            img.addEventListener("mousemove", moveLens);
-            lens.addEventListener("mousemove", moveLens);
+        img.addEventListener("mousemove", moveLens);
+        lens.addEventListener("mousemove", moveLens);
 
-            img.addEventListener("mouseleave", () => {
-                lens.style.display = "none";
-            });
-        }
+        img.addEventListener("mouseleave", () => {
+            lens.style.display = "none";
+            result.style.display = "none";  // hide zoom result
+        });
+    }
+
 
         window.changeImage = function (el) {
             document.querySelectorAll(".thumb-img")
