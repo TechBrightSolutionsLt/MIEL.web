@@ -5,6 +5,11 @@
 }
 
 <link href="~/css/purchase.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
 <div class="container-fluid">
 
@@ -78,7 +83,7 @@
                         <input id="Color"
                                name="Color"
                                class="form-control"
-                               placeholder="Red" />
+                               placeholder="eg:- Red" />
                     </div>
 
                     <div class="col-md-2">
@@ -86,7 +91,7 @@
                         <input id="Size"
                                name="Size"
                                class="form-control"
-                               placeholder="M" />
+                               placeholder="eg:- M" />
                     </div>
 
                     <div class="col-md-4">
@@ -103,19 +108,58 @@
                         <input asp-for="CostPrice"
                                class="form-control"
                                type="number"
+                               step="0.01"
+                               value="0" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Disc %</label>
+                        <input type="number"
+                               id="DiscPercent"
+                               class="form-control"
+                               min="0"
+                               max="100"
                                step="0.01" />
                     </div>
 
+                    <div class="col-md-2">
+                        <label class="form-label">Disc Amt</label>
+                        <input type="number"
+                               id="DiscAmount"
+                               class="form-control"
+                               min="0"
+                               step="0.01" />
+                    </div>
                     <div class="col-md-3">
                         <label class="form-label">Quantity</label>
                         <input asp-for="Quantity"
                                class="form-control"
                                type="number"
-                               min="1" />
+                               min="1"
+                               value="1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">GST %</label>
+                        <select id="GstPercent" class="form-select">
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="18">18%</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Selling Price (in AUD)</label>
+                        <input id="SellingPrice"
+                               type="number"
+                               step="0.01"
+                               class="form-control"
+                               placeholder="0.00" />
+                              
                     </div>
 
                     <div class="col-md-6 d-flex align-items-end">
-                        <button type="button" class="btn btn-primary w-100">
+                        <button type="button"
+                                id="btnAddItem"
+                                class="btn btn-primary w-100">
                             + Add Item
                         </button>
                     </div>
@@ -124,38 +168,40 @@
 
             </div>
         </div>
-
         <!-- ================= ITEMS GRID ================= -->
-        <div class="card mb-4">
-            <div class="card-header">Purchase Items</div>
-            <div class="card-body p-0">
+        <div id="hiddenItems"></div>
 
+        <div class="card mb-4">
+            <div class="card-header fw-bold">
+                Purchase Items
+            </div>
+
+            <div class="card-body p-0">
                 <table class="table table-bordered table-striped mb-0">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
                             <th>Product</th>
                             <th>Variant</th>
-                            <th>Rate</th>
-                            <th>Qty</th>
-                            <th>Amount</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Disc %</th>
+                            <th class="text-end">Disc Amt</th>
+                            <th class ="text-end">GST %</th>
+                            <th class="text-end">GST Amt</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-end">Selling Price</th>
+                            <th style="width:50px"></th>
+                            <th style="width:50px"></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach (var item in Model.Items)
-                        {
-                            <tr>
-                                <td>@item.ProductName</td>
-                                <td>@item.VariantCode</td>
-                                <td>@item.Rate</td>
-                                <td>@item.Quantity</td>
-                                <td>@item.Amount</td>
-                            </tr>
-                        }
+
+                    <tbody id="itemsTableBody">
+                        <!-- JS will insert rows here -->
                     </tbody>
                 </table>
-
             </div>
         </div>
+
 
         <!-- ================= SAVE ================= -->
         <div class="text-end">
@@ -169,8 +215,24 @@
 
 <!-- ================= SCRIPT ================= -->
 <script>
+    let itemIndex = 0;
+    let editingIndex = null;
+
     $(document).ready(function () {
 
+        // ================= DEFAULT VALUES =================
+        function resetItemDefaults() {
+            $('#Quantity').val(1);
+            $('#CostPrice').val(0);
+            $('#DiscPercent').val('');
+            $('#DiscAmount').val('');
+            $('#GstPercent').val('0');
+            $('#SellingPrice').val('');
+        }
+
+        resetItemDefaults();
+
+        // ================= SELECT2 PRODUCT SEARCH =================
         $('#ProductId').select2({
             width: '100%',
             placeholder: '-- Search Product --',
@@ -178,42 +240,204 @@
             minimumInputLength: 1,
             ajax: {
                 url: '/Purchase/SearchProducts',
+                type: 'GET',
                 dataType: 'json',
-                delay: 250,
+                delay: 300,
                 data: function (params) {
                     return { term: params.term };
                 },
                 processResults: function (data) {
-                    return { results: data };
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                id: item.id,
+                                text: item.text
+                            };
+                        })
+                    };
                 }
             }
         });
 
-        $('#ProductId').on('select2:select', function () {
-            generateVariantCodeFromProduct();
-        });
+        // ================= VARIANT CODE =================
+        $('#ProductId').on('select2:select', generateVariantCode);
+        $('#Color, #Size').on('keyup', generateVariantCode);
 
-        $('#Color, #Size').on('keyup', generateVariantCodeFromProduct);
-    });
+        function generateVariantCode() {
+            let product = $('#ProductId').select2('data')[0]?.text;
+            let color = $('#Color').val();
+            let size = $('#Size').val();
 
-    function generateVariantCodeFromProduct() {
+            if (!product || !color || !size) {
+                $('#VariantCode').val('');
+                return;
+            }
 
-        let productText = $('#ProductId option:selected').text();
-        let color = $('#Color').val();
-        let size = $('#Size').val();
+            let code =
+                product.replace(/\s+/g, '-').toUpperCase() + '-' +
+                color.toUpperCase() + '-' +
+                size.toUpperCase();
 
-        if (!productText || productText.includes('Search') || !color || !size) {
-            $('#VariantCode').val('');
-            return;
+            $('#VariantCode').val(code);
         }
 
-        let code =
-            productText.trim().toUpperCase().replace(/\s+/g, '-') + '-' +
-            color.trim().toUpperCase() + '-' +
-            size.trim().toUpperCase();
+        // ================= DISCOUNT SYNC =================
+        $('#DiscPercent').on('input', function () {
+            let rate = parseFloat($('#CostPrice').val()) || 0;
+            let qty = parseInt($('#Quantity').val()) || 0;
+            let percent = parseFloat($(this).val()) || 0;
 
-        $('#VariantCode').val(code);
-    }
+            let gross = rate * qty;
+            let amount = (gross * percent) / 100;
+            $('#DiscAmount').val(amount.toFixed(2));
+        });
+
+        $('#DiscAmount').on('input', function () {
+            let rate = parseFloat($('#CostPrice').val()) || 0;
+            let qty = parseInt($('#Quantity').val()) || 0;
+            let amount = parseFloat($(this).val()) || 0;
+
+            let gross = rate * qty;
+            if (gross === 0) return;
+
+            let percent = (amount / gross) * 100;
+            $('#DiscPercent').val(percent.toFixed(2));
+        });
+
+        // ================= ADD / UPDATE ITEM =================
+        $('#btnAddItem').on('click', function () {
+
+            let productId = $('#ProductId').val();
+            let productName = $('#ProductId').select2('data')[0]?.text || '';
+            let color = $('#Color').val().trim();
+            let size = $('#Size').val().trim();
+            let variantCode = $('#VariantCode').val().trim();
+
+            let rate = parseFloat($('#CostPrice').val()) || 0;
+            let qty = parseInt($('#Quantity').val()) || 1;
+            let gstPercent = parseFloat($('#GstPercent').val()) || 0;
+            let discPercent = parseFloat($('#DiscPercent').val()) || 0;
+            let discAmount = parseFloat($('#DiscAmount').val()) || 0;
+            let sellingPrice = parseFloat($('#SellingPrice').val()) || 0;
+
+            if (!productId || !color || !size) {
+                alert('Product, Color and Size are required');
+                return;
+            }
+
+            if (sellingPrice <= 0) {
+                alert('Selling price must be greater than 0');
+                return;
+            }
+
+            if (editingIndex === null &&
+                $(`tr[data-variant="${variantCode}"]`).length > 0) {
+                alert('This variant already added');
+                return;
+            }
+
+            let gross = rate * qty;
+            if (discPercent > 0)
+                discAmount = (gross * discPercent) / 100;
+
+            let taxable = gross - discAmount;
+            let gstAmount = (taxable * gstPercent) / 100;
+            let netAmount = taxable + gstAmount;
+
+            // ========== EDIT ==========
+            if (editingIndex !== null) {
+
+                let row = $(`tr[data-index="${editingIndex}"]`);
+
+                row.attr('data-variant', variantCode)
+                    .find('td:eq(0)').text(productName).end()
+                    .find('td:eq(1)').text(variantCode).end()
+                    .find('td:eq(2)').text(rate.toFixed(2)).end()
+                    .find('td:eq(3)').text(qty).end()
+                    .find('td:eq(4)').text(discPercent.toFixed(2) + '%').end()
+                    .find('td:eq(5)').text(discAmount.toFixed(2)).end()
+                    .find('td:eq(6)').text(gstPercent + '%').end()
+                    .find('td:eq(7)').text(gstAmount.toFixed(2)).end()
+                    .find('td:eq(8)').text(netAmount.toFixed(2)).end()
+                    .find('td:eq(9)').text(sellingPrice.toFixed(2));
+
+                let hidden = $(`.hidden-item[data-index="${editingIndex}"]`);
+                hidden.find('[name$=".Rate"]').val(rate);
+                hidden.find('[name$=".Quantity"]').val(qty);
+                hidden.find('[name$=".DiscPercent"]').val(discPercent);
+                hidden.find('[name$=".DiscAmount"]').val(discAmount);
+                hidden.find('[name$=".GstPercent"]').val(gstPercent);
+                hidden.find('[name$=".GstAmount"]').val(gstAmount);
+                hidden.find('[name$=".Amount"]').val(netAmount);
+                hidden.find('[name$=".SellingPrice"]').val(sellingPrice);
+
+                editingIndex = null;
+                resetItemDefaults();
+                row.removeClass('table-warning');
+                return;
+            }
+
+            // ========== ADD ==========
+            $('#itemsTableBody').append(`
+                <tr data-index="${itemIndex}" data-variant="${variantCode}">
+                    <td>${productName}</td>
+                    <td>${variantCode}</td>
+                    <td class="text-end">${rate.toFixed(2)}</td>
+                    <td class="text-end">${qty}</td>
+                    <td class="text-end">${discPercent.toFixed(2)}%</td>
+                    <td class="text-end">${discAmount.toFixed(2)}</td>
+                    <td class="text-end">${gstPercent}%</td>
+                    <td class="text-end">${gstAmount.toFixed(2)}</td>
+                    <td class="text-end">${netAmount.toFixed(2)}</td>
+                    <td class="text-end">${sellingPrice.toFixed(2)}</td>
+                    <td><button type="button" class="btn btn-sm btn-warning btn-edit-item">✎</button></td>
+                    <td><button type="button" class="btn btn-sm btn-danger btn-remove-item">✖</button></td>
+                </tr>
+            `);
+
+            $('#hiddenItems').append(`
+                <div class="hidden-item" data-index="${itemIndex}">
+                    <input type="hidden" name="Items[${itemIndex}].ProductName" value="${productName}">
+                    <input type="hidden" name="Items[${itemIndex}].VariantCode" value="${variantCode}">
+                    <input type="hidden" name="Items[${itemIndex}].Rate" value="${rate}">
+                    <input type="hidden" name="Items[${itemIndex}].Quantity" value="${qty}">
+                    <input type="hidden" name="Items[${itemIndex}].DiscPercent" value="${discPercent}">
+                    <input type="hidden" name="Items[${itemIndex}].DiscAmount" value="${discAmount}">
+                    <input type="hidden" name="Items[${itemIndex}].GstPercent" value="${gstPercent}">
+                    <input type="hidden" name="Items[${itemIndex}].GstAmount" value="${gstAmount}">
+                    <input type="hidden" name="Items[${itemIndex}].Amount" value="${netAmount}">
+                    <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${sellingPrice}">
+                </div>
+            `);
+
+            itemIndex++;
+            resetItemDefaults();
+        });
+
+        // ================= REMOVE =================
+        $(document).on('click', '.btn-remove-item', function () {
+            let row = $(this).closest('tr');
+            let index = row.data('index');
+            row.remove();
+            $(`.hidden-item[data-index="${index}"]`).remove();
+        });
+
+        // ================= EDIT =================
+        $(document).on('click', '.btn-edit-item', function () {
+            let row = $(this).closest('tr');
+            editingIndex = row.data('index');
+
+            row.addClass('table-warning').siblings().removeClass('table-warning');
+
+            $('#VariantCode').val(row.find('td:eq(1)').text());
+            $('#CostPrice').val(row.find('td:eq(2)').text());
+            $('#Quantity').val(row.find('td:eq(3)').text());
+            $('#DiscPercent').val(row.find('td:eq(4)').text().replace('%', ''));
+            $('#DiscAmount').val(row.find('td:eq(5)').text());
+            $('#GstPercent').val(row.find('td:eq(6)').text().replace('%', ''));
+            $('#SellingPrice').val(row.find('td:eq(9)').text());
+        });
+
+    });
 </script>
-
 

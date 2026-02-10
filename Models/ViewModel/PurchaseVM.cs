@@ -27,7 +27,9 @@ namespace MIEL.web.Models.ViewModel
 
         public decimal CostPrice { get; set; }
         public int Quantity { get; set; }
-
+        public decimal TotalDisc { get; set; }
+        public decimal TotalTaxable { get; set; }
+        public decimal TotalTax { get; set; }
         // Grid
         public List<PurchaseItemVM> Items { get; set; } = new();
     }
