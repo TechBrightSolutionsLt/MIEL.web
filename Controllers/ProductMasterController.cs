@@ -291,6 +291,33 @@ namespace MIEL.web.Controllers
 
             _db.SaveChanges();
 
+            // ---------- OTHER IMAGES ----------
+            var oldImageIds = Request.Form["OldImageIds"];
+
+            for (int i = 0; i < oldImageIds.Count; i++)
+            {
+                var file = Request.Form.Files["Image" + (i + 2)];
+                if (file == null || file.Length == 0)
+                    continue;
+
+                int imgId = Convert.ToInt32(oldImageIds[i]);
+
+                var oldImg = _db.ProductImages
+                    .First(x => x.ImgId == imgId);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var path = Path.Combine(uploadDir, fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                oldImg.ImgPath = "/proimg/" + fileName;
+            }
+
+            _db.SaveChanges();
+
 
             // ---------- UPDATE SIZE CHART ----------
             var sizeChartFile = Request.Form.Files["SizeChartImg"];
