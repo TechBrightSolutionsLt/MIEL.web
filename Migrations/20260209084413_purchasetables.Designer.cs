@@ -4,6 +4,7 @@ using MIEL.web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MIEL.web.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260209084413_purchasetables")]
+    partial class purchasetables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,6 +163,28 @@ namespace MIEL.web.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.Inventory", b =>
+                {
+                    b.Property<int>("InventoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryId"));
+
+                    b.Property<decimal>("AverageCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("QuantityOnHand")
+                        .HasColumnType("int");
+
+                    b.Property<int>("varientid")
+                        .HasColumnType("int");
+
+                    b.HasKey("InventoryId");
+
+                    b.ToTable("Inventory");
+                });
+
             modelBuilder.Entity("MIEL.web.Models.EntityModels.InventoryBatch", b =>
                 {
                     b.Property<int>("InventoryBatchId")
@@ -170,8 +195,7 @@ namespace MIEL.web.Migrations
 
                     b.Property<string>("BatchNo")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("CostPrice")
                         .HasColumnType("decimal(18,2)");
@@ -470,13 +494,7 @@ namespace MIEL.web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("varientid"));
 
-                    b.Property<decimal>("AverageCost")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantityOnHand")
                         .HasColumnType("int");
 
                     b.Property<string>("colour")
@@ -484,10 +502,6 @@ namespace MIEL.web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("size")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("varientCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

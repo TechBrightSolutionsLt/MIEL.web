@@ -14,6 +14,9 @@ namespace MIEL.web.Models.EntityModels
        
     public string colour { get; set; }
     public string size { get; set; }
+        public int QuantityOnHand { get; set; }
+        public string varientCode { get; set; }
+        public decimal AverageCost { get; set; }
 
     }
 }

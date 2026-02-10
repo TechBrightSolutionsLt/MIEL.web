@@ -1,4 +1,5 @@
-﻿using MIEL.web.Models.EntityModels;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using MIEL.web.Models.EntityModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,46 +8,32 @@ namespace MIEL.web.Models.ViewModel
 {
     public class PurchaseVM
     {
-        // =============================
-        // PURCHASE HEADER
-        // =============================
-        public int PurchaseId { get; set; }
-
+        // Purchase master
+        public int SupplierId { get; set; }
         public string PurchaseCode { get; set; }
-
         public DateTime PurchaseDate { get; set; }
 
-        public string InvoiceNo { get; set; }
+        public string BatchNo { get; set; }
 
-        // =============================
-        // SUPPLIER
-        // =============================
-        public int SupplierId { get; set; }
+        // Dropdowns
+        public List<SelectListItem> Suppliers { get; set; } = new();
 
-        public string SupplierName { get; set; }
+        // Item entry
+        public int ProductId { get; set; }
+        public string Color { get; set; }
+        public string Size { get; set; }
+        public string VariantCode { get; set; }
+        public int VariantId { get; set; }
 
-        public string SupplierMobile { get; set; }
+        public decimal CostPrice { get; set; }
+        public int Quantity { get; set; }
 
-        // =============================
-        // TOTALS
-        // =============================
-        public decimal TotalAmount { get; set; }
-
-        public string Status { get; set; }   // Draft / Completed
-
-        // =============================
-        // LOOKUPS
-        // =============================
-        public List<ProductMaster> Products { get; set; }
-
-        // =============================
-        // PURCHASE ITEMS
-        // =============================
-        //  public List<PurchaseItemVM> Items { get; set; } = new();
+        // Grid
+        public List<PurchaseItemVM> Items { get; set; } = new();
     }
 
     // =================================
     // PURCHASE ITEM VM
     // =================================
-  
+
 }
