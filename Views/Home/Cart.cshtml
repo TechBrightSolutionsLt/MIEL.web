@@ -4,6 +4,31 @@
     var totalQty = Model.Sum(x => x.Quantity);
     var totalAmount = Model.Sum(x => x.Price * x.Quantity);
 }
+<!-- ===== CHECKOUT STEPS ===== -->
+<div class="container mt-4">
+    <div class="checkout-steps d-flex justify-content-between align-items-center">
+
+        <div class="step active">
+            <div class="circle">1</div>
+            <div class="label">Cart</div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="step">
+            <div class="circle">2</div>
+            <div class="label">Review</div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="step">
+            <div class="circle">3</div>
+            <div class="label">Payment</div>
+        </div>
+
+    </div>
+</div>
 
 <div class="container py-4">
     <div class="row">
@@ -110,7 +135,8 @@
                         </span>
                     </h6>
 
-                    <button class="btn btn-warning w-100 mt-3 fw-bold">
+                    <button class="btn btn-warning w-100 mt-3 fw-bold"
+                            onclick="goToReview()">
                         PLACE ORDER
                     </button>
 
@@ -120,7 +146,57 @@
 
     </div>
 </div>
+<style>
+    .checkout-steps {
+        position: relative;
+        margin-bottom: 30px;
+    }
 
+    .step {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #ddd;
+        line-height: 35px;
+        font-weight: bold;
+        margin: auto;
+    }
+
+    .label {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .line {
+        flex: 1;
+        height: 3px;
+        background: #ddd;
+        margin: 0 10px;
+    }
+
+    /* ACTIVE STEP */
+    .step.active .circle {
+        background: #f59e0b;
+        color: #fff;
+    }
+
+    .step.active .label {
+        font-weight: bold;
+        color: #f59e0b;
+    }
+</style>
+
+<script>
+    function goToReview() {
+        window.location.href = '/Home/ReviewOrder';
+    }
+</script>
 <script>
         function updateQty(variantId, change) {
 

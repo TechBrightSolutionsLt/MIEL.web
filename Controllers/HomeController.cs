@@ -319,6 +319,32 @@ namespace MIEL.web.Controllers
 
             return Json(new { success = true });
         }
+        public IActionResult ReviewOrder()
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+
+            if (string.IsNullOrEmpty(cartJson))
+                return RedirectToAction("Cart");
+
+            var cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+
+            // Get logged in user
+            string userIdStr = HttpContext.Session.GetString("UserId");
+            int userId = Convert.ToInt32(userIdStr);
+
+            // Get Address from DB
+            var address = _context.Customers
+                .Where(a => a.CustomerId == userId)
+                .FirstOrDefault();
+
+            var vm = new ReviewOrderVM
+            {
+                CartItems = cart,
+                Address = address
+            };
+
+            return View(vm);
+        }
 
         public IActionResult Privacy()
         {

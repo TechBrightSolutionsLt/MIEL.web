@@ -1,0 +1,154 @@
+﻿@using MIEL.web.Models.ViewModel
+@model ReviewOrderVM
+<!-- ===== CHECKOUT STEPS ===== -->
+<div class="container mt-4">
+    <div class="checkout-steps d-flex justify-content-between align-items-center">
+
+        <!-- CART (Completed) -->
+        <div class="step completed">
+            <div class="circle">✔</div>
+            <div class="label">Cart</div>
+        </div>
+
+        <div class="line active-line"></div>
+
+        <!-- REVIEW (Active) -->
+        <div class="step active">
+            <div class="circle">2</div>
+            <div class="label">Review</div>
+        </div>
+
+        <div class="line"></div>
+
+        <!-- PAYMENT (Upcoming) -->
+        <div class="step">
+            <div class="circle">3</div>
+            <div class="label">Payment</div>
+        </div>
+
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+
+        <!-- ITEMS -->
+        <div class="col-md-8">
+            <h4>Review Items</h4>
+
+            @foreach (var item in Model.CartItems)
+            {
+                <div class="card mb-3 p-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <img src="@Url.Content(item.Image)" class="img-fluid" />
+                        </div>
+
+                        <div class="col-md-9">
+                            <h6>@item.ProductName</h6>
+                            <p>Color: @item.Color | Size: @item.Size</p>
+                            <p>Qty: @item.Quantity</p>
+                            <p class="fw-bold">₹ @item.Price</p>
+                            <p>Subtotal: ₹ @(item.Price* item.Quantity)</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- ADDRESS + TOTAL -->
+        <div class="col-md-4">
+            <div class="card p-3">
+
+                <h5>Delivery Address</h5>
+
+                @if (Model.Address != null)
+                {
+                    <p>@Model.Address.Name</p>
+                    <p>@Model.Address.BuildingName</p>
+                    <p>@Model.Address.City - @Model.Address.Pin</p>
+                    <p>@Model.Address.Mobile</p>
+
+                    <a href="@Url.Action("ChangeAddress", "Home")"
+                       class="btn btn-sm btn-outline-primary">
+                        Change Address
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("AddAddress", "Home")"
+                       class="btn btn-primary">
+                        Add Address
+                    </a>
+                }
+
+                <hr />
+
+                <h5>Total: ₹ @Model.TotalAmount</h5>
+
+                <form asp-action="ConfirmOrder" method="post">
+                    <button class="btn btn-warning w-100 mt-2">
+                        CONFIRM ORDER
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<style>
+    .checkout-steps {
+        margin-bottom: 30px;
+    }
+
+    .step {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #ddd;
+        line-height: 35px;
+        font-weight: bold;
+        margin: auto;
+    }
+
+    .label {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .line {
+        flex: 1;
+        height: 3px;
+        background: #ddd;
+        margin: 0 10px;
+    }
+
+    /* COMPLETED STEP */
+    .step.completed .circle {
+        background: green;
+        color: #fff;
+    }
+
+    /* ACTIVE STEP */
+    .step.active .circle {
+        background: #f59e0b;
+        color: #fff;
+    }
+
+    .step.active .label {
+        font-weight: bold;
+        color: #f59e0b;
+    }
+
+    .active-line {
+        background: #f59e0b;
+    }
+</style>
+
