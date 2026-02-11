@@ -3,7 +3,7 @@
 <div class="container py-5">
     <div class="row align-items-start">
 
-        <!-- THUMBNAILS -->
+        <!-- ================= THUMBNAILS ================= -->
         <div class="col-lg-1 col-md-2">
             <div class="thumbnail-column">
                 <img src="@Model.ImagePath"
@@ -22,15 +22,7 @@
             </div>
         </div>
 
-        <!-- MAIN IMAGE -->
-     @*    <div class="col-lg-4 col-md-5">
-            <div class="main-image" id="mainImageContainer">
-                <img id="mainProductImage"
-                     src="@Model.ImagePath"
-                     alt="@Model.ProductName" />
-                <div id="zoomLens"></div>
-            </div>
-        </div> *@
+        <!-- ================= MAIN IMAGE ================= -->
         <div class="col-lg-4 col-md-5 position-relative">
             <div class="main-image" id="mainImageContainer">
                 <img id="mainProductImage"
@@ -38,58 +30,52 @@
                      alt="@Model.ProductName" />
                 <div id="zoomLens"></div>
             </div>
-
-            <!-- ZOOM RESULT (floating) -->
             <div id="zoomResult"></div>
         </div>
-        <!-- ZOOM RESULT -->
- @*        <div class="col-lg-4 d-none d-lg-block">
-            <div id="zoomResult"></div>
-        </div> *@
 
-        <!-- PRODUCT DETAILS -->
-        <div class="col-lg-3 col-md-5">
+        <!-- ================= PRODUCT DETAILS ================= -->
+        <div class="col-lg-4 col-md-5">
 
             <h2 class="product-title">@Model.ProductName</h2>
             <p class="product-brand">@Model.Brand</p>
 
-            <!-- COLOR -->
+            <h6>MRP RS.</h6>
+           
+            <p class="product-title" id="productPrice">₹ @Model.NetAmount</p>
+
+            <!-- ================= COLOR ================= -->
             @if (Model.Variants != null && Model.Variants.Any())
             {
                 var colors = Model.Variants.Select(v => v.Color).Distinct().ToList();
 
                 <div class="variant-box">
                     <h6>Color</h6>
-                    <div class="variant-options">
+                    <div class="variant-options" id="colorContainer">
                         @foreach (var color in colors)
                         {
-                            <span class="variant-pill">@color</span>
+                            <span class="variant-pill color-pill"
+                                  data-color="@color">
+                                @color
+                            </span>
                         }
                     </div>
                 </div>
             }
 
-            <!-- SIZE -->
-            @if (Model.Variants != null && Model.Variants.Any())
-            {
-                var sizes = Model.Variants.Select(v => v.Size).Distinct().ToList();
-
-                <div class="variant-box">
-                    <h6>Size</h6>
-                    <div class="variant-options">
-                        @foreach (var size in sizes)
-                        {
-                            <span class="variant-pill">@size</span>
-                        }
-                    </div>
+            <!-- ================= SIZE ================= -->
+            <div class="variant-box">
+                <h6>Size</h6>
+                <div class="variant-options" id="sizeContainer">
+                    <!-- sizes load dynamically -->
                 </div>
-            }
-            <div id="sizeError" style="color:red; font-size:13px; display:none;">
+            </div>
+
+            <div id="sizeError" class="text-danger" style="display:none;">
                 Please select a size
             </div>
 
-            <!-- BUTTONS -->
-            <div class="btn-row mt-4">
+            <!-- ================= BUTTONS ================= -->
+            <div class="mt-4">
                 <button class="btn btn-outline-dark me-3"
                         onclick="addToCart(@Model.ProductId)">
                     Add to Cart
@@ -100,12 +86,11 @@
                 </button>
             </div>
 
-            <!-- HIGHLIGHTS -->
+            <!-- ================= HIGHLIGHTS ================= -->
             @if (Model.Specificationsnew != null && Model.Specificationsnew.Any())
             {
                 <div class="highlight-box mt-5">
                     <h5>Product Highlights</h5>
-
                     @foreach (var spec in Model.Specificationsnew)
                     {
                         <div class="highlight-row">
@@ -119,6 +104,7 @@
     </div>
 </div>
 
+<!-- ================= STYLES ================= -->
 <style>
     .thumbnail-column {
         display: flex;
@@ -135,9 +121,9 @@
         padding: 3px;
     }
 
-    .thumb-img.active {
-        border: 2px solid #000;
-    }
+        .thumb-img.active {
+            border: 2px solid #000;
+        }
 
     .main-image {
         position: relative;
@@ -145,14 +131,13 @@
         height: 480px;
         border: 1px solid #eee;
         overflow: hidden;
-        background: #fff;
     }
 
-    .main-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
     #zoomLens {
         position: absolute;
@@ -161,22 +146,17 @@
         height: 180px;
         display: none;
         background: rgba(255,255,255,0.4);
-        /* cursor: crosshair; */
         pointer-events: none;
     }
-
-
-
 
     #zoomResult {
         position: absolute;
         top: 0;
-        left: 105%; /* pushes zoom to the right of image */
+        left: 105%;
         width: 380px;
         height: 480px;
         border: 1px solid #eee;
         background-repeat: no-repeat;
-        background-size: 1200px 1600px;
         display: none;
         background-color: #fff;
         z-index: 10;
@@ -191,11 +171,6 @@
         color: #888;
         font-size: 13px;
         text-transform: uppercase;
-        margin-bottom: 20px;
-    }
-
-    .variant-box {
-        margin-bottom: 20px;
     }
 
     .variant-options {
@@ -209,14 +184,13 @@
         border: 1px solid #ccc;
         border-radius: 25px;
         cursor: pointer;
-        font-size: 14px;
         background: #fff;
     }
 
-    .variant-pill.active {
-        background: #000;
-        color: #fff;
-    }
+        .variant-pill.active {
+            background: #000;
+            color: #fff;
+        }
 
     .btn-buy {
         background: #d32f2f;
@@ -231,33 +205,26 @@
         border: 1px solid #eee;
         border-radius: 8px;
         padding: 15px;
-        background: #fff;
     }
-
-    .highlight-row {
-        margin-bottom: 8px;
-        font-size: 14px;
-    }
-
-  
-    @@media (max-width: 992px) {
-        #zoomResult
-
-    {
-        display: none !important;
-    }}
 </style>
 
+<!-- ================= VARIANT DATA ================= -->
+<script>
+    const productVariants = @Html.Raw(
+                System.Text.Json.JsonSerializer.Serialize(Model.Variants)
+        );
+</script>
+
+<!-- ================= SCRIPT ================= -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+        /* ================= ZOOM SECTION (YOUR ORIGINAL - CLEANED) ================= */
 
         const img = document.getElementById("mainProductImage");
         const lens = document.getElementById("zoomLens");
         const result = document.getElementById("zoomResult");
 
-        let selectedSize = null;
-
-        // ---------------- ZOOM ----------------
         function initZoom() {
             if (!img || !lens || !result) return;
 
@@ -272,50 +239,49 @@
         }
 
         function moveLens(e) {
-        const rect = img.getBoundingClientRect();
 
-        const imgWidth = rect.width;
-        const imgHeight = rect.height;
+            const rect = img.getBoundingClientRect();
 
-        let x = e.clientX - rect.left - lens.offsetWidth / 2;
-        let y = e.clientY - rect.top - lens.offsetHeight / 2;
+            let x = e.clientX - rect.left - lens.offsetWidth / 2;
+            let y = e.clientY - rect.top - lens.offsetHeight / 2;
 
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > imgWidth - lens.offsetWidth) x = imgWidth - lens.offsetWidth;
-        if (y > imgHeight - lens.offsetHeight) y = imgHeight - lens.offsetHeight;
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x > rect.width - lens.offsetWidth)
+                x = rect.width - lens.offsetWidth;
 
-        lens.style.left = x + "px";
-        lens.style.top = y + "px";
+            if (y > rect.height - lens.offsetHeight)
+                y = rect.height - lens.offsetHeight;
 
-        const cx = result.offsetWidth / lens.offsetWidth;
-        const cy = result.offsetHeight / lens.offsetHeight;
+            lens.style.left = x + "px";
+            lens.style.top = y + "px";
 
-        result.style.backgroundPosition =
-            "-" + (x * cx) + "px -" + (y * cy) + "px";
-    }
+            const cx = result.offsetWidth / lens.offsetWidth;
+            const cy = result.offsetHeight / lens.offsetHeight;
 
+            result.style.backgroundPosition =
+                "-" + (x * cx) + "px -" + (y * cy) + "px";
+        }
 
         if (img) {
-        img.addEventListener("mouseenter", () => {
-            lens.style.display = "block";
-            result.style.display = "block";  // show zoom result
-            initZoom();
-        });
+            img.addEventListener("mouseenter", () => {
+                lens.style.display = "block";
+                result.style.display = "block";
+                initZoom();
+            });
 
-        img.addEventListener("mousemove", moveLens);
-        lens.addEventListener("mousemove", moveLens);
+            img.addEventListener("mousemove", moveLens);
+            lens.addEventListener("mousemove", moveLens);
 
-        img.addEventListener("mouseleave", () => {
-            lens.style.display = "none";
-            result.style.display = "none";  // hide zoom result
-        });
-    }
-
+            img.addEventListener("mouseleave", () => {
+                lens.style.display = "none";
+                result.style.display = "none";
+            });
+        }
 
         window.changeImage = function (el) {
             document.querySelectorAll(".thumb-img")
-                .forEach(img => img.classList.remove("active"));
+                .forEach(i => i.classList.remove("active"));
 
             el.classList.add("active");
             img.src = el.src;
@@ -323,55 +289,125 @@
             setTimeout(initZoom, 100);
         };
 
-        // ---------------- SIZE SELECTION ----------------
-        document.querySelectorAll(".variant-pill").forEach(el => {
-            el.addEventListener("click", function () {
+        /* ================= VARIANT SECTION ================= */
 
-                this.parentElement.querySelectorAll(".variant-pill")
-                    .forEach(p => p.classList.remove("active"));
+        let selectedColor = null;
+        let selectedSize = null;
 
+        const colorPills = document.querySelectorAll(".color-pill");
+        const sizeContainer = document.getElementById("sizeContainer");
+
+        colorPills.forEach(pill => {
+            pill.addEventListener("click", function () {
+
+                colorPills.forEach(p => p.classList.remove("active"));
                 this.classList.add("active");
 
-                selectedSize = this.innerText;
-
-                const err = document.getElementById("sizeError");
-                if (err) err.style.display = "none";
+                selectedColor = this.dataset.color;
+                loadSizesByColor(selectedColor);
             });
         });
 
-        // ---------------- ADD TO CART ----------------
+        function loadSizesByColor(color) {
+
+            sizeContainer.innerHTML = "";
+            selectedSize = null;
+
+            const filtered = productVariants
+                .filter(v => v.Color === color)
+                .map(v => v.Size);
+
+            const uniqueSizes = [...new Set(filtered)];
+
+            uniqueSizes.forEach(size => {
+
+                const span = document.createElement("span");
+                span.className = "variant-pill size-pill";
+                span.innerText = size;
+
+                 span.addEventListener("click", function () {
+
+        document.querySelectorAll(".size-pill")
+            .forEach(s => s.classList.remove("active"));
+
+        this.classList.add("active");
+
+        selectedSize = size;
+
+        document.getElementById("sizeError").style.display = "none";
+
+        // 🔥 CHANGE PRICE HERE
+        const matchedVariant = productVariants.find(v =>
+            v.Color === selectedColor &&
+            v.Size === selectedSize
+        );
+
+        if (matchedVariant) {
+            document.getElementById("productPrice")
+                .innerText = "₹ " + matchedVariant.Rate;
+        }
+    });
+
+
+                sizeContainer.appendChild(span);
+            });
+        }
+
+        // Auto select first color
+        if (colorPills.length > 0) {
+            colorPills[0].click();
+        }
+
+        /* ================= ADD TO CART ================= */
+
         window.addToCart = function (productId) {
 
+            if (!selectedColor) {
+                alert("Please select a color");
+                return;
+            }
+
             if (!selectedSize) {
-                const err = document.getElementById("sizeError");
-                if (err) err.style.display = "block";
+                document.getElementById("sizeError").style.display = "block";
                 return;
             }
 
             fetch('/Home/AddToCart', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     productId: productId,
                     quantity: 1,
+                    color: selectedColor,
                     size: selectedSize
                 })
             })
             .then(res => res.json())
             .then(data => {
+
                 if (data.success) {
+
+                    // Update cart count
                     fetch('/Home/GetCartCount')
                         .then(res => res.json())
                         .then(c => {
-                            const cartCount = document.getElementById("cartCount");
+                            const cartCount =
+                                document.getElementById("cartCount");
                             if (cartCount) {
                                 cartCount.textContent = c.count;
                             }
                         });
+
+                    alert("Added to cart successfully");
+                }
+                else {
+                    alert("Something went wrong");
                 }
             });
         };
 
-        initZoom();
     });
 </script>
+

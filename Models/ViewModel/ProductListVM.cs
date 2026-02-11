@@ -4,6 +4,8 @@
     {
         public string Color { get; set; }
         public string Size { get; set; }
+        public decimal Rate { get; set; }
+        public int VariantId { get; set; }
     }
     public class SpecificationVM
     {
@@ -17,6 +19,7 @@
         public string Brand { get; set; }
         public string ImagePath { get; set; }
 
+        public decimal? NetAmount { get; set; }
 
         public string ProductDescription { get; set; }
         public List<string> Images { get; set; }

@@ -73,27 +73,34 @@ namespace MIEL.web.Controllers
             return Json(subCategories);
         }
 
-     
+
         public IActionResult CategoryProducts(int categoryId)
         {
-            var products = _context.ProductMasters
-                .Where(p => p.CategoryId == categoryId)
-                .Select(p => new ProductListVM
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    Brand = p.Brand,
+            var products = (from p in _context.ProductMasters
+                            where p.CategoryId == categoryId
+                            select new ProductListVM
+                            {
+                                ProductId = p.ProductId,
+                                ProductName = p.ProductName,
+                                Brand = p.Brand,
 
-                    ImagePath = _context.ProductImages
-    .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
-    .Select(i => i.ImgPath)
-    .FirstOrDefault()
+                                ImagePath = _context.ProductImages
+                                    .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
+                                    .Select(i => i.ImgPath)
+                                    .FirstOrDefault(),
 
-                })
-                .ToList();
+                                NetAmount = (from v in _context.ProColorSizeVariants
+                                         join pi in _context.PurchaseItems
+                                         on v.varientid equals pi.varientid
+                                         where v.ProductId == p.ProductId
+                                         orderby pi.PurchaseItemId descending
+                                         select pi.Rate)
+                                         .FirstOrDefault()
+                            }).ToList();
 
             return View(products);
         }
+
 
 
 
@@ -109,20 +116,17 @@ namespace MIEL.web.Controllers
                     Brand = p.Brand,
                     ProductDescription = p.ProductDescription,
 
-                    // Main image
                     ImagePath = _context.ProductImages
                         .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
                         .Select(i => i.ImgPath)
                         .FirstOrDefault(),
 
-                    // Other images
                     Images = _context.ProductImages
                         .Where(i => i.ProductId == p.ProductId && i.Flag == 0)
                         .OrderBy(i => i.ImgId)
                         .Select(i => i.ImgPath)
                         .ToList(),
 
-                    // Correct specification join
                     Specificationsnew = (
                         from ps in _context.productspecifications
                         join s in _context.Specifications
@@ -132,18 +136,35 @@ namespace MIEL.web.Controllers
                         {
                             SpecName = s.SpecName,
                             SpecValue = ps.specificationvalue
+                        }).ToList(),
+
+                    // ? Correct Variants with Latest Rate
+                    Variants = (
+                        from v in _context.ProColorSizeVariants
+                        where v.ProductId == p.ProductId
+                        select new ColorSizeVM
+                        {
+                            VariantId = v.varientid,
+                            Color = v.colour,
+                            Size = v.size,
+                            Rate = _context.PurchaseItems
+                                .Where(pi => pi.varientid == v.varientid)
+                                .OrderByDescending(pi => pi.PurchaseItemId)
+                                .Select(pi => pi.Rate)
+                                .FirstOrDefault()
                         }
                     ).ToList(),
 
-                    // Variants
-                    Variants = _context.ProColorSizeVariants
+                    // Default price (first variant)
+                    NetAmount = _context.ProColorSizeVariants
                         .Where(v => v.ProductId == p.ProductId)
-                        .Select(v => new ColorSizeVM
-                        {
-                            Color = v.colour,
-                            Size = v.size
-                        })
-                        .ToList()
+                        .Select(v => _context.PurchaseItems
+                            .Where(pi => pi.varientid == v.varientid)
+                            .OrderByDescending(pi => pi.PurchaseItemId)
+                            .Select(pi => pi.Rate)
+                            .FirstOrDefault()
+                        )
+                        .FirstOrDefault()
                 })
                 .FirstOrDefault();
 
@@ -154,36 +175,70 @@ namespace MIEL.web.Controllers
         }
 
 
+
+
         [HttpPost]
-        public IActionResult AddToCart([FromBody] CartItem item)
+        public IActionResult AddToCart([FromBody] CartItem model)
         {
             var cartJson = HttpContext.Session.GetString("Cart");
-            List<CartItem> cart;
 
-            if (string.IsNullOrEmpty(cartJson))
+            var cart = string.IsNullOrEmpty(cartJson)
+                ? new List<CartItem>()
+                : JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+
+            // ?? Get variant with latest price
+            var variant = (
+                from v in _context.ProColorSizeVariants
+                join pi in _context.PurchaseItems
+                    on v.varientid equals pi.varientid
+                where v.ProductId == model.ProductId
+                      && v.colour == model.Color
+                      && v.size == model.Size
+                orderby pi.PurchaseItemId descending
+                select new
+                {
+                    v.varientid,
+                    pi.Rate
+                }
+            ).FirstOrDefault();
+
+            if (variant == null)
+                return Json(new { success = false });
+
+            // ?? Get image
+            var image = _context.ProductImages
+                .Where(i => i.ProductId == model.ProductId && i.Flag == 1)
+                .Select(i => i.ImgPath)
+                .FirstOrDefault();
+
+            var existingItem = cart.FirstOrDefault(x =>
+                x.VariantId == variant.varientid);
+
+            if (existingItem != null)
             {
-                cart = new List<CartItem>();
+                existingItem.Quantity += model.Quantity;
             }
             else
             {
-                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+                cart.Add(new CartItem
+                {
+                    ProductId = model.ProductId,
+                    VariantId = variant.varientid,
+                    ProductName = _context.ProductMasters
+                        .Where(p => p.ProductId == model.ProductId)
+                        .Select(p => p.ProductName)
+                        .FirstOrDefault(),
+
+                    Color = model.Color,
+                    Size = model.Size,
+                    Price = variant.Rate,  // ? CORRECT PRICE
+                    Image = image,         // ? CORRECT IMAGE
+                    Quantity = model.Quantity
+                });
             }
 
-
-            var existing = cart.FirstOrDefault(x =>
-     x.ProductId == item.ProductId && x.Size == item.Size
- );
-
-            if (existing != null)
-            {
-                existing.Quantity += item.Quantity;
-            }
-            else
-            {
-                cart.Add(item);
-            }
-
-            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+            HttpContext.Session.SetString("Cart",
+                JsonConvert.SerializeObject(cart));
 
             return Json(new { success = true });
         }
@@ -221,26 +276,46 @@ namespace MIEL.web.Controllers
         public IActionResult UpdateCartQty([FromBody] CartItem model)
         {
             var cartJson = HttpContext.Session.GetString("Cart");
-            List<CartItem> cart = new List<CartItem>();
 
-            if (!string.IsNullOrEmpty(cartJson))
-            {
-                cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
-            }
+            if (string.IsNullOrEmpty(cartJson))
+                return Json(new { success = false });
 
-            var item = cart.FirstOrDefault(x => x.ProductId == model.ProductId);
+            var cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+
+            var item = cart.FirstOrDefault(x => x.VariantId == model.VariantId);
+
+            if (item == null)
+                return Json(new { success = false });
+
+            item.Quantity += model.Change;
+
+            // ? Prevent less than 1
+            if (item.Quantity <= 0)
+                cart.Remove(item);
+
+            HttpContext.Session.SetString("Cart",
+                JsonConvert.SerializeObject(cart));
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveCartItem([FromBody] CartItem model)
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+
+            if (string.IsNullOrEmpty(cartJson))
+                return Json(new { success = false });
+
+            var cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+
+            var item = cart.FirstOrDefault(x => x.VariantId == model.VariantId);
 
             if (item != null)
-            {
-                item.Quantity += model.Change;
+                cart.Remove(item);
 
-                if (item.Quantity <= 0)
-                {
-                    cart.Remove(item);
-                }
-            }
-
-            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+            HttpContext.Session.SetString("Cart",
+                JsonConvert.SerializeObject(cart));
 
             return Json(new { success = true });
         }

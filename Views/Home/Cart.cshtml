@@ -1,10 +1,16 @@
 ﻿@model List<MIEL.web.Models.ViewModel.CartItem>
+
+@{
+    var totalQty = Model.Sum(x => x.Quantity);
+    var totalAmount = Model.Sum(x => x.Price * x.Quantity);
+}
+
 <div class="container py-4">
     <div class="row">
 
-        <!-- LEFT: CART ITEMS -->
+        <!-- ================= LEFT SIDE ================= -->
         <div class="col-md-8">
-            <h4 class="mb-3">My Cart (@Model.Count item)</h4>
+            <h4 class="mb-3">My Cart (@totalQty item)</h4>
 
             @if (!Model.Any())
             {
@@ -14,32 +20,58 @@
             {
                 @foreach (var item in Model)
                 {
-                    <div class="card mb-3">
+                    <div class="card mb-3 shadow-sm">
                         <div class="card-body d-flex">
+
+                            <!-- IMAGE -->
                             <img src="@Url.Content(item.Image)"
-                                 style="width:120px;height:auto"
-                                 class="me-3" />
+                                 class="me-3"
+                                 style="width:120px;height:150px;object-fit:cover;" />
 
-
+                            <!-- DETAILS -->
                             <div class="flex-grow-1">
-                                <h6>@item.ProductName</h6>
-                                <p class="mb-1">Size: @item.Size</p>
-                                <p class="fw-bold">₹@item.Price</p>
 
-                                <div class="d-flex align-items-center">
+                                <h6 class="fw-bold">@item.ProductName</h6>
+
+                                <p class="text-muted mb-1">
+                                    Color: <strong>@item.Color</strong> |
+                                    Size: <strong>@item.Size</strong>
+                                </p>
+
+                                <p class="mb-1">
+                                    Price: <strong>₹@item.Price</strong>
+                                </p>
+
+                                <p class="mb-2">
+                                    Subtotal:
+                                    <strong>
+                                        ₹@(item.Price* item.Quantity)
+                                    </strong>
+                                </p>
+
+                                <!-- QUANTITY -->
+                                <div class="d-flex align-items-center mb-2">
                                     <button class="btn btn-outline-secondary btn-sm"
-                                            onclick="updateQty(@item.ProductId, -1)">
+                                            onclick="updateQty(@item.VariantId, -1)">
                                         −
                                     </button>
 
-                                    <span class="px-3">@item.Quantity</span>
+                                    <span class="px-3 fw-bold">
+                                        @item.Quantity
+                                    </span>
 
                                     <button class="btn btn-outline-secondary btn-sm"
-                                            onclick="updateQty(@item.ProductId, 1)">
+                                            onclick="updateQty(@item.VariantId, 1)">
                                         +
                                     </button>
-
                                 </div>
+
+                                <!-- REMOVE BUTTON -->
+                                <button class="btn btn-sm btn-danger"
+                                        onclick="removeItem(@item.VariantId)">
+                                    Remove
+                                </button>
+
                             </div>
                         </div>
                     </div>
@@ -47,50 +79,56 @@
             }
         </div>
 
-        <!-- RIGHT: PRICE DETAILS -->
+        <!-- ================= RIGHT SIDE ================= -->
         <div class="col-md-4">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
+
                     <h5>PRICE DETAILS</h5>
                     <hr />
 
                     <p>
-                        Price (@Model.Sum(x => x.Quantity) item)
-                        <span class="float-end">₹@Model.Sum(x => x.Price * x.Quantity)</span>
+                        Price (@totalQty item)
+                        <span class="float-end">
+                            ₹@totalAmount
+                        </span>
                     </p>
 
                     <p>
                         Delivery Charges
-                        <span class="float-end text-success">FREE</span>
+                        <span class="float-end text-success">
+                            FREE
+                        </span>
                     </p>
 
                     <hr />
 
                     <h6>
                         Total Amount
-                        <span class="float-end">
-                            ₹@Model.Sum(x => x.Price * x.Quantity)
+                        <span class="float-end text-danger">
+                            ₹@totalAmount
                         </span>
                     </h6>
 
-                    <button class="btn btn-warning w-100 mt-3">
+                    <button class="btn btn-warning w-100 mt-3 fw-bold">
                         PLACE ORDER
                     </button>
+
                 </div>
             </div>
         </div>
 
     </div>
 </div>
+
 <script>
-    function updateQty(productId, change) {
+        function updateQty(variantId, change) {
+
         fetch('/Home/UpdateCartQty', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                productId: productId,
+                variantId: variantId,
                 change: change
             })
         })
@@ -99,4 +137,24 @@
             location.reload();
         });
     }
+
+    function removeItem(variantId) {
+
+        if (!confirm("Remove this item?"))
+            return;
+
+        fetch('/Home/RemoveCartItem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                variantId: variantId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            location.reload();
+        });
+    }
+
+
 </script>
