@@ -1,88 +1,174 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MIEL.web.Data;
+using MIEL.web.Models.EntityModels;
 using MIEL.web.Models.ViewModel;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MIEL.web.Controllers
 {
     public class SalesController : Controller
     {
-        private readonly AppDBContext _db;
+        private readonly AppDBContext _context;
 
-        public SalesController(AppDBContext db)
+        public SalesController(AppDBContext context)
         {
-            _db = db;
+            _context = context;
         }
 
-        [HttpGet]
+        // =====================================================
+        // CREATE GET
+        // =====================================================
         public IActionResult Create()
         {
-            var vm = new SaleCreateVM
+            var vm = new SalesVM
             {
-                SaleCode = GenerateSaleCode(),
-                SaleDate = DateTime.Today,
-                Products = _db.ProductMasters.ToList()
+                InvoiceNo = "SAL-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                SalesDate = DateTime.Today
             };
 
             return View(vm);
         }
-        private string GenerateSaleCode()
-        {
-            return $"SAL-{DateTime.Now:yyyyMMdd-HHmm}";
-        }
-        [HttpGet]
-        public IActionResult SearchProducts(string term)
-        {
-            if (string.IsNullOrWhiteSpace(term))
-                return Json(new List<object>());
 
-            var products = _db.ProductMasters
-                .Where(p => p.ProductName.Contains(term))
-                .Select(p => new
+        // =====================================================
+        // CREATE POST
+        // =====================================================
+        [HttpPost]
+        public async Task<IActionResult> Create(SalesVM vm)
+        {
+            if (vm.Items == null || vm.Items.Count == 0)
+            {
+                ModelState.AddModelError("", "Please add items.");
+                return View(vm);
+            }
+
+            using var tx = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var master = new SalesMaster
                 {
-                    productId = p.ProductId,
-                    productName = p.ProductName
-                })
-                .Take(10)
-                .ToList();
+                    InvoiceNo = vm.InvoiceNo,
+                    SalesDate = vm.SalesDate,
+                    PaymentType = vm.PaymentType,
+                    TotalAmount = vm.TotalAmount,
+                    TotalDiscount = vm.TotalDiscount,
+                    GstAmount = vm.GstAmount,
+                    NetAmount = vm.NetAmount
+                };
 
-            return Json(products);
-        }
-        
+                _context.SalesMasters.Add(master);
+                await _context.SaveChangesAsync();
 
-
-
-
-
-        [HttpGet]
-        public IActionResult SearchCustomer(string term)
-        {
-            if (string.IsNullOrWhiteSpace(term))
-                return Json(new List<object>());
-
-            var customers = _db.Customers
-                .Where(c => c.Name.Contains(term))
-                .Select(c => new
+                foreach (var item in vm.Items)
                 {
-                    customerId = c.CustomerId,
-                    name = c.Name,
-                    mobile = c.Mobile   // 👈 IMPORTANT
-                })
-                .Take(10)
-                .ToList();
+                    var batch = await _context.InventoryBatch
+                        .FirstOrDefaultAsync(x =>
+                            x.varientid == item.varientid &&
+                            x.BatchNo == item.BatchNo);
 
-            return Json(customers);
+                    int available = batch.QuantityIn - batch.QuantityOut;
+
+                    if (available < item.Quantity)
+                        throw new Exception("Insufficient stock");
+
+                    decimal lineTotal = item.Quantity * item.SellingPrice;
+                    decimal afterDiscount = lineTotal - item.DiscAmount;
+                    decimal gst = Math.Round(afterDiscount * 10 / 110, 2);
+
+                    var salesItem = new SalesItem
+                    {
+                        SalesId = master.SalesId,
+                        varientid = item.varientid,
+                        BatchNo = item.BatchNo,
+                        Quantity = item.Quantity,
+                        SellingPrice = item.SellingPrice,
+                        DiscPercent = item.DiscPercent,
+                        DiscAmount = item.DiscAmount,
+                        TaxAmount = gst,
+                        NetAmount = afterDiscount
+                    };
+
+                    _context.SalesItems.Add(salesItem);
+
+                    batch.QuantityOut += item.Quantity;
+                }
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                return RedirectToAction("Create");
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                ModelState.AddModelError("", ex.Message);
+                return View(vm);
+            }
         }
 
-        //private string GenerateSaleCode()
-        //{
-        //    var today = DateTime.Today;
+        // =====================================================
+        // SEARCH PRODUCT
+        // =====================================================
+        public async Task<IActionResult> SearchProducts(string term)
+        {
+            var data = await _context.ProductMasters
+                .Where(x => x.ProductName.Contains(term))
+                .Select(x => new { id = x.ProductId, text = x.ProductName })
+                .Take(20)
+                .ToListAsync();
 
-        //    var todayCount = _db.Sales
-        //        .Count(s => s.SaleDate.Date == today) + 1;
+            return Json(data);
+        }
 
-        //    return $"SAL-{today:yyyyMMdd}-{todayCount:D3}";
-        //}
+        // SEARCH CUSTOMER
+        public async Task<IActionResult> SearchCustomers(string term)
+        {
+            var data = await _context.Customers
+                .Where(x => x.Name.Contains(term))
+                .Select(x => new { id = x.CustomerId, text = x.Name })
+                .Take(20)
+                .ToListAsync();
+
+            return Json(data);
+        }
+
+        // LOAD VARIANTS
+        public async Task<IActionResult> GetVariants(int productId)
+        {
+            var data = await _context.ProColorSizeVariants
+                .Where(x => x.ProductId == productId)
+                .Select(x => new
+                {
+                    id = x.varientid,
+                    text = x.colour + " - " + x.size
+                })
+                .ToListAsync();
+
+            return Json(data);
+        }
+
+        // LOAD BATCH DETAILS (STOCK + PRICE)
+        public async Task<IActionResult> GetBatchDetails(int variantId, string batchNo)
+        {
+            var batch = await _context.InventoryBatch
+                .FirstOrDefaultAsync(x =>
+                    x.varientid == variantId &&
+                    x.BatchNo == batchNo);
+
+            var price = await _context.VariantPrices
+                .Where(x => x.varientid == variantId && x.IsActive)
+                .OrderByDescending(x => x.VariantPriceId)
+                .Select(x => x.SellingPrice)
+                .FirstOrDefaultAsync();
+
+            return Json(new
+            {
+                availableQty = batch.QuantityIn - batch.QuantityOut,
+                sellingPrice = price
+            });
+        }
     }
 }

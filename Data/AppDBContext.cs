@@ -39,6 +39,13 @@ namespace MIEL.web.Data
 
        
         public DbSet<InventoryBatch> InventoryBatch { get; set; }
+
+        public DbSet<SalesItem>SalesItems { get; set; }
+        public DbSet<SalesMaster> SalesMasters { get; set; }
+
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProductImages>()

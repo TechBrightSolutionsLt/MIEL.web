@@ -19,6 +19,7 @@ namespace MIEL.web.Models.EntityModels
         public int QuantityOut { get; set; }
 
         public decimal CostPrice { get; set; }
+        public decimal SellingPrice { get; set; }
 
         public DateTime CreatedDate { get; set; }
        

@@ -1,481 +1,450 @@
-﻿@model MIEL.web.Models.ViewModel.SaleCreateVM
+﻿@model MIEL.web.Models.ViewModel.SalesVM
 @{
-    ViewData["Title"] = "Sales";
+    ViewData["Title"] = "Create Sales";
     Layout = "_AdminLayout";
 }
 
-<style>
-    :root {
-        --primary: #0d6efd;
-        --secondary: #6c757d;
-        --success: #198754;
-        --border: #dee2e6;
-        --bg-light: #f8f9fa;
-        --text-dark: #212529;
-    }
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    body {
-        background-color: #f1f3f6;
-        font-family: "Segoe UI", Roboto, Arial, sans-serif;
-        color: var(--text-dark);
-        font-size: 14px;
-    }
+<div class="container-fluid">
+    <h4 class="mb-3">Create Sales</h4>
 
-    .container {
-        max-width: 1100px;
-        margin: 40px auto;
-    }
+    <form asp-action="Create" method="post">
 
-    .card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0,0,0,.08);
-        padding: 25px 30px;
-    }
-
-    h2 {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 25px;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 10px;
-    }
-
-    fieldset {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 25px;
-        background: var(--bg-light);
-    }
-
-    legend {
-        font-size: 15px;
-        font-weight: 600;
-        padding: 0 10px;
-        color: var(--primary);
-    }
-
-    .form-row {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 15px;
-    }
-
-    .form-group {
-        flex: 1;
-        position: relative;
-    }
-
-    label {
-        font-weight: 500;
-        margin-bottom: 6px;
-        display: block;
-        font-size: 13px;
-    }
-
-    input, select {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font-size: 14px;
-        transition: all .2s ease;
-    }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(13,110,253,.15);
-        }
-
-        input[readonly] {
-            background-color: #e9ecef;
-        }
-
-    table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        background: #fff;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    thead th {
-        background: #f1f5fb;
-        font-weight: 600;
-        font-size: 13px;
-        padding: 10px;
-        border-bottom: 1px solid var(--border);
-    }
-
-    tbody td {
-        padding: 10px;
-        border-bottom: 1px solid var(--border);
-        font-size: 13px;
-    }
-
-    tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-
-    .actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 25px;
-    }
-
-    button {
-        padding: 9px 18px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        transition: all .2s ease;
-    }
-
-    .btn-primary {
-        background-color: var(--primary);
-        color: #fff;
-    }
-
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-        }
-
-    .btn-secondary {
-        background-color: var(--secondary);
-        color: #fff;
-    }
-
-        .btn-secondary:hover {
-            background-color: #5c636a;
-        }
-
-    .btn-success {
-        background-color: var(--success);
-        color: #fff;
-    }
-
-    /* AUTOCOMPLETE */
-    .suggestions-box {
-        position: absolute;
-        top: calc(100% + 4px);
-        left: 0;
-        right: 0;
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        max-height: 220px;
-        overflow-y: auto;
-        z-index: 1000;
-        display: none;
-        box-shadow: 0 6px 18px rgba(0,0,0,.1);
-    }
-
-        .suggestions-box div {
-            padding: 8px 12px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-            .suggestions-box div:hover {
-                background-color: #f1f5fb;
-            }
-</style>
-
-<div class="container">
-    <div class="card">
-        <h3 class="mb-4 fw-bold">
-            <i class="fas fa-cart-plus me-2"></i>Create Sale
-        </h3>
-
-        <form method="post">
-
-            <!-- SALE DETAILS -->
-            <fieldset>
-                <legend>Sale Details</legend>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Sale Code</label>
-                        <input value="@Model.SaleCode" readonly />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sale Date</label>
-                        <input type="date" value="@Model.SaleDate.ToString("yyyy-MM-dd")" />
-                    </div>
-                </div>
-            </fieldset>
-
-            <!-- CUSTOMER DETAILS -->
-            <fieldset>
-                <legend>Customer Details</legend>
-
-                <div class="form-row">
-
-                    <!-- CUSTOMER AUTOCOMPLETE -->
-                    <div class="form-group" style="position:relative;">
-                        <label>Customer Name</label>
-
-                        <input type="text"
-                               id="customerSearch"
-                               placeholder="Type customer name..."
-                               autocomplete="off" />
-
-                        <input type="hidden" id="customerId" />
-
-                        <div id="customerSuggestions" class="suggestions-box"></div>
-                    </div>
-
-                    <!-- MOBILE (AUTO-FILL) -->
-                    <div class="form-group">
-                        <label>Mobile</label>
-                        <input type="text"
-                               id="customerMobile"
-                               placeholder="Mobile number"
-                               readonly />
-                    </div>
-
-                </div>
-            </fieldset>
-
-            <!-- PRODUCT SELECTION -->
-            <fieldset>
-                <legend>Add Product</legend>
-
-                <div class="form-row">
-
-                    <!-- PRODUCT AUTOCOMPLETE -->
-                    <div class="form-group" style="position:relative;">
-                        <label>Product</label>
-                        <input type="text" id="productSearch"
-                               placeholder="Type product name..."
-                               autocomplete="off" />
-
-                        <input type="hidden" id="productId" />
-
-                        <div id="productSuggestions" class="suggestions-box"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Varients Code</label>
-                        <select>
-                            <option>-- Select  --</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Batch No</label>
-                        <select>
-                            <option>-- Select --</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Available Qty</label>
-                        <input readonly />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Available Discount</label>
-                        <input readonly />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Unit Price</label>
-                        <input readonly />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Required Qty</label>
-                        <input type="number" min="1" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Amount</label>
-                        <input readonly />
-                    </div>
-                </div>
-
-                <button type="button" class="btn-primary">Add Item</button>
-            </fieldset>
-
-            <!-- SALE ITEMS -->
-            <fieldset>
-                <legend>Sale Items</legend>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Color</th>
-                            <th>Size</th>
-                            <th>Qty</th>
-                            <th>Unit Price</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Kurti</td>
-                            <td>Black</td>
-                            <td>S</td>
-                            <td>2</td>
-                            <td>1200</td>
-                            <td>2400</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fieldset>
-
-            <!-- ACTIONS -->
-            <div class="actions">
-                <button class="btn-secondary" name="action" value="Draft">Save Draft</button>
-                @*    <button class="btn-success" name="action" value="Completed">Complete Sale</button> *@
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Invoice No</label>
+                <input asp-for="InvoiceNo" class="form-control" readonly />
             </div>
 
-        </form>
-    </div>
+            <div class="col-md-3">
+                <label>Date</label>
+                <input asp-for="SalesDate" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Customer</label>
+                <select id="CustomerId" name="CustomerId" class="form-select"></select>
+
+            </div>
+
+            <div class="col-md-3">
+                <label>Payment</label>
+                <select asp-for="PaymentType" class="form-select">
+                    <option>Cash</option>
+                    <option>Pay_ID</option>
+                   
+                </select>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Product</label>
+                <select id="ProductId" class="form-select"></select>
+            </div>
+
+            <div class="col-md-2">
+                <label>Variant</label>
+                <select id="VariantId" class="form-select"></select>
+            </div>
+
+            <div class="col-md-2">
+                <label>Batch</label>
+                <select id="BatchNo" class="form-select"></select>
+            </div>
+
+            <div class="col-md-1">
+                <label>Stock</label>
+                <input id="AvailableQty" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-1">
+                <label>Price</label>
+                <input id="SellingPrice" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-1">
+                <label>Qty</label>
+                <input id="Quantity" type="number" value="1" class="form-control" />
+            </div>
+
+            <div class="col-md-1">
+                <label>Disc %</label>
+                <input id="DiscPercent" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-1">
+                <label>Disc Amt</label>
+                <input id="DiscAmount" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" id="btnAdd" class="btn btn-primary w-100">Add</button>
+            </div>
+        </div>
+
+        <div id="hiddenItems"></div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Variant</th>
+                    <th>Batch</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Disc</th>
+                    <th>Tax</th>
+                    <th>Net</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+        </table>
+
+        <div class="text-end">
+            <h5>Discount: <span id="lblDiscount">0.00</span></h5>
+            <h5>GST: <span id="lblGst">0.00</span></h5>
+            <h4>Total: <span id="lblNet">0.00</span></h4>
+        </div>
+
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-success">Save</button>
+        </div>
+
+        <input type="hidden" name="TotalAmount" id="hdTotalAmount" />
+        <input type="hidden" name="TotalDiscount" id="hdTotalDiscount" />
+        <input type="hidden" name="GstAmount" id="hdGstAmount" />
+        <input type="hidden" name="NetAmount" id="hdNetAmount" />
+
+    </form>
+
 </div>
 
-
+<!-- ================= script ================= -->
 <script>
-    document.getElementById('productSearch').addEventListener('keyup', function () {
+    let itemIndex = 0;
 
-        const term = this.value.trim();
-        const box = document.getElementById('productSuggestions');
+    $(document).ready(function () {
 
-        if (term.length === 0) {
-            box.style.display = 'none';
-            return;
-        }
-
-        fetch(`/Sale/SearchProducts?term=${encodeURIComponent(term)}`)
-            .then(res => res.json())
-            .then(data => {
-
-                box.innerHTML = '';
-
-                if (data.length === 0) {
-                    box.style.display = 'none';
-                    return;
-                }
-
-                data.forEach(p => {
-                    const div = document.createElement('div');
-                    div.textContent = p.productName;
-                    div.onclick = function () {
-                        document.getElementById('productSearch').value = p.productName;
-                        document.getElementById('productId').value = p.productId;
-                        box.style.display = 'none';
+        // =====================================================
+        // PRODUCT SEARCH (SELECT2)
+        // =====================================================
+        $('#ProductId').select2({
+            width: '100%',
+            placeholder: "Search Product",
+            minimumInputLength: 1,
+            ajax: {
+                url: '/Sales/SearchProducts',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { term: params.term };
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return { id: item.id, text: item.text };
+                        })
                     };
-                    box.appendChild(div);
-                });
-
-                box.style.display = 'block';
-            });
-    });
-</script>
-
-<script>
-    document.getElementById('customerSearch').addEventListener('keyup', function () {
-
-        const term = this.value.trim();
-        const box = document.getElementById('customerSuggestions');
-
-        if (term.length === 0) {
-            box.style.display = 'none';
-            return;
-        }
-
-        fetch(`/Sales/SearchCustomer?term=${encodeURIComponent(term)}`)
-            .then(res => res.json())
-            .then(data => {
-
-                box.innerHTML = '';
-
-                if (data.length === 0) {
-                    box.style.display = 'none';
-                    return;
                 }
+            }
+        });
 
-                data.forEach(c => {
-                    const div = document.createElement('div');
-                    div.textContent = `${c.name} (${c.mobile})`;
-
-                    div.onclick = function () {
-                        document.getElementById('customerSearch').value = c.name;
-                        document.getElementById('customerId').value = c.customerId;
-                        document.getElementById('customerMobile').value = c.mobile;
-                        box.style.display = 'none';
-                    };
-
-                    box.appendChild(div);
-                });
-
-                box.style.display = 'block';
-            });
-    });
-     
-
-</script>
-
-
-<script>
-    const productUrl = '@Url.Action("SearchProducts", "Sales")';
-
-    document.getElementById('productSearch').addEventListener('keyup', function () {
-
-        const term = this.value.trim();
-        const box = document.getElementById('productSuggestions');
-
-        if (term.length < 2) {
-            box.innerHTML = '';
-            box.style.display = 'none';
-            return;
+     // =====================================================
+    // CUSTOMER SEARCH (SELECT2)
+    // =====================================================
+      $('#CustomerId').select2({
+        width: '100%',
+        placeholder: "Search Customer",
+        minimumInputLength: 1,
+        ajax: {
+            url: '/Sales/SearchCustomers',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { term: params.term };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (cust) {
+                        return {
+                            id: cust.id,
+                            text: cust.text
+                        };
+                    })
+                };
+            }
         }
-
-        fetch(productUrl + '?term=' + encodeURIComponent(term))
-            .then(res => res.json())
-            .then(data => {
-
-                box.innerHTML = '';
-
-                if (!data || data.length === 0) {
-                    box.style.display = 'none';
-                    return;
-                }
-
-                data.forEach(p => {
-                    const div = document.createElement('div');
-                    div.textContent = p.productName;
-
-                    div.onclick = function () {
-                        document.getElementById('productSearch').value = p.productName;
-                        document.getElementById('productId').value = p.productId;
-                        box.style.display = 'none';
-                    };
-
-                    box.appendChild(div);
-                });
-
-                box.style.display = 'block';
-            })
-            .catch(err => console.error('Product load error:', err));
     });
+
+
+
+
+
+
+
+        // =====================================================
+        // LOAD VARIANTS
+        // =====================================================
+        $('#ProductId').on('change', function () {
+
+            let productId = $(this).val();
+
+            $('#VariantId').empty().append('<option value="">-- Select Variant --</option>');
+            $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
+            $('#AvailableQty').val('');
+            $('#SellingPrice').val('');
+
+            if (!productId) return;
+
+            $.get('/Sales/GetVariants',
+                { productId: productId },
+                function (data) {
+
+                    $.each(data, function (i, item) {
+                        $('#VariantId').append(
+                            `<option value="${item.id}">${item.text}</option>`
+                        );
+                    });
+                });
+        });
+
+        // =====================================================
+        // LOAD BATCHES
+        // =====================================================
+        $('#VariantId').on('change', function () {
+
+            let variantId = $(this).val();
+
+            $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
+            $('#AvailableQty').val('');
+            $('#SellingPrice').val('');
+
+            if (!variantId) return;
+
+            $.get('/Sales/GetBatches',
+                { variantId: variantId },
+                function (data) {
+
+                    $.each(data, function (i, item) {
+                        $('#BatchNo').append(
+                            `<option value="${item.batchNo}">
+                                ${item.batchNo} (Stock: ${item.availableQty})
+                             </option>`
+                        );
+                    });
+                });
+        });
+
+        // =====================================================
+        // LOAD STOCK + SELLING PRICE
+        // =====================================================
+        $('#BatchNo').on('change', function () {
+
+            let batchNo = $(this).val();
+            let variantId = $('#VariantId').val();
+
+            $('#AvailableQty').val('');
+            $('#SellingPrice').val('');
+
+            if (!batchNo || !variantId) return;
+
+            $.get('/Sales/GetBatchDetails',
+                {
+                    variantId: variantId,
+                    batchNo: batchNo
+                },
+                function (data) {
+
+                    if (data) {
+                        $('#AvailableQty').val(data.availableQty);
+                        $('#SellingPrice').val(data.sellingPrice);
+                    }
+                });
+        });
+
+        // =====================================================
+        // DISCOUNT CALCULATION
+        // =====================================================
+        $('#DiscPercent').on('input', function () {
+
+            let price = parseFloat($('#SellingPrice').val()) || 0;
+            let qty = parseInt($('#Quantity').val()) || 0;
+            let percent = parseFloat($(this).val()) || 0;
+
+            let gross = price * qty;
+            let discAmt = (gross * percent) / 100;
+
+            $('#DiscAmount').val(discAmt.toFixed(2));
+        });
+
+        $('#DiscAmount').on('input', function () {
+
+            let price = parseFloat($('#SellingPrice').val()) || 0;
+            let qty = parseInt($('#Quantity').val()) || 0;
+            let amount = parseFloat($(this).val()) || 0;
+
+            let gross = price * qty;
+            if (gross === 0) return;
+
+            let percent = (amount / gross) * 100;
+            $('#DiscPercent').val(percent.toFixed(2));
+        });
+
+        // =====================================================
+        // ADD ITEM
+        // =====================================================
+        $('#btnAddItem').on('click', function () {
+
+            let productData = $('#ProductId').select2('data');
+
+            if (!productData || productData.length === 0) {
+                alert("Select product first");
+                return;
+            }
+
+            let productName = productData[0].text;
+            let variantId = $('#VariantId').val();
+            let variantText = $('#VariantId option:selected').text();
+            let batchNo = $('#BatchNo').val();
+            let available = parseInt($('#AvailableQty').val()) || 0;
+            let price = parseFloat($('#SellingPrice').val()) || 0;
+            let qty = parseInt($('#Quantity').val()) || 1;
+            let discPercent = parseFloat($('#DiscPercent').val()) || 0;
+            let discAmount = parseFloat($('#DiscAmount').val()) || 0;
+
+            if (!variantId || !batchNo) {
+                alert("Select product, variant and batch");
+                return;
+            }
+
+            if (qty <= 0) {
+                alert("Quantity must be greater than zero");
+                return;
+            }
+
+            if (available <= 0) {
+                alert("No stock available for this batch");
+                return;
+            }
+
+            if (qty > available) {
+                alert("Insufficient stock available");
+                return;
+            }
+
+            // PREVENT DUPLICATE
+            if ($(`tr[data-key="${variantId}-${batchNo}"]`).length > 0) {
+                alert("This batch already added");
+                return;
+            }
+
+            let gross = price * qty;
+            let taxable = gross - discAmount;
+
+            // GST INCLUDED (10%)
+            let gst = taxable * 10 / 110;
+            let net = taxable;
+
+            // ADD ROW
+            let row = `
+                <tr data-key="${variantId}-${batchNo}">
+                    <td>${productName}</td>
+                    <td>${variantText}</td>
+                    <td>${batchNo}</td>
+                    <td class="text-end">${price.toFixed(2)}</td>
+                    <td class="text-end">${qty}</td>
+                    <td class="text-end">${discPercent.toFixed(2)}%</td>
+                    <td class="text-end">${discAmount.toFixed(2)}</td>
+                    <td class="text-end">${gst.toFixed(2)}</td>
+                    <td class="text-end">${net.toFixed(2)}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-danger btn-remove">✖</button>
+                    </td>
+                </tr>`;
+
+            $('#itemsTableBody').append(row);
+
+            // HIDDEN INPUTS
+            $('#hiddenItems').append(`
+                <div class="hidden-item" data-key="${variantId}-${batchNo}">
+                    <input type="hidden" name="Items[${itemIndex}].varientid" value="${variantId}" />
+                    <input type="hidden" name="Items[${itemIndex}].BatchNo" value="${batchNo}" />
+                    <input type="hidden" name="Items[${itemIndex}].Quantity" value="${qty}" />
+                    <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${price}" />
+                    <input type="hidden" name="Items[${itemIndex}].DiscPercent" value="${discPercent}" />
+                    <input type="hidden" name="Items[${itemIndex}].DiscAmount" value="${discAmount}" />
+                    <input type="hidden" name="Items[${itemIndex}].TaxAmount" value="${gst}" />
+                    <input type="hidden" name="Items[${itemIndex}].NetAmount" value="${net}" />
+                </div>
+            `);
+
+            itemIndex++;
+
+            calculateTotals();
+            resetFields();
+        });
+
+        // =====================================================
+        // REMOVE ITEM
+        // =====================================================
+        $(document).on('click', '.btn-remove', function () {
+
+            let row = $(this).closest('tr');
+            let key = row.data('key');
+
+            row.remove();
+            $(`.hidden-item[data-key="${key}"]`).remove();
+
+            calculateTotals();
+        });
+
+    });
+
+    // =====================================================
+    // CALCULATE TOTALS
+    // =====================================================
+    function calculateTotals() {
+
+        let totalDiscount = 0;
+        let totalGst = 0;
+        let netTotal = 0;
+
+        $('#hiddenItems .hidden-item').each(function () {
+
+            totalDiscount += parseFloat($(this).find('[name$=".DiscAmount"]').val()) || 0;
+            totalGst += parseFloat($(this).find('[name$=".TaxAmount"]').val()) || 0;
+            netTotal += parseFloat($(this).find('[name$=".NetAmount"]').val()) || 0;
+        });
+
+        $('#lblTotalDiscount').text(totalDiscount.toFixed(2));
+        $('#lblGst').text(totalGst.toFixed(2));
+        $('#lblNet').text(netTotal.toFixed(2));
+
+        // IMPORTANT → Send to controller
+        $('#hdTotalAmount').val(netTotal.toFixed(2));
+        $('#hdTotalDiscount').val(totalDiscount.toFixed(2));
+        $('#hdGstAmount').val(totalGst.toFixed(2));
+        $('#hdNetAmount').val(netTotal.toFixed(2));
+    }
+
+    // =====================================================
+    // RESET FIELDS
+    // =====================================================
+    function resetFields() {
+
+        $('#Quantity').val(1);
+        $('#DiscPercent').val('');
+        $('#DiscAmount').val('');
+        $('#VariantId').val('');
+        $('#BatchNo').val('');
+        $('#AvailableQty').val('');
+        $('#SellingPrice').val('');
+    }
 </script>
-
-
-
