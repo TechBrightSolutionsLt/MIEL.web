@@ -65,11 +65,15 @@ namespace MIEL.web.Controllers
                 foreach (var item in vm.Items)
                 {
                     var batch = await _context.InventoryBatch
-                        .FirstOrDefaultAsync(x =>
-                            x.varientid == item.varientid &&
-                            x.BatchNo == item.BatchNo);
+     .FirstOrDefaultAsync(x =>
+         x.varientid == item.varientid &&
+         x.BatchNo == item.BatchNo);
+
+                    if (batch == null)
+                        throw new Exception("Batch not found.");
 
                     int available = batch.QuantityIn - batch.QuantityOut;
+
 
                     if (available < item.Quantity)
                         throw new Exception("Insufficient stock");
@@ -150,7 +154,21 @@ namespace MIEL.web.Controllers
             return Json(data);
         }
 
-        // LOAD BATCH DETAILS (STOCK + PRICE)
+        public async Task<IActionResult> GetBatches(int variantId)
+        {
+            var data = await _context.InventoryBatch
+                .Where(x => x.varientid == variantId && (x.QuantityIn - x.QuantityOut) > 0)
+                .Select(x => new
+                {
+                    batchNo = x.BatchNo,
+                    availableQty = x.QuantityIn - x.QuantityOut
+                })
+                .ToListAsync();
+
+            return Json(data);
+        }
+
+
         public async Task<IActionResult> GetBatchDetails(int variantId, string batchNo)
         {
             var batch = await _context.InventoryBatch
@@ -158,17 +176,23 @@ namespace MIEL.web.Controllers
                     x.varientid == variantId &&
                     x.BatchNo == batchNo);
 
-            var price = await _context.VariantPrices
-                .Where(x => x.varientid == variantId && x.IsActive)
-                .OrderByDescending(x => x.VariantPriceId)
-                .Select(x => x.SellingPrice)
-                .FirstOrDefaultAsync();
+            if (batch == null)
+            {
+                return Json(new
+                {
+                    availableQty = 0,
+                    sellingPrice = 0
+                });
+            }
 
             return Json(new
             {
                 availableQty = batch.QuantityIn - batch.QuantityOut,
-                sellingPrice = price
+                sellingPrice = batch.CostPrice   // ✅ CHANGE HERE
             });
         }
+
+
+
     }
 }

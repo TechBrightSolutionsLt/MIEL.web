@@ -98,12 +98,14 @@
                     <th>Batch</th>
                     <th>Price</th>
                     <th>Qty</th>
-                    <th>Disc</th>
-                    <th>Tax</th>
+                    <th>Disc %</th>
+                    <th>Disc Amt</th>
+                    <th>GST</th>
                     <th>Net</th>
                     <th></th>
                 </tr>
             </thead>
+
             <tbody id="itemsBody"></tbody>
         </table>
 
@@ -300,7 +302,8 @@
         // =====================================================
         // ADD ITEM
         // =====================================================
-        $('#btnAddItem').on('click', function () {
+           $('#btnAdd').on('click', function ()
+    {
 
             let productData = $('#ProductId').select2('data');
 
@@ -369,7 +372,8 @@
                     </td>
                 </tr>`;
 
-            $('#itemsTableBody').append(row);
+           $('#itemsBody').append(row);
+
 
             // HIDDEN INPUTS
             $('#hiddenItems').append(`
@@ -423,7 +427,8 @@
             netTotal += parseFloat($(this).find('[name$=".NetAmount"]').val()) || 0;
         });
 
-        $('#lblTotalDiscount').text(totalDiscount.toFixed(2));
+        $('#lblDiscount').text(totalDiscount.toFixed(2));
+
         $('#lblGst').text(totalGst.toFixed(2));
         $('#lblNet').text(netTotal.toFixed(2));
 
@@ -437,14 +442,17 @@
     // =====================================================
     // RESET FIELDS
     // =====================================================
-    function resetFields() {
+        function resetFields() {
 
         $('#Quantity').val(1);
         $('#DiscPercent').val('');
         $('#DiscAmount').val('');
-        $('#VariantId').val('');
-        $('#BatchNo').val('');
+
+        $('#VariantId').val('').trigger('change');
+        $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
+
         $('#AvailableQty').val('');
         $('#SellingPrice').val('');
     }
+
 </script>
