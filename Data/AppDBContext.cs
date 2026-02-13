@@ -70,6 +70,19 @@ namespace MIEL.web.Data
             modelBuilder.Entity<procolrsizevarnt>()
     .HasIndex(x => new { x.ProductId, x.colour, x.size })
     .IsUnique();
+            // Apply decimal(18,2) to ALL decimal properties automatically
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                var properties = entity.GetProperties()
+                    .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?));
+
+                foreach (var property in properties)
+                {
+                    property.SetColumnType("decimal(18,2)");
+                }
+            }
+
+            base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<MainCategory> MainCategories { get; set; }

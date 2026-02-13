@@ -10,6 +10,7 @@ namespace MIEL.web.Models.ViewModel
         public string InvoiceNo { get; set; }
 
         public DateTime SalesDate { get; set; } = DateTime.Now;
+        public int CustomerId { get; set; }
 
         public string PaymentType { get; set; }   // Cash / Card / UPI / Bank
 
@@ -18,6 +19,7 @@ namespace MIEL.web.Models.ViewModel
         public decimal TotalDiscount { get; set; }
         public decimal GstAmount { get; set; }
         public decimal NetAmount { get; set; }
+       
 
         // ===== DROPDOWNS =====
         public List<SelectListItem> PaymentTypes { get; set; } = new()

@@ -9,9 +9,18 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <div class="container-fluid">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            alert('@TempData["SuccessMessage"]');
+        </script>
+    }
+
     <h4 class="mb-3">Create Sales</h4>
 
+    @* <form asp-action="Create" method="post"> *@
     <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
 
         <div class="row mb-3">
             <div class="col-md-3">
@@ -26,7 +35,10 @@
 
             <div class="col-md-3">
                 <label>Customer</label>
-                <select id="CustomerId" name="CustomerId" class="form-select"></select>
+
+               @*  <select id="CustomerId" name="CustomerId" class="form-select"></select> *@
+                <select asp-for="CustomerId" id="CustomerId" class="form-select"></select>
+
 
             </div>
 

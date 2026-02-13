@@ -36,6 +36,7 @@ namespace MIEL.web.Controllers
         // CREATE POST
         // =====================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SalesVM vm)
         {
             if (vm.Items == null || vm.Items.Count == 0)
@@ -65,22 +66,17 @@ namespace MIEL.web.Controllers
                 foreach (var item in vm.Items)
                 {
                     var batch = await _context.InventoryBatch
-     .FirstOrDefaultAsync(x =>
-         x.varientid == item.varientid &&
-         x.BatchNo == item.BatchNo);
+                        .FirstOrDefaultAsync(x =>
+                            x.varientid == item.varientid &&
+                            x.BatchNo == item.BatchNo);
 
                     if (batch == null)
                         throw new Exception("Batch not found.");
 
                     int available = batch.QuantityIn - batch.QuantityOut;
 
-
                     if (available < item.Quantity)
-                        throw new Exception("Insufficient stock");
-
-                    decimal lineTotal = item.Quantity * item.SellingPrice;
-                    decimal afterDiscount = lineTotal - item.DiscAmount;
-                    decimal gst = Math.Round(afterDiscount * 10 / 110, 2);
+                        throw new Exception("Insufficient stock.");
 
                     var salesItem = new SalesItem
                     {
@@ -91,8 +87,8 @@ namespace MIEL.web.Controllers
                         SellingPrice = item.SellingPrice,
                         DiscPercent = item.DiscPercent,
                         DiscAmount = item.DiscAmount,
-                        TaxAmount = gst,
-                        NetAmount = afterDiscount
+                        TaxAmount = item.TaxAmount,
+                        NetAmount = item.NetAmount
                     };
 
                     _context.SalesItems.Add(salesItem);
@@ -103,6 +99,7 @@ namespace MIEL.web.Controllers
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
 
+                TempData["SuccessMessage"] = "Sales saved successfully!";
                 return RedirectToAction("Create");
             }
             catch (Exception ex)

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MIEL.web.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20260207064945_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260213041841_InitialSync")]
+    partial class InitialSync
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,28 @@ namespace MIEL.web.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("MainCategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoryId");
+
+                    b.HasIndex("MainCategoryId");
+
+                    b.ToTable("Categories");
+                });
 
             modelBuilder.Entity("ImageItem", b =>
                 {
@@ -42,22 +64,51 @@ namespace MIEL.web.Migrations
                     b.ToTable("ImageItems");
                 });
 
-            modelBuilder.Entity("MIEL.web.Models.EntityModels.Category", b =>
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.Cart", b =>
                 {
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("CartId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CartId"));
 
-                    b.Property<string>("CategoryName")
+                    b.Property<string>("Color")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CategoryId");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
-                    b.ToTable("Categories");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VariantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CartId");
+
+                    b.ToTable("Cart");
                 });
 
             modelBuilder.Entity("MIEL.web.Models.EntityModels.CategorySpecification", b =>
@@ -159,6 +210,60 @@ namespace MIEL.web.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.InventoryBatch", b =>
+                {
+                    b.Property<int>("InventoryBatchId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryBatchId"));
+
+                    b.Property<string>("BatchNo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("QuantityIn")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityOut")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("varientid")
+                        .HasColumnType("int");
+
+                    b.HasKey("InventoryBatchId");
+
+                    b.ToTable("InventoryBatch");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.MainCategory", b =>
+                {
+                    b.Property<int>("MainCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MainCategoryId"));
+
+                    b.Property<string>("MainCategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("MainCategoryId");
+
+                    b.ToTable("MainCategories");
+                });
+
             modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImages", b =>
                 {
                     b.Property<int>("ImgId")
@@ -230,15 +335,182 @@ namespace MIEL.web.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("SizeChartImg")
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("sizechartPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductId");
+
+                    b.ToTable("ProductMasters");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.PurchaseItem", b =>
+                {
+                    b.Property<int>("PurchaseItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseItemId"));
+
+                    b.Property<string>("BatchNo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DiscPercent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("GstAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("GstPercent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NetAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PurchaseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxableAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("varientid")
+                        .HasColumnType("int");
+
+                    b.HasKey("PurchaseItemId");
+
+                    b.ToTable("PurchaseItems");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.PurchaseMaster", b =>
+                {
+                    b.Property<int>("PurchaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseId"));
+
+                    b.Property<decimal>("GrandTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvoiceNo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductId");
+                    b.Property<decimal>("TotalDisc")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("ProductMasters");
+                    b.Property<decimal>("TotalTax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalTaxable")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("PurchaseId");
+
+                    b.ToTable("PurchaseMasters");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.SalesItem", b =>
+                {
+                    b.Property<int>("SalesItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalesItemId"));
+
+                    b.Property<string>("BatchNo")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<decimal>("DiscAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DiscPercent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NetAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SalesId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SalesMasterSalesId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("varientid")
+                        .HasColumnType("int");
+
+                    b.HasKey("SalesItemId");
+
+                    b.HasIndex("SalesMasterSalesId");
+
+                    b.ToTable("SalesItems");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.SalesMaster", b =>
+                {
+                    b.Property<int>("SalesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalesId"));
+
+                    b.Property<decimal>("GstAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("InvoiceNo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("NetAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("SalesDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("SalesId");
+
+                    b.ToTable("SalesMasters");
                 });
 
             modelBuilder.Entity("MIEL.web.Models.EntityModels.Supplier", b =>
@@ -315,6 +587,28 @@ namespace MIEL.web.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.VariantPrice", b =>
+                {
+                    b.Property<int>("VariantPriceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VariantPriceId"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("varientid")
+                        .HasColumnType("int");
+
+                    b.HasKey("VariantPriceId");
+
+                    b.ToTable("VariantPrices");
+                });
+
             modelBuilder.Entity("MIEL.web.Models.EntityModels.procolrsizevarnt", b =>
                 {
                     b.Property<int>("varientid")
@@ -323,18 +617,31 @@ namespace MIEL.web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("varientid"));
 
+                    b.Property<decimal>("AverageCost")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityOnHand")
                         .HasColumnType("int");
 
                     b.Property<string>("colour")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("varientCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("varientid");
+
+                    b.HasIndex("ProductId", "colour", "size")
+                        .IsUnique();
 
                     b.ToTable("ProColorSizeVariants");
                 });
@@ -358,6 +665,8 @@ namespace MIEL.web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("sId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("productspecifications");
                 });
@@ -424,6 +733,15 @@ namespace MIEL.web.Migrations
                     b.ToTable("users_TB");
                 });
 
+            modelBuilder.Entity("Category", b =>
+                {
+                    b.HasOne("MIEL.web.Models.EntityModels.MainCategory", "MainCategory")
+                        .WithMany()
+                        .HasForeignKey("MainCategoryId");
+
+                    b.Navigation("MainCategory");
+                });
+
             modelBuilder.Entity("MIEL.web.Models.EntityModels.ProductImages", b =>
                 {
                     b.HasOne("MIEL.web.Models.EntityModels.ProductMaster", "ProductMaster")
@@ -433,6 +751,36 @@ namespace MIEL.web.Migrations
                         .IsRequired();
 
                     b.Navigation("ProductMaster");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.SalesItem", b =>
+                {
+                    b.HasOne("MIEL.web.Models.EntityModels.SalesMaster", null)
+                        .WithMany("SalesItems")
+                        .HasForeignKey("SalesMasterSalesId");
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.procolrsizevarnt", b =>
+                {
+                    b.HasOne("MIEL.web.Models.EntityModels.ProductMaster", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.productspecification", b =>
+                {
+                    b.HasOne("MIEL.web.Models.EntityModels.ProductMaster", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MIEL.web.Models.EntityModels.SalesMaster", b =>
+                {
+                    b.Navigation("SalesItems");
                 });
 #pragma warning restore 612, 618
         }

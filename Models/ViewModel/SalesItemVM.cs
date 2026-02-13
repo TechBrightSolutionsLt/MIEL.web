@@ -1,4 +1,6 @@
-﻿namespace MIEL.web.Models.ViewModel
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MIEL.web.Models.ViewModel
 {
     public class SalesItemVM
     {
@@ -7,7 +9,9 @@
         public string ProductName { get; set; }
         public string VariantCode { get; set; }
 
+        //[Column(TypeName = "varchar(50)")]
         public string BatchNo { get; set; }
+
 
         public int Quantity { get; set; }
 
