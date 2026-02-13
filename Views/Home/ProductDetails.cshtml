@@ -360,53 +360,64 @@
 
         /* ================= ADD TO CART ================= */
 
-        window.addToCart = function (productId) {
+    window.addToCart = function (productId) {
 
-            if (!selectedColor) {
-                alert("Please select a color");
-                return;
-            }
+        if (!selectedColor) {
+            alert("Please select a color");
+            return;
+        }
 
-            if (!selectedSize) {
-                document.getElementById("sizeError").style.display = "block";
-                return;
-            }
+        if (!selectedSize) {
+            document.getElementById("sizeError").style.display = "block";
+            return;
+        }
 
-            fetch('/Home/AddToCart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    productId: productId,
-                    quantity: 1,
-                    color: selectedColor,
-                    size: selectedSize
-                })
+        fetch('/Home/AddToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: 1,
+                color: selectedColor,
+                size: selectedSize
             })
-            .then(res => res.json())
-            .then(data => {
+        })
+        .then(res => res.json())
+        .then(data => {
 
-                if (data.success) {
+            // ✅ SHOW LOGIN MESSAGE ONLY
+            if (data.notLoggedIn) {
 
-                    // Update cart count
-                    fetch('/Home/GetCartCount')
-                        .then(res => res.json())
-                        .then(c => {
-                            const cartCount =
-                                document.getElementById("cartCount");
-                            if (cartCount) {
-                                cartCount.textContent = c.count;
-                            }
-                        });
+                alert("Please login");
 
-                    alert("Added to cart successfully");
-                }
-                else {
-                    alert("Something went wrong");
-                }
-            });
-        };
+                return;
+            }
+
+            if (data.success) {
+
+                fetch('/Home/GetCartCount')
+                .then(res => res.json())
+                .then(c => {
+                    const cartCount =
+                        document.getElementById("cartCount");
+
+                    if (cartCount) {
+                        cartCount.textContent = c.count;
+                    }
+                });
+
+                alert("Added to cart successfully");
+            }
+            else {
+                alert("Something went wrong");
+            }
+
+        });
+
+    };
+
 
     });
 </script>

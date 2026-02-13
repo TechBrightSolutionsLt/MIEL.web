@@ -69,17 +69,52 @@
                     <p>@Model.Address.City - @Model.Address.Pin</p>
                     <p>@Model.Address.Mobile</p>
 
-                    <a href="@Url.Action("ChangeAddress", "Home")"
+                    <a href="@Url.Action("Profile", "Account")"
                        class="btn btn-sm btn-outline-primary">
                         Change Address
                     </a>
                 }
                 else
                 {
-                    <a href="@Url.Action("AddAddress", "Home")"
-                       class="btn btn-primary">
-                        Add Address
-                    </a>
+                    <!-- ADDRESS FORM -->
+                    <form asp-action="Profile" asp-controller="Account" method="post">
+
+                        <input type="text"
+                               name="Name"
+                               placeholder="Full Name"
+                               class="form-control mb-2"
+                               required />
+
+                        <input type="text"
+                               name="BuildingName"
+                               placeholder="Building Name"
+                               class="form-control mb-2"
+                               required />
+
+                        <input type="text"
+                               name="City"
+                               placeholder="City"
+                               class="form-control mb-2"
+                               required />
+
+                        <input type="text"
+                               name="Pin"
+                               placeholder="PIN Code"
+                               class="form-control mb-2"
+                               required />
+
+                        <input type="text"
+                               name="Mobile"
+                               placeholder="Mobile"
+                               class="form-control mb-2"
+                               required />
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Save Address
+                        </button>
+
+                    </form>
                 }
 
                 <hr />
