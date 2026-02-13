@@ -157,7 +157,8 @@ namespace MIEL.web.Controllers
         public async Task<IActionResult> GetBatches(int variantId)
         {
             var data = await _context.InventoryBatch
-                .Where(x => x.varientid == variantId && (x.QuantityIn - x.QuantityOut) > 0)
+                .Where(x => x.varientid == variantId &&
+                            (x.QuantityIn - x.QuantityOut) > 0)
                 .Select(x => new
                 {
                     batchNo = x.BatchNo,
@@ -167,7 +168,6 @@ namespace MIEL.web.Controllers
 
             return Json(data);
         }
-
 
         public async Task<IActionResult> GetBatchDetails(int variantId, string batchNo)
         {
@@ -191,6 +191,7 @@ namespace MIEL.web.Controllers
                 sellingPrice = batch.CostPrice   // ✅ CHANGE HERE
             });
         }
+
 
 
 
