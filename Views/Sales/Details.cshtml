@@ -1,0 +1,43 @@
+﻿@model List<MIEL.web.Models.ViewModel.SalesVM>
+
+<h4>All Sales Details</h4>
+
+@foreach (var sale in Model)
+{
+    <div class="card mb-4 p-3">
+
+        <h5>Invoice: @sale.InvoiceNo</h5>
+        <p>Date: @sale.SalesDate.ToString("dd-MM-yyyy")</p>
+        <p>Payment: @sale.PaymentType</p>
+        <p>Total: @sale.NetAmount</p>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Variant</th>
+                    <th>Batch</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>GST</th>
+                    <th>Net</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in sale.Items)
+                {
+                    <tr>
+                        <td>@item.varientid</td>
+                        <td>@item.BatchNo</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.SellingPrice</td>
+                        <td>@item.DiscAmount</td>
+                        <td>@item.TaxAmount</td>
+                        <td>@item.NetAmount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+}

@@ -17,10 +17,16 @@
     }
 
     <h4 class="mb-3">Create Sales</h4>
+    <a asp-action="Details"
+       class="btn btn-primary mb-3">
+        View All Sales
+    </a>
+
 
     @* <form asp-action="Create" method="post"> *@
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
+       
 
         <div class="row mb-3">
             <div class="col-md-3">
@@ -96,8 +102,13 @@
             </div>
 
             <div class="col-md-1 d-flex align-items-end">
-                <button type="button" id="btnAdd" class="btn btn-primary w-100">Add</button>
+                <button type="button" id="btnAdd" class="btn btn-primary w-100">
+                    Add
+                </button>
             </div>
+
+           
+
         </div>
 
         <div id="hiddenItems"></div>

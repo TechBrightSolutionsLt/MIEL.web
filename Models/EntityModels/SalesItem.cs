@@ -16,6 +16,7 @@ namespace MIEL.web.Models.EntityModels
 
         public int Quantity { get; set; }
 
+
         // GST INCLUDED price (AUD)
         public decimal SellingPrice { get; set; }
 
