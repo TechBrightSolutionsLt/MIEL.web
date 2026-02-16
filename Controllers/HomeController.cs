@@ -446,47 +446,64 @@ namespace MIEL.web.Controllers
         [HttpPost]
         public IActionResult RemoveCartItem([FromBody] CartItem model)
         {
-            string customerId = HttpContext.Session.GetString("CustomerId");
-            string guestId = GetGuestId();
-
+            string customerIdStr = HttpContext.Session.GetString("CustomerId");
+            string guestId = Request.Cookies["GuestId"];
 
             Cart item = null;
 
-            if (!string.IsNullOrEmpty(customerId))
+            // Logged user
+            if (!string.IsNullOrEmpty(customerIdStr))
             {
-                int cid = Convert.ToInt32(customerId);
+                int customerId = Convert.ToInt32(customerIdStr);
 
                 item = _context.Cart.FirstOrDefault(x =>
-                    x.CustomerId == cid &&
+                    x.CustomerId.HasValue &&
+                    x.CustomerId.Value == customerId &&
                     x.VariantId == model.VariantId);
             }
+            // Guest user
             else if (!string.IsNullOrEmpty(guestId))
             {
                 item = _context.Cart.FirstOrDefault(x =>
+                    x.GuestId != null &&
                     x.GuestId == guestId &&
                     x.VariantId == model.VariantId);
             }
 
             if (item == null)
-                return Json(new { success = false });
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Item not found"
+                });
+            }
 
             _context.Cart.Remove(item);
             _context.SaveChanges();
 
             int count = 0;
 
-            if (!string.IsNullOrEmpty(customerId))
+            if (!string.IsNullOrEmpty(customerIdStr))
             {
-                int cid = Convert.ToInt32(customerId);
+                int customerId = Convert.ToInt32(customerIdStr);
 
-                count = _context.Cart.Count(x => x.CustomerId == cid);
+                count = _context.Cart
+                    .Where(x => x.CustomerId.HasValue && x.CustomerId.Value == customerId)
+                    .Count();
             }
-            else
+            else if (!string.IsNullOrEmpty(guestId))
             {
-                count = _context.Cart.Count(x => x.GuestId == guestId);
+                count = _context.Cart
+                    .Where(x => x.GuestId != null && x.GuestId == guestId)
+                    .Count();
             }
 
-            return Json(new { success = true, count = count });
+            return Json(new
+            {
+                success = true,
+                count = count
+            });
         }
 
 

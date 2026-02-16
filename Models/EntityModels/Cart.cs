@@ -21,7 +21,7 @@
         public int Quantity { get; set; }
 
         public string Image { get; set; }
-        public string GuestId { get; set; }
+        public string ?GuestId { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }
