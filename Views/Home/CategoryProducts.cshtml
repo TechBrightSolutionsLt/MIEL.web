@@ -22,6 +22,12 @@
                         </div>
 
                     </a>
+                    <div class="mt-2">
+                        <button class="btn-addcart"
+                                onclick="addToCartFromCategory(@item.ProductId)">
+                            Add to Cart
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -32,8 +38,31 @@
 <style>
 
 
+    .product-card .btn-addcart {
+        display: inline-block;
+        width: 100%;
+        padding: 10px 0;
+        background: #333; /* dark gray base color */
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
 
+        .product-card .btn-addcart:hover {
+            background: #ff6600; /* orange hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
 
+        .product-card .btn-addcart:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
 
     .product-brand {
         font-size: 13px;
@@ -109,3 +138,22 @@
 
     }
 </style>
+<script>
+               function addToCartFromCategory(productId) {
+        fetch(`/Home/AddToCartFromCategory?productId=${productId}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const cartCount = document.getElementById("cartCount");
+                if (cartCount) cartCount.textContent = data.count;
+                alert("Added to cart");
+            } else {
+                alert("Something went wrong");
+            }
+        });
+    }
+
+
+
+    
+</script>
