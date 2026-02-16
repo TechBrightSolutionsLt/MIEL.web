@@ -5,6 +5,7 @@ using MIEL.web.Models.EntityModels;
 using MIEL.web.Models.ViewModel;
 using System;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace MIEL.web.Controllers
 {
@@ -81,7 +82,7 @@ namespace MIEL.web.Controllers
             }
 
             // ===========================
-            // 1️⃣ PURCHASE MASTER
+            // 1️⃣ SAVE PURCHASE MASTER
             // ===========================
             var purchase = new PurchaseMaster
             {
@@ -95,38 +96,51 @@ namespace MIEL.web.Controllers
             };
 
             _context.PurchaseMasters.Add(purchase);
-            _context.SaveChanges(); // get PurchaseId
+            _context.SaveChanges();
 
             // ===========================
-            // 2️⃣ FIND OR CREATE VARIANT (ONLY ONCE)
-            // ===========================
-            var variant = _context.ProColorSizeVariants
-                .FirstOrDefault(x =>
-                    x.ProductId == model.ProductId &&
-                    x.colour == model.Color &&
-                    x.size == model.Size);
-
-            if (variant == null)
-            {
-                variant = new procolrsizevarnt
-                {
-                    ProductId = model.ProductId,
-                    colour = model.Color,
-                    size = model.Size,
-                    varientCode = model.VariantCode,
-                    QuantityOnHand = 0,
-                    AverageCost = model.Items.First().Rate
-                };
-
-                _context.ProColorSizeVariants.Add(variant);
-                _context.SaveChanges(); // get varientid
-            }
-
-            // ===========================
-            // 3️⃣ LOOP ITEMS
+            // 2️⃣ LOOP ITEMS
             // ===========================
             foreach (var item in model.Items)
             {
+                // 🔍 FIND VARIANT USING VARIANT CODE
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(x => x.varientCode == item.VariantCode);
+
+                // If not found → create new variant
+                if (variant == null)
+                {
+                    // Extract product from variant code
+                    // Format: PRODUCT-COLOR-SIZE
+                    var parts = item.VariantCode.Split('-');
+
+                    string productName = parts.Length > 0 ? parts[0] : "";
+                    string color = parts.Length > 1 ? parts[1] : "";
+                    string size = parts.Length > 2 ? parts[2] : "";
+
+                    var product = _context.ProductMasters
+                        .FirstOrDefault(x => x.ProductName.Replace(" ", "-").ToUpper() == productName);
+
+                    if (product == null)
+                        continue; // skip if invalid
+
+                    variant = new procolrsizevarnt
+                    {
+                        ProductId = product.ProductId,
+                        colour = color,
+                        size = size,
+                        varientCode = item.VariantCode,
+                        QuantityOnHand = 0,
+                        AverageCost = item.Rate
+                    };
+
+                    _context.ProColorSizeVariants.Add(variant);
+                    _context.SaveChanges();
+                }
+
+                // ===========================
+                // SAVE PURCHASE ITEM
+                // ===========================
                 var pItem = new PurchaseItem
                 {
                     PurchaseId = purchase.PurchaseId,
@@ -144,7 +158,9 @@ namespace MIEL.web.Controllers
 
                 _context.PurchaseItems.Add(pItem);
 
-                // Inventory batch
+                // ===========================
+                // INVENTORY BATCH
+                // ===========================
                 var batch = new InventoryBatch
                 {
                     varientid = variant.varientid,
@@ -152,25 +168,27 @@ namespace MIEL.web.Controllers
                     QuantityIn = item.Quantity,
                     QuantityOut = 0,
                     CostPrice = item.Rate,
-                    CreatedDate = DateTime.Now,
-                    SellingPrice = item.SellingPrice
+                    SellingPrice = item.SellingPrice,
+                    CreatedDate = DateTime.Now
                 };
 
                 _context.InventoryBatch.Add(batch);
 
-                // Update stock
+                // ===========================
+                // UPDATE STOCK
+                // ===========================
                 variant.QuantityOnHand += item.Quantity;
                 variant.AverageCost = item.Rate;
 
-                // Update variant price
+                // ===========================
+                // UPDATE SELLING PRICE
+                // ===========================
                 var oldPrices = _context.VariantPrices
                     .Where(x => x.varientid == variant.varientid && x.IsActive)
                     .ToList();
 
                 foreach (var price in oldPrices)
-                {
                     price.IsActive = false;
-                }
 
                 _context.VariantPrices.Add(new VariantPrice
                 {
@@ -185,8 +203,179 @@ namespace MIEL.web.Controllers
             return RedirectToAction("Create");
         }
 
+        // ===============================
+        // PURCHASE LIST
+        // ===============================
+        public IActionResult Index(string search)
+        {
+            var query = _context.PurchaseMasters
+                .OrderByDescending(x => x.PurchaseId)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(x => x.InvoiceNo.Contains(search));
+            }
+
+            var list = query.Select(x => new
+            {
+                x.PurchaseId,
+                x.InvoiceNo,
+                x.InvoiceDate,
+                x.GrandTotal,
+                SupplierName = _context.Suppliers
+                    .Where(s => s.SupplierId == x.SupplierId)
+                    .Select(s => s.Name)
+                    .FirstOrDefault()
+            }).ToList();
+
+            return View(list);
+        }
+
+        // ===============================
+        // PURCHASE DELETE
+        // ===============================
+        public IActionResult Delete(int id)
+        {
+            var purchase = _context.PurchaseMasters
+                .FirstOrDefault(x => x.PurchaseId == id);
+
+            if (purchase == null)
+                return RedirectToAction("Index");
+
+            var items = _context.PurchaseItems
+                .Where(x => x.PurchaseId == id)
+                .ToList();
+
+            foreach (var item in items)
+            {
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == item.varientid);
+
+                if (variant != null)
+                {
+                    variant.QuantityOnHand -= item.Quantity;
+                }
+
+                var batches = _context.InventoryBatch
+                    .Where(b => b.varientid == item.varientid && b.BatchNo == item.BatchNo)
+                    .ToList();
+
+                _context.InventoryBatch.RemoveRange(batches);
+            }
+
+            _context.PurchaseItems.RemoveRange(items);
+            _context.PurchaseMasters.Remove(purchase);
+
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
+        // ===============================
+        // PURCHASE EDIT - GET
+        // ===============================
+        public IActionResult Edit(int id)
+        {
+            // Get purchase master
+            var purchase = _context.PurchaseMasters
+                .FirstOrDefault(x => x.PurchaseId == id);
+
+            if (purchase == null)
+                return RedirectToAction("Index");
+
+            // Create ViewModel
+            var vm = new PurchaseVM
+            {
+                SupplierId = purchase.SupplierId,
+                PurchaseCode = purchase.InvoiceNo,
+                PurchaseDate = purchase.InvoiceDate,
+                Suppliers = _context.Suppliers
+                    .Where(x => x.Status == "Active")
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.SupplierId.ToString(),
+                        Text = x.Name
+                    }).ToList(),
+
+                Items = new List<PurchaseItemVM>()  // IMPORTANT
+            };
+
+            // Load purchase items with JOIN (Best Practice)
+            vm.Items = (from pi in _context.PurchaseItems
+                        join v in _context.ProColorSizeVariants
+                            on pi.varientid equals v.varientid
+                        join p in _context.ProductMasters
+                            on v.ProductId equals p.ProductId
+                        join vp in _context.VariantPrices
+                            on v.varientid equals vp.varientid into vpJoin
+                        from vp in vpJoin.Where(x => x.IsActive).DefaultIfEmpty()
+                        where pi.PurchaseId == id
+                        select new PurchaseItemVM
+                        {
+                            ProductName = p.ProductName,
+                            VariantCode = v.varientCode,
+                            Rate = pi.Rate,
+                            Quantity = pi.Quantity,
+                            DiscPercent = pi.DiscPercent,
+                            DiscAmount = pi.DiscAmount,
+                            GstPercent = pi.GstPercent,
+                            GstAmount = pi.GstAmount,
+                            Amount = pi.NetAmount,
+                            SellingPrice = vp != null ? vp.SellingPrice : 0
+                        }).ToList();
+
+            // Optional: Load BatchNo (if stored in item)
+            vm.BatchNo = _context.PurchaseItems
+                .Where(x => x.PurchaseId == id)
+                .Select(x => x.BatchNo)
+                .FirstOrDefault();
+
+            ViewBag.PurchaseId = id;
+
+            return View(vm);
+        }
 
 
+
+
+        // ===============================
+        // PURCHASE edit post
+        // ===============================
+        [HttpPost]
+        public IActionResult Edit(int id, PurchaseVM model)
+        {
+            var oldItems = _context.PurchaseItems
+                .Where(x => x.PurchaseId == id)
+                .ToList();
+
+            // 🔥 REVERSE OLD STOCK
+            foreach (var item in oldItems)
+            {
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == item.varientid);
+
+                if (variant != null)
+                {
+                    variant.QuantityOnHand -= item.Quantity;
+                }
+            }
+
+            _context.PurchaseItems.RemoveRange(oldItems);
+            _context.InventoryBatch.RemoveRange(
+                _context.InventoryBatch.Where(x => oldItems.Select(o => o.varientid).Contains(x.varientid))
+            );
+
+            _context.SaveChanges();
+
+            // 🔥 SAVE AGAIN USING CREATE LOGIC
+            model.PurchaseCode = _context.PurchaseMasters
+                .Where(x => x.PurchaseId == id)
+                .Select(x => x.InvoiceNo)
+                .FirstOrDefault();
+
+            return Create(model);
+        }
 
         //[HttpPost]
         //public IActionResult Create(PurchaseVM model)
