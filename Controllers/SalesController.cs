@@ -150,7 +150,6 @@ namespace MIEL.web.Controllers
 
             return Json(data);
         }
-
         public async Task<IActionResult> GetBatches(int variantId)
         {
             var data = await _context.InventoryBatch
@@ -165,32 +164,33 @@ namespace MIEL.web.Controllers
 
             return Json(data);
         }
-
-        public async Task<IActionResult> GetBatchDetails(int variantId, string batchNo)
+        public IActionResult Details()
         {
-            var batch = await _context.InventoryBatch
-                .FirstOrDefaultAsync(x =>
-                    x.varientid == variantId &&
-                    x.BatchNo == batchNo);
-
-            if (batch == null)
-            {
-                return Json(new
+            var sales = _context.SalesMasters
+                .Select(s => new SalesVM
                 {
-                    availableQty = 0,
-                    sellingPrice = 0
-                });
-            }
+                    SalesId = s.SalesId,
+                    InvoiceNo = s.InvoiceNo,
+                    SalesDate = s.SalesDate,
+                    PaymentType = s.PaymentType,
+                    NetAmount = s.NetAmount,
+                    Items = _context.SalesItems
+                        .Where(d => d.SalesId == s.SalesId)
+                        .Select(d => new SalesItemVM
+                        {
+                            varientid = d.varientid,
+                            BatchNo = d.BatchNo,
+                            Quantity = d.Quantity,
+                            SellingPrice = d.SellingPrice,
+                            DiscAmount = d.DiscAmount,
+                            TaxAmount = d.TaxAmount,
+                            NetAmount = d.NetAmount
+                        }).ToList()
+                })
+                .ToList();
 
-            return Json(new
-            {
-                availableQty = batch.QuantityIn - batch.QuantityOut,
-                sellingPrice = batch.CostPrice   // ✅ CHANGE HERE
-            });
+            return View(sales);
         }
-
-
-
 
     }
 }
