@@ -181,29 +181,30 @@ namespace MIEL.web.Controllers
         public IActionResult AddToCart([FromBody] CartItem model)
         {
             string customerId = HttpContext.Session.GetString("CustomerId");
-
             string guestId = GetGuestId();
 
-
-            // Get latest variant price
-            var variant = (
-                from v in _context.ProColorSizeVariants
-                join pi in _context.PurchaseItems
-                    on v.varientid equals pi.varientid
-                where v.ProductId == model.ProductId
-                      && v.colour == model.Color
-                      && v.size == model.Size
-                orderby pi.PurchaseItemId descending
-                select new
+            // PICK VARIANT
+            var variant = _context.ProColorSizeVariants
+                .Where(v => v.ProductId == model.ProductId
+                            && v.colour == model.Color
+                            && v.size == model.Size)
+                .Select(v => new
                 {
-                    v.varientid,
-                    pi.Rate
-                }
-            ).FirstOrDefault();
+                    v.varientid
+                })
+                .FirstOrDefault();
 
             if (variant == null)
                 return Json(new { success = false });
 
+            // GET RATE separately
+            var rate = _context.PurchaseItems
+                .Where(pi => pi.varientid == variant.varientid)
+                .OrderByDescending(pi => pi.PurchaseItemId)
+                .Select(pi => pi.Rate)
+                .FirstOrDefault();
+
+            // GET IMAGE AND NAME
             var image = _context.ProductImages
                 .Where(i => i.ProductId == model.ProductId && i.Flag == 1)
                 .Select(i => i.ImgPath)
@@ -214,16 +215,11 @@ namespace MIEL.web.Controllers
                 .Select(p => p.ProductName)
                 .FirstOrDefault();
 
-            // ==========================================
-            // CHECK EXISTING ITEM (CUSTOMER OR GUEST)
-            // ==========================================
-
+            // CHECK EXISTING ITEM
             Cart existingItem = null;
-
             if (!string.IsNullOrEmpty(customerId))
             {
                 int custId = Convert.ToInt32(customerId);
-
                 existingItem = _context.Cart.FirstOrDefault(x =>
                     x.CustomerId == custId &&
                     x.VariantId == variant.varientid);
@@ -235,70 +231,118 @@ namespace MIEL.web.Controllers
                     x.VariantId == variant.varientid);
             }
 
-            // ==========================================
             // UPDATE OR INSERT
-            // ==========================================
-
             if (existingItem != null)
-            {
                 existingItem.Quantity += model.Quantity;
-            }
             else
             {
                 Cart newItem = new Cart
                 {
-                    CustomerId = string.IsNullOrEmpty(customerId)
-                        ? (int?)null
-                        : Convert.ToInt32(customerId),
-
-                    GuestId = string.IsNullOrEmpty(customerId)
-                        ? guestId
-                        : null,
-
+                    CustomerId = string.IsNullOrEmpty(customerId) ? (int?)null : Convert.ToInt32(customerId),
+                    GuestId = string.IsNullOrEmpty(customerId) ? guestId : null,
                     ProductId = model.ProductId,
                     VariantId = variant.varientid,
                     ProductName = productName,
                     Color = model.Color,
                     Size = model.Size,
-                    Price = variant.Rate,
+                    Price = rate,
                     Image = image,
                     Quantity = model.Quantity,
                     CreatedDate = DateTime.Now
                 };
-
                 _context.Cart.Add(newItem);
             }
 
             _context.SaveChanges();
 
-            // ==========================================
-            // GET COUNT
-            // ==========================================
+            // RETURN COUNT
+            int count = !string.IsNullOrEmpty(customerId)
+                ? _context.Cart.Count(x => x.CustomerId == Convert.ToInt32(customerId))
+                : _context.Cart.Count(x => x.GuestId == guestId);
 
-            int count = 0;
+            return Json(new { success = true, count });
+        }
 
+
+
+
+        [HttpPost]
+        public IActionResult AddToCartFromCategory(int productId)
+        {
+            string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
+
+            // pick first variant of product
+            var variant = _context.ProColorSizeVariants
+                .Where(v => v.ProductId == productId)
+                .OrderBy(v => v.varientid) // pick first
+                .Select(v => new { v.varientid, v.colour, v.size })
+                .FirstOrDefault();
+
+            if (variant == null)
+                return Json(new { success = false });
+
+            // get latest rate
+            var rate = _context.PurchaseItems
+                .Where(pi => pi.varientid == variant.varientid)
+                .OrderByDescending(pi => pi.PurchaseItemId)
+                .Select(pi => pi.Rate)
+                .FirstOrDefault();
+
+            // image & name
+            var image = _context.ProductImages
+                .Where(i => i.ProductId == productId && i.Flag == 1)
+                .Select(i => i.ImgPath)
+                .FirstOrDefault();
+
+            var productName = _context.ProductMasters
+                .Where(p => p.ProductId == productId)
+                .Select(p => p.ProductName)
+                .FirstOrDefault();
+
+            // check existing item
+            Cart existingItem = null;
             if (!string.IsNullOrEmpty(customerId))
             {
                 int custId = Convert.ToInt32(customerId);
-
-                count = _context.Cart
-                    .Where(x => x.CustomerId == custId)
-                    .Count();
+                existingItem = _context.Cart.FirstOrDefault(x =>
+                    x.CustomerId == custId && x.VariantId == variant.varientid);
             }
             else
             {
-                count = _context.Cart
-                    .Where(x => x.GuestId == guestId)
-                    .Count();
+                existingItem = _context.Cart.FirstOrDefault(x =>
+                    x.GuestId == guestId && x.VariantId == variant.varientid);
             }
 
-            return Json(new
+            // insert or update
+            if (existingItem != null)
+                existingItem.Quantity += 1;
+            else
             {
-                success = true,
-                count = count
-            });
-        }
+                _context.Cart.Add(new Cart
+                {
+                    CustomerId = string.IsNullOrEmpty(customerId) ? (int?)null : Convert.ToInt32(customerId),
+                    GuestId = string.IsNullOrEmpty(customerId) ? guestId : null,
+                    ProductId = productId,
+                    VariantId = variant.varientid,
+                    ProductName = productName,
+                    Color = variant.colour,
+                    Size = variant.size,
+                    Price = rate,
+                    Image = image,
+                    Quantity = 1,
+                    CreatedDate = DateTime.Now
+                });
+            }
 
+            _context.SaveChanges();
+
+            int count = !string.IsNullOrEmpty(customerId)
+                ? _context.Cart.Count(x => x.CustomerId == Convert.ToInt32(customerId))
+                : _context.Cart.Count(x => x.GuestId == guestId);
+
+            return Json(new { success = true, count });
+        }
 
 
 
