@@ -81,7 +81,7 @@ namespace MIEL.web.Controllers
             }
 
             // ===========================
-            // 1️⃣ PURCHASE MASTER
+            // 1️⃣ SAVE PURCHASE MASTER
             // ===========================
             var purchase = new PurchaseMaster
             {
@@ -95,38 +95,51 @@ namespace MIEL.web.Controllers
             };
 
             _context.PurchaseMasters.Add(purchase);
-            _context.SaveChanges(); // get PurchaseId
+            _context.SaveChanges();
 
             // ===========================
-            // 2️⃣ FIND OR CREATE VARIANT (ONLY ONCE)
-            // ===========================
-            var variant = _context.ProColorSizeVariants
-                .FirstOrDefault(x =>
-                    x.ProductId == model.ProductId &&
-                    x.colour == model.Color &&
-                    x.size == model.Size);
-
-            if (variant == null)
-            {
-                variant = new procolrsizevarnt
-                {
-                    ProductId = model.ProductId,
-                    colour = model.Color,
-                    size = model.Size,
-                    varientCode = model.VariantCode,
-                    QuantityOnHand = 0,
-                    AverageCost = model.Items.First().Rate
-                };
-
-                _context.ProColorSizeVariants.Add(variant);
-                _context.SaveChanges(); // get varientid
-            }
-
-            // ===========================
-            // 3️⃣ LOOP ITEMS
+            // 2️⃣ LOOP ITEMS
             // ===========================
             foreach (var item in model.Items)
             {
+                // 🔍 FIND VARIANT USING VARIANT CODE
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(x => x.varientCode == item.VariantCode);
+
+                // If not found → create new variant
+                if (variant == null)
+                {
+                    // Extract product from variant code
+                    // Format: PRODUCT-COLOR-SIZE
+                    var parts = item.VariantCode.Split('-');
+
+                    string productName = parts.Length > 0 ? parts[0] : "";
+                    string color = parts.Length > 1 ? parts[1] : "";
+                    string size = parts.Length > 2 ? parts[2] : "";
+
+                    var product = _context.ProductMasters
+                        .FirstOrDefault(x => x.ProductName.Replace(" ", "-").ToUpper() == productName);
+
+                    if (product == null)
+                        continue; // skip if invalid
+
+                    variant = new procolrsizevarnt
+                    {
+                        ProductId = product.ProductId,
+                        colour = color,
+                        size = size,
+                        varientCode = item.VariantCode,
+                        QuantityOnHand = 0,
+                        AverageCost = item.Rate
+                    };
+
+                    _context.ProColorSizeVariants.Add(variant);
+                    _context.SaveChanges();
+                }
+
+                // ===========================
+                // SAVE PURCHASE ITEM
+                // ===========================
                 var pItem = new PurchaseItem
                 {
                     PurchaseId = purchase.PurchaseId,
@@ -144,7 +157,9 @@ namespace MIEL.web.Controllers
 
                 _context.PurchaseItems.Add(pItem);
 
-                // Inventory batch
+                // ===========================
+                // INVENTORY BATCH
+                // ===========================
                 var batch = new InventoryBatch
                 {
                     varientid = variant.varientid,
@@ -152,25 +167,27 @@ namespace MIEL.web.Controllers
                     QuantityIn = item.Quantity,
                     QuantityOut = 0,
                     CostPrice = item.Rate,
-                    CreatedDate = DateTime.Now,
-                    SellingPrice = item.SellingPrice
+                    SellingPrice = item.SellingPrice,
+                    CreatedDate = DateTime.Now
                 };
 
                 _context.InventoryBatch.Add(batch);
 
-                // Update stock
+                // ===========================
+                // UPDATE STOCK
+                // ===========================
                 variant.QuantityOnHand += item.Quantity;
                 variant.AverageCost = item.Rate;
 
-                // Update variant price
+                // ===========================
+                // UPDATE SELLING PRICE
+                // ===========================
                 var oldPrices = _context.VariantPrices
                     .Where(x => x.varientid == variant.varientid && x.IsActive)
                     .ToList();
 
                 foreach (var price in oldPrices)
-                {
                     price.IsActive = false;
-                }
 
                 _context.VariantPrices.Add(new VariantPrice
                 {
@@ -184,6 +201,7 @@ namespace MIEL.web.Controllers
 
             return RedirectToAction("Create");
         }
+
 
 
 
