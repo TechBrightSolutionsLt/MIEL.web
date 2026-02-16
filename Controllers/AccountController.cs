@@ -22,6 +22,7 @@ namespace MIEL.web.Controllers
 
         // POST: Login
         [HttpPost]
+
         public IActionResult Login(UserLoginVM model)
         {
             if (!ModelState.IsValid)
@@ -38,12 +39,47 @@ namespace MIEL.web.Controllers
                 return View("~/Views/Home/Login.cshtml", model);
             }
 
-            // Store user info in session
+            // GET GUEST ID FROM COOKIE
+            string guestId = Request.Cookies["GuestId"];
+
+            // ✅ TRANSFER GUEST CART TO CUSTOMER CART
+            if (!string.IsNullOrEmpty(guestId))
+            {
+                var guestCartItems = _context.Cart
+                    .Where(c => c.GuestId == guestId)
+                    .ToList();
+
+                foreach (var item in guestCartItems)
+                {
+                    // check if same variant already exists for customer
+                    var existing = _context.Cart.FirstOrDefault(x =>
+                        x.CustomerId == user.CustomerId &&
+                        x.VariantId == item.VariantId);
+
+                    if (existing != null)
+                    {
+                        // merge quantity
+                        existing.Quantity += item.Quantity;
+
+                        // remove guest row
+                        _context.Cart.Remove(item);
+                    }
+                    else
+                    {
+                        // assign customer id
+                        item.CustomerId = user.CustomerId;
+                        item.GuestId = null;
+                    }
+                }
+
+                _context.SaveChanges();
+            }
+
+            // SET SESSION
             HttpContext.Session.SetString("CustomerId", user.CustomerId.ToString());
             HttpContext.Session.SetString("UserName", user.FirstName);
             HttpContext.Session.SetString("RoleId", user.RoleId.ToString());
 
-            // Redirect based on role
             return user.RoleId switch
             {
                 1 => RedirectToAction("Admin", "Home"),
@@ -51,6 +87,8 @@ namespace MIEL.web.Controllers
                 _ => RedirectToAction("Index", "Home")
             };
         }
+
+
 
         // GET: Profile
         [HttpGet]

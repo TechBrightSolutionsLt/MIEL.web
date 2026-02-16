@@ -193,9 +193,23 @@
 </style>
 
 <script>
-    function goToReview() {
+         function goToReview() {
+
+        var isLoggedIn = '@(Context.Session.GetString("CustomerId") != null ? "true" : "false")';
+
+        if (isLoggedIn === "false") {
+
+            alert("Please login to continue");
+
+            window.location.href = '/Account/Profile';
+
+            return;
+        }
+
         window.location.href = '/Home/ReviewOrder';
     }
+
+
 </script>
 <script>
         function updateQty(variantId, change) {

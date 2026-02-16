@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MIEL.web.Data;
 using MIEL.web.Models;
 using MIEL.web.Models.EntityModels;
@@ -177,20 +177,15 @@ namespace MIEL.web.Controllers
 
 
 
-
         [HttpPost]
         public IActionResult AddToCart([FromBody] CartItem model)
         {
             string customerId = HttpContext.Session.GetString("CustomerId");
 
-            if (string.IsNullOrEmpty(customerId))
-            {
-                return Json(new { notLoggedIn = true });
-            }
+            string guestId = GetGuestId();
 
-            int custId = Convert.ToInt32(customerId);
 
-            // ? Get variant with latest price (UNCHANGED)
+            // Get latest variant price
             var variant = (
                 from v in _context.ProColorSizeVariants
                 join pi in _context.PurchaseItems
@@ -209,16 +204,40 @@ namespace MIEL.web.Controllers
             if (variant == null)
                 return Json(new { success = false });
 
-            // ? Get image (UNCHANGED)
             var image = _context.ProductImages
                 .Where(i => i.ProductId == model.ProductId && i.Flag == 1)
                 .Select(i => i.ImgPath)
                 .FirstOrDefault();
 
-            // ? CHECK EXISTING ITEM IN DATABASE (NOT SESSION)
-            var existingItem = _context.Cart.FirstOrDefault(x =>
-                x.CustomerId == custId &&
-                x.VariantId == variant.varientid);
+            var productName = _context.ProductMasters
+                .Where(p => p.ProductId == model.ProductId)
+                .Select(p => p.ProductName)
+                .FirstOrDefault();
+
+            // ==========================================
+            // CHECK EXISTING ITEM (CUSTOMER OR GUEST)
+            // ==========================================
+
+            Cart existingItem = null;
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                int custId = Convert.ToInt32(customerId);
+
+                existingItem = _context.Cart.FirstOrDefault(x =>
+                    x.CustomerId == custId &&
+                    x.VariantId == variant.varientid);
+            }
+            else
+            {
+                existingItem = _context.Cart.FirstOrDefault(x =>
+                    x.GuestId == guestId &&
+                    x.VariantId == variant.varientid);
+            }
+
+            // ==========================================
+            // UPDATE OR INSERT
+            // ==========================================
 
             if (existingItem != null)
             {
@@ -228,14 +247,17 @@ namespace MIEL.web.Controllers
             {
                 Cart newItem = new Cart
                 {
-                    CustomerId = custId,
+                    CustomerId = string.IsNullOrEmpty(customerId)
+                        ? (int?)null
+                        : Convert.ToInt32(customerId),
+
+                    GuestId = string.IsNullOrEmpty(customerId)
+                        ? guestId
+                        : null,
+
                     ProductId = model.ProductId,
                     VariantId = variant.varientid,
-                    ProductName = _context.ProductMasters
-                        .Where(p => p.ProductId == model.ProductId)
-                        .Select(p => p.ProductName)
-                        .FirstOrDefault(),
-
+                    ProductName = productName,
                     Color = model.Color,
                     Size = model.Size,
                     Price = variant.Rate,
@@ -249,10 +271,26 @@ namespace MIEL.web.Controllers
 
             _context.SaveChanges();
 
-            // ? GET PRODUCT COUNT (NOT QUANTITY COUNT)
-            int count = _context.Cart
-                .Where(x => x.CustomerId == custId)
-                .Count();
+            // ==========================================
+            // GET COUNT
+            // ==========================================
+
+            int count = 0;
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                int custId = Convert.ToInt32(customerId);
+
+                count = _context.Cart
+                    .Where(x => x.CustomerId == custId)
+                    .Count();
+            }
+            else
+            {
+                count = _context.Cart
+                    .Where(x => x.GuestId == guestId)
+                    .Count();
+            }
 
             return Json(new
             {
@@ -262,120 +300,224 @@ namespace MIEL.web.Controllers
         }
 
 
+
+
         [HttpGet]
         public IActionResult GetCartCount()
         {
             string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
 
-            if (string.IsNullOrEmpty(customerId))
+
+            int count = 0;
+
+            // Logged user → count by CustomerId
+            if (!string.IsNullOrEmpty(customerId))
             {
-                return Json(new { count = 0 });
+                int cid = Convert.ToInt32(customerId);
+
+                count = _context.Cart
+                    .Where(c => c.CustomerId == cid)
+                    .Count();
             }
 
-            int cid = Convert.ToInt32(customerId);
-
-            int count = _context.Cart
-                .Where(c => c.CustomerId == cid)
-                .Count();   // counts products, not quantity
+            // Guest user → count by GuestId
+            else if (!string.IsNullOrEmpty(guestId))
+            {
+                count = _context.Cart
+                    .Where(c => c.GuestId == guestId)
+                    .Count();
+            }
 
             return Json(new { count });
         }
 
+        private string GetGuestId()
+        {
+            string guestId = Request.Cookies["GuestId"];
+
+            if (string.IsNullOrEmpty(guestId))
+            {
+                guestId = Guid.NewGuid().ToString();
+
+                Response.Cookies.Append("GuestId", guestId, new CookieOptions
+                {
+                    Expires = DateTime.Now.AddDays(30), // persists 30 days
+                    HttpOnly = true,
+                    IsEssential = true
+                });
+            }
+
+            return guestId;
+        }
 
 
         public IActionResult Cart()
         {
             string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
 
-            if (string.IsNullOrEmpty(customerId))
+
+            List<CartItem> cartItems = new List<CartItem>();
+
+            // Logged user
+            if (!string.IsNullOrEmpty(customerId))
             {
-                return RedirectToAction("IndexLogin", "Login");
+                int cid = Convert.ToInt32(customerId);
+
+                cartItems = _context.Cart
+                    .Where(c => c.CustomerId == cid)
+                    .Select(c => new CartItem
+                    {
+                        ProductId = c.ProductId,
+                        VariantId = c.VariantId,
+                        ProductName = c.ProductName,
+                        Color = c.Color,
+                        Size = c.Size,
+                        Price = c.Price,
+                        Quantity = c.Quantity,
+                        Image = c.Image
+                    })
+                    .ToList();
+            }
+            // Guest user
+            else if (!string.IsNullOrEmpty(guestId))
+            {
+                cartItems = _context.Cart
+                    .Where(c => c.GuestId == guestId)
+                    .Select(c => new CartItem
+                    {
+                        ProductId = c.ProductId,
+                        VariantId = c.VariantId,
+                        ProductName = c.ProductName,
+                        Color = c.Color,
+                        Size = c.Size,
+                        Price = c.Price,
+                        Quantity = c.Quantity,
+                        Image = c.Image
+                    })
+                    .ToList();
             }
 
-            int cid = Convert.ToInt32(customerId);
-
-            var cart = _context.Cart
-                .Where(c => c.CustomerId == cid)
-                .Select(c => new CartItem
-                {
-                    ProductId = c.ProductId,
-                    VariantId = c.VariantId,
-                    ProductName = c.ProductName,
-                    Color = c.Color,
-                    Size = c.Size,
-                    Price = c.Price,
-                    Quantity = c.Quantity,
-                    Image = c.Image
-                })
-                .ToList();
-
-            return View(cart);
+            return View(cartItems);
         }
+
+
 
         [HttpPost]
         public IActionResult UpdateCartQty([FromBody] CartItem model)
         {
-            var cartJson = HttpContext.Session.GetString("Cart");
+            string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
 
-            if (string.IsNullOrEmpty(cartJson))
-                return Json(new { success = false });
 
-            var cart = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+            Cart item = null;
 
-            var item = cart.FirstOrDefault(x => x.VariantId == model.VariantId);
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                int cid = Convert.ToInt32(customerId);
+
+                item = _context.Cart.FirstOrDefault(x =>
+                    x.CustomerId == cid &&
+                    x.VariantId == model.VariantId);
+            }
+            else if (!string.IsNullOrEmpty(guestId))
+            {
+                item = _context.Cart.FirstOrDefault(x =>
+                    x.GuestId == guestId &&
+                    x.VariantId == model.VariantId);
+            }
 
             if (item == null)
                 return Json(new { success = false });
 
             item.Quantity += model.Change;
 
-            // ? Prevent less than 1
             if (item.Quantity <= 0)
-                cart.Remove(item);
+                _context.Cart.Remove(item);
 
-            HttpContext.Session.SetString("Cart",
-                JsonConvert.SerializeObject(cart));
-
-            return Json(new { success = true });
-        }
-
-       
-        [HttpPost]
-        public IActionResult RemoveCartItem([FromBody] CartItem model)
-        {
-            string userIdStr = HttpContext.Session.GetString("CustomerId");
-
-            if (string.IsNullOrEmpty(userIdStr))
-                return Json(new { success = false, message = "Not logged in" });
-
-            int customerId = Convert.ToInt32(userIdStr);
-
-            // Find item in Cart table
-            var item = _context.Cart.FirstOrDefault(c =>
-                c.CustomerId == customerId &&
-                c.VariantId == model.VariantId);
-
-            if (item == null)
-                return Json(new { success = false, message = "Item not found" });
-
-            // Remove from database
-            _context.Cart.Remove(item);
             _context.SaveChanges();
 
             return Json(new { success = true });
         }
 
+
+
+        [HttpPost]
+        public IActionResult RemoveCartItem([FromBody] CartItem model)
+        {
+            string customerIdStr = HttpContext.Session.GetString("CustomerId");
+            string guestId = Request.Cookies["GuestId"];
+
+            Cart item = null;
+
+            // Logged user
+            if (!string.IsNullOrEmpty(customerIdStr))
+            {
+                int customerId = Convert.ToInt32(customerIdStr);
+
+                item = _context.Cart.FirstOrDefault(x =>
+                    x.CustomerId.HasValue &&
+                    x.CustomerId.Value == customerId &&
+                    x.VariantId == model.VariantId);
+            }
+            // Guest user
+            else if (!string.IsNullOrEmpty(guestId))
+            {
+                item = _context.Cart.FirstOrDefault(x =>
+                    x.GuestId != null &&
+                    x.GuestId == guestId &&
+                    x.VariantId == model.VariantId);
+            }
+
+            if (item == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Item not found"
+                });
+            }
+
+            _context.Cart.Remove(item);
+            _context.SaveChanges();
+
+            int count = 0;
+
+            if (!string.IsNullOrEmpty(customerIdStr))
+            {
+                int customerId = Convert.ToInt32(customerIdStr);
+
+                count = _context.Cart
+                    .Where(x => x.CustomerId.HasValue && x.CustomerId.Value == customerId)
+                    .Count();
+            }
+            else if (!string.IsNullOrEmpty(guestId))
+            {
+                count = _context.Cart
+                    .Where(x => x.GuestId != null && x.GuestId == guestId)
+                    .Count();
+            }
+
+            return Json(new
+            {
+                success = true,
+                count = count
+            });
+        }
+
+
+
         public IActionResult ReviewOrder()
         {
-      
             string userIdStr = HttpContext.Session.GetString("CustomerId");
 
+            // Checkout requires login
             if (string.IsNullOrEmpty(userIdStr))
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("IndexLogin", "Login");
 
             int customerId = Convert.ToInt32(userIdStr);
 
-   
             var cart = _context.Cart
                 .Where(c => c.CustomerId == customerId)
                 .Select(c => new CartItem
@@ -389,22 +531,23 @@ namespace MIEL.web.Controllers
                     Quantity = c.Quantity,
                     Image = c.Image
                 })
-                .ToList(); 
+                .ToList();
+
             if (cart == null || !cart.Any())
                 return RedirectToAction("Cart", "Cart");
 
             var address = _context.users_TB
-      .Where(a => a.CustomerId == customerId)
-      .Select(a => new Customer
-      {
-          CustomerId = a.CustomerId,
-          Name = (a.FirstName ?? "") + " " + (a.LastName ?? ""),
-          BuildingName = a.Address,
-          City = a.City,
-          Pin = a.Postcode,
-          Mobile = a.MobileNumber
-      })
-      .FirstOrDefault();
+                .Where(a => a.CustomerId == customerId)
+                .Select(a => new Customer
+                {
+                    CustomerId = a.CustomerId,
+                    Name = (a.FirstName ?? "") + " " + (a.LastName ?? ""),
+                    BuildingName = a.Address,
+                    City = a.City,
+                    Pin = a.Postcode,
+                    Mobile = a.MobileNumber
+                })
+                .FirstOrDefault();
 
             var vm = new ReviewOrderVM
             {
@@ -415,6 +558,7 @@ namespace MIEL.web.Controllers
 
             return View(vm);
         }
+
 
 
         public IActionResult Privacy()
