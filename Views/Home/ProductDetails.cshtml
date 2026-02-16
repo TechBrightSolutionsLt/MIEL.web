@@ -388,28 +388,38 @@
         .then(data => {
 
             // ✅ SHOW LOGIN MESSAGE ONLY
-            if (data.notLoggedIn) {
+          if (data.success) {
 
-                alert("Please login");
+        fetch('/Home/GetCartCount')
+        .then(res => res.json())
+        .then(c => {
+            const cartCount =
+                document.getElementById("cartCount");
 
-                return;
+            if (cartCount) {
+                cartCount.textContent = c.count;
             }
+        });
 
-            if (data.success) {
+        alert("Added to cart ");
+    }
 
-                fetch('/Home/GetCartCount')
-                .then(res => res.json())
-                .then(c => {
-                    const cartCount =
-                        document.getElementById("cartCount");
 
-                    if (cartCount) {
-                        cartCount.textContent = c.count;
-                    }
-                });
+            // if (data.success) {
 
-                alert("Added to cart successfully");
-            }
+            //     fetch('/Home/GetCartCount')
+            //     .then(res => res.json())
+            //     .then(c => {
+            //         const cartCount =
+            //             document.getElementById("cartCount");
+
+            //         if (cartCount) {
+            //             cartCount.textContent = c.count;
+            //         }
+            //     });
+
+            //     alert("Added to cart successfully");
+            // }
             else {
                 alert("Something went wrong");
             }
