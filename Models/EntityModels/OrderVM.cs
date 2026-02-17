@@ -13,7 +13,7 @@ namespace MIEL.web.Models.EntityModels
 
         public decimal TotalAmount { get; set; }
 
-        public string PaymentStatus { get; set; }  // 0=Pending,1=Paid,2=COD
+        public string PaymentStatus { get; set; } = "NotPaid";
 
         public string PayId { get; set; }  // Transaction ID / Payment ID
 
