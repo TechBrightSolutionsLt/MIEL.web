@@ -11,8 +11,8 @@ namespace MIEL.web.Models.ViewModel
 
         //[Column(TypeName = "varchar(50)")]
         public string BatchNo { get; set; }
+        
 
-       
         public int Quantity { get; set; }
 
         // ===== PRICING =====

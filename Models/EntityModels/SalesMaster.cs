@@ -13,18 +13,22 @@ namespace MIEL.web.Models.EntityModels
         public string InvoiceNo { get; set; }
 
         [MaxLength(20)]
-        public string PaymentType { get; set; } // Cash / Card / UPI / Bank
+        public string PaymentType { get; set; }
 
         // ================= TOTALS =================
 
-        public decimal TotalAmount { get; set; }      // Sum of item gross (before discount)
-        public decimal TotalDiscount { get; set; }    // 🔴 REQUIRED
-        public decimal GstAmount { get; set; }        // GST INCLUDED (10%)
-        public decimal NetAmount { get; set; }        // Final payable
+        public decimal TotalAmount { get; set; }
+        public decimal TotalDiscount { get; set; }
+        public decimal GstAmount { get; set; }
+        public decimal NetAmount { get; set; }
 
         public int salesmode { get; set; }
 
-        // ================= NAV =================
-        public ICollection<SalesItem> SalesItems { get; set; }
+        // 🔥 Foreign Key to Customer (users_TB)
+        public int CustomerId { get; set; }
+
+        // ================= NAVIGATION =================
+
+        public ICollection<SalesItem> SalesItems { get; set; } = new List<SalesItem>();
     }
 }
