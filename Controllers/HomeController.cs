@@ -730,7 +730,7 @@ namespace MIEL.web.Controllers
                 
               
                 OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
-                 VerifyId = null
+                 VerifyId = 0
             };
 
             _context.Orders.Add(order);

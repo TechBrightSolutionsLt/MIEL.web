@@ -15,8 +15,20 @@ public class AdminPaymentController : Controller
     // 1️⃣ Show Pending Orders
     public async Task<IActionResult> PendingPayments()
     {
-        var orders = await _context.Set<OrderVM>()
+        var orders = await _context.Orders
             .Where(x => x.PaymentStatus == "NotPaid")
+            .Select(x => new OrderVM
+            {
+                Id = x.Id,
+                CustomerId = x.CustomerId,
+                OrderNumber = x.OrderNumber,
+                TotalAmount = x.TotalAmount,
+                PaymentStatus = x.PaymentStatus,
+                PayId = x.PayId,
+                VerifyId = x.VerifyId,
+                BankReference = x.BankReference,
+                VerifiedDate = x.VerifiedDate
+            })
             .ToListAsync();
 
         return View(orders);

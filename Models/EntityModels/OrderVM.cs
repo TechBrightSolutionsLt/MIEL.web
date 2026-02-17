@@ -4,23 +4,22 @@ namespace MIEL.web.Models.EntityModels
 {
     public class OrderVM
     {
-
         public int Id { get; set; }
         public int CustomerId { get; set; }
-
 
         public string OrderNumber { get; set; }
 
         public decimal TotalAmount { get; set; }
 
-        public string PaymentStatus { get; set; } = "NotPaid";
+        public string PaymentStatus { get; set; }
 
-        public string PayId { get; set; }  // Transaction ID / Payment ID
+        public string? PayId { get; set; }
 
-        public int? VerifyId { get; set; }  // Admin ID
+        public int? VerifyId { get; set; }
 
-        public string BankReference { get; set; }
+        public string? BankReference { get; set; }
 
         public DateTime? VerifiedDate { get; set; }
     }
+
 }
