@@ -120,19 +120,63 @@ namespace MIEL.web.Controllers
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
 
-                TempData["SuccessMessage"] = "Sales saved successfully!";
+                return Json(new
+                {
+                    success = true,
+                    salesId = master.SalesId
+                });
 
-                return RedirectToAction("Create");
+
+               
             }
             catch (Exception ex)
             {
                 await tx.RollbackAsync();
 
-                
 
-                ModelState.AddModelError("", ex.Message);
-                return View(vm);
+
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+
             }
+        }
+        // ==========================================
+        // PRINT A4 PAGE
+        // ==========================================
+        public async Task<IActionResult> Print(int id)
+        {
+            var sale = await _context.SalesMasters
+                .Include(s => s.SalesItems)
+                .FirstOrDefaultAsync(s => s.SalesId == id);
+
+            if (sale == null)
+                return NotFound();
+
+            var vm = new SalesVM
+            {
+                SalesId = sale.SalesId,
+                InvoiceNo = sale.InvoiceNo,
+                SalesDate = sale.SalesDate,
+                PaymentType = sale.PaymentType,
+                TotalDiscount = sale.TotalDiscount,
+                GstAmount = sale.GstAmount,
+                NetAmount = sale.NetAmount,
+                Items = sale.SalesItems.Select(i => new SalesItemVM
+                {
+                    varientid = i.varientid,
+                    BatchNo = i.BatchNo,
+                    Quantity = i.Quantity,
+                    SellingPrice = i.SellingPrice,
+                    DiscAmount = i.DiscAmount,
+                    TaxAmount = i.TaxAmount,
+                    NetAmount = i.NetAmount
+                }).ToList()
+            };
+
+            return View(vm);
         }
 
         // =====================================================
@@ -257,20 +301,13 @@ namespace MIEL.web.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var sale = await _context.SalesMasters
-                .Include(s => s.SalesItems)
+                .Include(s => s.SalesItems)   // ✅ correct navigation
                 .FirstOrDefaultAsync(s => s.SalesId == id);
 
             if (sale == null)
                 return NotFound();
 
-            ViewBag.Customers = new SelectList(
-                _context.users_TB.ToList(),
-                "CustomerId",
-                "FirstName",
-                sale.CustomerId   // 🔥 THIS selects current customer
-            );
-
-            var model = new SalesVM
+            var vm = new SalesVM
             {
                 SalesId = sale.SalesId,
                 InvoiceNo = sale.InvoiceNo,
@@ -281,92 +318,114 @@ namespace MIEL.web.Controllers
                 TotalDiscount = sale.TotalDiscount,
                 GstAmount = sale.GstAmount,
                 NetAmount = sale.NetAmount,
-                Items = sale.SalesItems.Select(i => new SalesItemVM
+
+                Items = sale.SalesItems.Select(d => new SalesItemVM
                 {
-                    varientid = i.varientid,
-                    BatchNo = i.BatchNo,
-                    Quantity = i.Quantity,
-                    SellingPrice = i.SellingPrice,
-                    DiscPercent = i.DiscPercent,
-                    DiscAmount = i.DiscAmount,
-                    TaxAmount = i.TaxAmount,
-                    NetAmount = i.NetAmount
+                    varientid = d.varientid,
+                    BatchNo = d.BatchNo,
+                    Quantity = d.Quantity,
+                    SellingPrice = d.SellingPrice,
+                    DiscPercent = d.DiscPercent,
+                    DiscAmount = d.DiscAmount,
+                    TaxAmount = d.TaxAmount,
+                    NetAmount = d.NetAmount
                 }).ToList()
             };
 
-            return View(model);
-        }
+            ViewBag.Customers = new SelectList(
+                _context.users_TB.ToList(),
+                "CustomerId",
+                "FirstName",
+                vm.CustomerId
+            );
 
+            return View(vm);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(SalesVM model)
+        public async Task<IActionResult> Edit(SalesVM vm)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            using var tx = await _context.Database.BeginTransactionAsync();
 
-            var sale = await _context.SalesMasters
-                .Include(s => s.SalesItems)
-                .FirstOrDefaultAsync(s => s.SalesId == model.SalesId);
-
-            if (sale == null)
-                return NotFound();
-
-            // 🔥 1. RESTORE OLD STOCK
-            foreach (var oldItem in sale.SalesItems)
+            try
             {
-                var batch = await _context.InventoryBatch
-                    .FirstOrDefaultAsync(x =>
-                        x.varientid == oldItem.varientid &&
-                        x.BatchNo == oldItem.BatchNo);
+                var sale = await _context.SalesMasters
+                    .Include(s => s.SalesItems)
+                    .FirstOrDefaultAsync(s => s.SalesId == vm.SalesId);
 
-                if (batch != null)
-                    batch.QuantityOut -= oldItem.Quantity;
-            }
+                if (sale == null)
+                    return NotFound();
 
-            // 🔥 2. REMOVE OLD ITEMS
-            _context.SalesItems.RemoveRange(sale.SalesItems);
-
-            // 🔥 3. UPDATE MASTER
-            sale.SalesDate = model.SalesDate;
-            sale.CustomerId = model.CustomerId;
-            sale.TotalAmount = model.TotalAmount;
-            sale.TotalDiscount = model.TotalDiscount;
-            sale.GstAmount = model.GstAmount;
-            sale.NetAmount = model.NetAmount;
-
-            // 🔥 4. ADD NEW ITEMS
-            foreach (var item in model.Items)
-            {
-                var newItem = new SalesItem
+                // 🔥 1. RESTORE OLD STOCK
+                foreach (var oldItem in sale.SalesItems)
                 {
-                    SalesId = sale.SalesId,
-                    varientid = item.varientid,
-                    BatchNo = item.BatchNo,
-                    Quantity = item.Quantity,
-                    SellingPrice = item.SellingPrice,
-                    DiscPercent = item.DiscPercent,
-                    DiscAmount = item.DiscAmount,
-                    TaxAmount = item.TaxAmount,
-                    NetAmount = item.NetAmount
-                };
+                    var batch = await _context.InventoryBatch
+                        .FirstOrDefaultAsync(x =>
+                            x.varientid == oldItem.varientid &&
+                            x.BatchNo == oldItem.BatchNo);
 
-                _context.SalesItems.Add(newItem);
+                    if (batch != null)
+                        batch.QuantityOut -= oldItem.Quantity;
+                }
 
-                var batch = await _context.InventoryBatch
-                    .FirstOrDefaultAsync(x =>
-                        x.varientid == item.varientid &&
-                        x.BatchNo == item.BatchNo);
+                // 🔥 2. REMOVE OLD ITEMS
+                _context.SalesItems.RemoveRange(sale.SalesItems);
 
-                if (batch != null)
+                // 🔥 3. UPDATE HEADER
+                sale.SalesDate = vm.SalesDate;
+                sale.CustomerId = vm.CustomerId;
+                sale.PaymentType = vm.PaymentType;
+                sale.TotalAmount = vm.TotalAmount;
+                sale.TotalDiscount = vm.TotalDiscount;
+                sale.GstAmount = vm.GstAmount;
+                sale.NetAmount = vm.NetAmount;
+
+                // 🔥 4. ADD NEW ITEMS + REDUCE STOCK
+                foreach (var item in vm.Items)
+                {
+                    var batch = await _context.InventoryBatch
+                        .FirstOrDefaultAsync(x =>
+                            x.varientid == item.varientid &&
+                            x.BatchNo == item.BatchNo);
+
+                    if (batch == null)
+                        throw new Exception("Batch not found.");
+
+                    int available = batch.QuantityIn - batch.QuantityOut;
+
+                    if (available < item.Quantity)
+                        throw new Exception("Insufficient stock.");
+
+                    sale.SalesItems.Add(new SalesItem
+                    {
+                        SalesId = sale.SalesId,
+                        varientid = item.varientid,
+                        BatchNo = item.BatchNo,
+                        Quantity = item.Quantity,
+                        SellingPrice = item.SellingPrice,
+                        DiscPercent = item.DiscPercent,
+                        DiscAmount = item.DiscAmount,
+                        TaxAmount = item.TaxAmount,
+                        NetAmount = item.NetAmount
+                    });
+
                     batch.QuantityOut += item.Quantity;
+                }
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                return RedirectToAction("Details");
             }
-
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Sale Updated Successfully!";
-            return RedirectToAction("Details");
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                ModelState.AddModelError("", ex.Message);
+                return View(vm);
+            }
         }
+
 
         // ==========================================
         // DELETE
