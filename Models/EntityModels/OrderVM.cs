@@ -6,7 +6,7 @@ namespace MIEL.web.Models.EntityModels
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
-
+        public int SalesId { get; set; }
         public string OrderNumber { get; set; }
 
         public decimal TotalAmount { get; set; }
