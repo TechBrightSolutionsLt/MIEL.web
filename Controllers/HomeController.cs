@@ -623,11 +623,17 @@ namespace MIEL.web.Controllers
 
                 foreach (var item in cart)
                 {
+                    var batch = _context.InventoryBatch
+        .Where(b => b.varientid == item.VariantId && (b.QuantityIn - b.QuantityOut) > 0)
+        .OrderBy(b => b.CreatedDate) // FIFO: earliest created batch first
+        .FirstOrDefault();
+
+                    string batchNo = batch != null ? batch.BatchNo : "";
                     var salesItem = new SalesItem
                     {
                         SalesId = salesMaster.SalesId,
                         varientid = item.VariantId,
-                        BatchNo = "",
+                        BatchNo = batchNo,
                         Quantity = item.Quantity,
                         SellingPrice = item.Price,
                         DiscPercent = 0,
@@ -763,35 +769,67 @@ namespace MIEL.web.Controllers
         }
         public IActionResult OrderSuccess(int salesId)
         {
-            var order = _context.SalesMasters
-                .FirstOrDefault(x => x.SalesId == salesId);
-
-            return View(order);
-        }
-        [HttpGet]
-        public IActionResult ConfirmPayID(int salesId)
-        {
-            var order = _context.SalesMasters
+            var order = _context.Orders
                 .FirstOrDefault(x => x.SalesId == salesId);
 
             if (order == null)
                 return RedirectToAction("Cart", "Cart");
 
-    
-            order.PaymentType = "PayID";
-
-            // Payment completed
-            order.paysts = 1;
-
-            _context.SaveChanges();
-
-            // Clear session
-            HttpContext.Session.Remove("SalesId");
-
-            // Redirect success page
-            return RedirectToAction("OrderSuccess", new { salesId = salesId });
+            return View(order);
         }
 
+
+        [HttpGet]
+        public IActionResult ConfirmPayID(int salesId)
+        {
+            var sales = _context.SalesMasters
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            if (sales == null)
+                return RedirectToAction("Cart", "Cart");
+
+            // Mark as PayID payment type (pending confirmation)
+            sales.PaymentType = "PayID";
+            sales.paysts = 0; // still pending
+            _context.SaveChanges();
+
+            // ✅ Create an Order entry immediately
+            var orderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            var order = new OrderVM
+            {
+                CustomerId = sales.CustomerId,
+                SalesId = sales.SalesId,
+                TotalAmount = sales.TotalAmount,
+                OrderNumber = orderNumber,
+                PaymentStatus = "NotPaid",
+                VerifyId = 0
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            // Clear customer's cart/session if you want
+            // ClearCustomerCart(sales.CustomerId); 
+            // HttpContext.Session.Remove("SalesId");
+
+            // Prepare ViewModel to show on PayIDPage
+            var vm = new PayIDViewModel
+            {
+                SalesId = sales.SalesId,
+                OrderId = order.Id,               // <-- Order ID saved
+                OrderNumber = order.OrderNumber,  // <-- show this as invoice
+                TotalAmount = sales.TotalAmount,
+                PayId = 0430823457,               // static PayID
+                Email = "binoyjoseph@y7mail.com"
+            };
+
+            return View("PayIDPage", vm);
+        }
+
+
+
+   
 
         public IActionResult Privacy()
         {

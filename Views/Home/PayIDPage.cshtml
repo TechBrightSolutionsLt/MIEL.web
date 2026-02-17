@@ -1,0 +1,17 @@
+﻿@model MIEL.web.Models.ViewModel.PayIDViewModel
+
+<div class="container mt-5">
+    <h3>Pay Online (PayID)</h3>
+
+    <p><strong>Order ID:</strong> @Model.OrderNumber</p>
+    <p><strong>Amount:</strong> ₹@Model.TotalAmount</p>
+    <p><strong>PayID:</strong> @Model.PayId</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+
+    <form asp-action="OrderSuccess" method="post">
+        <input type="hidden" name="SalesId" value="@Model.SalesId" />
+        <input type="hidden" name="OrderId" value="@Model.OrderId" />
+        <input type="hidden" name="PayId" value="@Model.PayId" />
+        <button type="submit" class="btn btn-primary mt-3">Continue</button>
+    </form>
+</div>
