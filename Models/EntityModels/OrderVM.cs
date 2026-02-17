@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MIEL.web.Models.ViewModel
+namespace MIEL.web.Models.EntityModels
 {
     public class OrderVM
     {
@@ -13,7 +13,7 @@ namespace MIEL.web.Models.ViewModel
 
         public decimal TotalAmount { get; set; }
 
-        public String PaymentStatus { get; set; }  // 0=Pending,1=Paid,2=COD
+        public string PaymentStatus { get; set; }  // 0=Pending,1=Paid,2=COD
 
         public string PayId { get; set; }  // Transaction ID / Payment ID
 

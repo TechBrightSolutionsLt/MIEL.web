@@ -583,45 +583,57 @@ namespace MIEL.web.Controllers
 
 
 
-           
             int? existingSalesId = HttpContext.Session.GetInt32("SalesId");
+            SalesMaster salesMasters = null;
 
-            decimal totalAmount = cart.Sum(x => x.Price * x.Quantity);
+            if (existingSalesId != null)
+            {
+                // Check if SalesMaster exists in database
+                salesMasters = _context.SalesMasters
+                    .FirstOrDefault(x => x.SalesId == existingSalesId.Value);
+            }
 
-            // SAVE SALEMASTER
+
             if (existingSalesId == null)
             {
-                SalesMaster sales = new SalesMaster()
+                decimal totalAmount = cart.Sum(x => x.Price * x.Quantity);
+
+                decimal discount = 0;
+
+               // decimal gst = totalAmount * 0.10m; // 10% GST
+
+              //  decimal netAmount = totalAmount + gst - discount;
+
+                var salesMaster = new SalesMaster
                 {
                     SalesDate = DateTime.Now,
 
-                    InvoiceNo = "SAL" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    InvoiceNo = "SAL-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+
+                    PaymentType = "Pending", // default
 
                     CustomerId = customerId,
 
                     TotalAmount = totalAmount,
 
+                    TotalDiscount = discount,
+
+                   // GstAmount = gst,
+
                     NetAmount = totalAmount,
 
-                    PaymentType = "Pending",   // ✅ REQUIRED FIX
+                    paysts = 0, // 🔴 THIS IS YOUR REQUIRED FIELD (Pending)
 
-                    paysts = 0,                // Pending
-
-                    salesmode = 2
+                    salesmode = 2 // Online
                 };
 
-                _context.SalesMasters.Add(sales);
+                _context.SalesMasters.Add(salesMaster);
+
                 _context.SaveChanges();
 
-                HttpContext.Session.SetInt32("SalesId", sales.SalesId);
-                existingSalesId = sales.SalesId;
-
+                // Save SalesId in Session
+                HttpContext.Session.SetInt32("SalesId", salesMaster.SalesId);
             }
-
-     
-
-
-
 
 
             var address = _context.users_TB
