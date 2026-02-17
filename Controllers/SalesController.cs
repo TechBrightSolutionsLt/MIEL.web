@@ -32,11 +32,9 @@ namespace MIEL.web.Controllers
                 SalesDate = DateTime.Today
             };
 
-            ViewBag.Customers = new SelectList(
-                _context.users_TB.ToList(),
-                "CustomerId",
-                "FirstName"
-            );
+            
+
+
 
             return View(vm);
         }
@@ -53,12 +51,7 @@ namespace MIEL.web.Controllers
             {
                 ModelState.AddModelError("", "Please add items.");
 
-                ViewBag.Customers = new SelectList(
-                    _context.users_TB.ToList(),
-                    "CustomerId",
-                    "FirstName",
-                    vm.CustomerId
-                );
+                
 
                 return View(vm);
             }
@@ -135,12 +128,7 @@ namespace MIEL.web.Controllers
             {
                 await tx.RollbackAsync();
 
-                ViewBag.Customers = new SelectList(
-                    _context.users_TB.ToList(),
-                    "CustomerId",
-                    "FirstName",
-                    vm.CustomerId
-                );
+                
 
                 ModelState.AddModelError("", ex.Message);
                 return View(vm);
@@ -164,14 +152,19 @@ namespace MIEL.web.Controllers
         // SEARCH CUSTOMER
         public async Task<IActionResult> SearchCustomers(string term)
         {
-            var data = await _context.Customers
-                .Where(x => x.Name.Contains(term))
-                .Select(x => new { id = x.CustomerId, text = x.Name })
+            var data = await _context.users_TB
+                .Where(x => x.FirstName.Contains(term))
+                .Select(x => new
+                {
+                    id = x.CustomerId,
+                    text = x.FirstName
+                })
                 .Take(20)
                 .ToListAsync();
 
             return Json(data);
         }
+
 
         // LOAD VARIANTS
         public async Task<IActionResult> GetVariants(int productId)
