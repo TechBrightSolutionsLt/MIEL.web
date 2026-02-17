@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MIEL.web.Models.EntityModels;
 using MIEL.web.Models;
+using MIEL.web.Models.ViewModel;
 
 namespace MIEL.web.Data
 {
@@ -43,6 +44,7 @@ namespace MIEL.web.Data
         public DbSet<SalesItem>SalesItems { get; set; }
         public DbSet<SalesMaster> SalesMasters { get; set; }
         public DbSet<Cart> Cart { get; set; }
+        public DbSet<OrderVM> Orders { get; set;}
 
 
 

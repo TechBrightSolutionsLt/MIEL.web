@@ -121,11 +121,12 @@
 
                 <h5>Total: $ @Model.TotalAmount</h5>
 
-                <form asp-action="ConfirmOrder" method="post">
+                <form asp-action="ConfirmOrder" asp-controller="Home" method="post">
                     <button class="btn btn-warning w-100 mt-2">
                         CONFIRM ORDER
                     </button>
                 </form>
+             
 
             </div>
         </div>

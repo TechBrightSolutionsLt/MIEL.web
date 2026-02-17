@@ -7,5 +7,7 @@ namespace MIEL.web.Models.ViewModel
         public List<CartItem> CartItems { get; set; }
         public Customer Address { get; set; }
         public decimal TotalAmount { get; set; }
+        public int saleID { get; set; }
+
     }
 }

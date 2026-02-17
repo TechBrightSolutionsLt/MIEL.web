@@ -16,7 +16,7 @@ namespace MIEL.web.Models.EntityModels
         public string PaymentType { get; set; } // Cash / Card / UPI / Bank
 
         // ================= TOTALS =================
-
+        public int CustomerId { get; set; }
         public decimal TotalAmount { get; set; }      // Sum of item gross (before discount)
         public decimal TotalDiscount { get; set; }    // 🔴 REQUIRED
         public decimal GstAmount { get; set; }        // GST INCLUDED (10%)

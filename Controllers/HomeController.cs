@@ -580,6 +580,50 @@ namespace MIEL.web.Controllers
             if (cart == null || !cart.Any())
                 return RedirectToAction("Cart", "Cart");
 
+
+
+
+           
+            int? existingSalesId = HttpContext.Session.GetInt32("SalesId");
+
+            decimal totalAmount = cart.Sum(x => x.Price * x.Quantity);
+
+            // SAVE SALEMASTER
+            if (existingSalesId == null)
+            {
+                SalesMaster sales = new SalesMaster()
+                {
+                    SalesDate = DateTime.Now,
+
+                    InvoiceNo = "SAL" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+
+                    CustomerId = customerId,
+
+                    TotalAmount = totalAmount,
+
+                    NetAmount = totalAmount,
+
+                    PaymentType = "Pending",   // ✅ REQUIRED FIX
+
+                    paysts = 0,                // Pending
+
+                    salesmode = 2
+                };
+
+                _context.SalesMasters.Add(sales);
+                _context.SaveChanges();
+
+                HttpContext.Session.SetInt32("SalesId", sales.SalesId);
+                existingSalesId = sales.SalesId;
+
+            }
+
+     
+
+
+
+
+
             var address = _context.users_TB
                 .Where(a => a.CustomerId == customerId)
                 .Select(a => new Customer
@@ -603,6 +647,105 @@ namespace MIEL.web.Controllers
             return View(vm);
         }
 
+        [HttpPost]
+        public IActionResult ConfirmOrder()
+        {
+            int? salesId = HttpContext.Session.GetInt32("SalesId");
+
+            if (salesId == null)
+            {
+                return RedirectToAction("Cart", "Cart");
+            }
+
+            // Redirect to payment page
+            return RedirectToAction("Payment", "Home", new { salesId = salesId });
+        }
+        public IActionResult Payment(int salesId)
+        {
+            var order = _context.SalesMasters
+                .Where(x => x.SalesId == salesId)
+                .Select(x => new PaymentVM
+                {
+                    SalesId = x.SalesId,
+                    InvoiceNo = x.InvoiceNo,
+                    TotalAmount = x.NetAmount,
+                    PayStatus = x.paysts,
+
+                    // LOAD ITEMS
+                    Items = _context.Cart
+                        .Where(c => c.CustomerId == x.CustomerId)
+                        .Select(c => new CartItem
+                        {
+                            ProductName = c.ProductName,
+                            Quantity = c.Quantity,
+                            Price = c.Price,
+                            Image = c.Image
+                        }).ToList()
+                })
+                .FirstOrDefault();
+
+            if (order == null)
+                return RedirectToAction("Cart", "Cart");
+
+            return View(order);
+        }
+
+
+
+        [HttpGet]
+        public IActionResult ConfirmCOD(int salesId)
+        {
+            var order = _context.SalesMasters
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            if (order == null)
+                return RedirectToAction("Cart", "Cart");
+
+            // Update payment type
+            order.PaymentType = "COD";
+
+            // Payment pending (COD not paid yet)
+            order.paysts = 0;
+
+            _context.SaveChanges();
+
+            // Clear session
+            HttpContext.Session.Remove("SalesId");
+
+            // Redirect success page
+            return RedirectToAction("OrderSuccess",
+                   new { salesId = salesId });
+        }
+        public IActionResult OrderSuccess(int salesId)
+        {
+            var order = _context.SalesMasters
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            return View(order);
+        }
+        [HttpGet]
+        public IActionResult ConfirmPayID(int salesId)
+        {
+            var order = _context.SalesMasters
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            if (order == null)
+                return RedirectToAction("Cart", "Cart");
+
+            // Set payment type
+            order.PaymentType = "PayID";
+
+            // Payment completed
+            order.paysts = 1;
+
+            _context.SaveChanges();
+
+            // Clear session
+            HttpContext.Session.Remove("SalesId");
+
+            // Redirect success page
+            return RedirectToAction("OrderSuccess", new { salesId = salesId });
+        }
 
 
         public IActionResult Privacy()
