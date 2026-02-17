@@ -14,7 +14,11 @@
         </p>
 
         <p>
-            Payment Method: <strong>Cash On Delivery</strong>
+            Payment Method:
+            <strong>
+                @(Model.PaymentType == "Cash" ? "Cash On Delivery" :
+                                Model.PaymentType == "PayID" ? "Pay Online" : "Pending")
+            </strong>
         </p>
 
         <a href="/Home/Index"

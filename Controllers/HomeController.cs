@@ -707,26 +707,52 @@ namespace MIEL.web.Controllers
         [HttpGet]
         public IActionResult ConfirmCOD(int salesId)
         {
-            var order = _context.SalesMasters
+            var sales = _context.SalesMasters
                 .FirstOrDefault(x => x.SalesId == salesId);
 
-            if (order == null)
+            if (sales == null)
                 return RedirectToAction("Cart", "Cart");
 
-            // Update payment type
-            order.PaymentType = "COD";
 
-            // Payment pending (COD not paid yet)
-            order.paysts = 0;
+            sales.PaymentType = "Cash";
+
+
+            sales.paysts = 0;
 
             _context.SaveChanges();
 
-            // Clear session
             HttpContext.Session.Remove("SalesId");
 
-            // Redirect success page
+            var order = new OrderVM
+            {
+                CustomerId = sales.CustomerId,
+                TotalAmount = sales.TotalAmount,
+                
+              
+                OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                 VerifyId = null
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            // ✅ Clear customer's cart
+            ClearCustomerCart(sales.CustomerId);
             return RedirectToAction("OrderSuccess",
                    new { salesId = salesId });
+        }
+
+        private void ClearCustomerCart(int customerId)
+        {
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == customerId)
+                .ToList();
+
+            if (cartItems.Any())
+            {
+                _context.Cart.RemoveRange(cartItems);
+                _context.SaveChanges();
+            }
         }
         public IActionResult OrderSuccess(int salesId)
         {
@@ -744,7 +770,7 @@ namespace MIEL.web.Controllers
             if (order == null)
                 return RedirectToAction("Cart", "Cart");
 
-            // Set payment type
+    
             order.PaymentType = "PayID";
 
             // Payment completed
