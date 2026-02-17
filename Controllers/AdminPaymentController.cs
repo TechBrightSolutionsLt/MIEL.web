@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
+using MIEL.web.Models.ViewModel;
 
 public class AdminPaymentController : Controller
 {
@@ -15,6 +16,7 @@ public class AdminPaymentController : Controller
     // 1️⃣ Show Pending Orders
     public async Task<IActionResult> PendingPayments()
     {
+        
         var orders = await _context.Orders
             .Where(x => x.PaymentStatus == "NotPaid")
             .Select(x => new OrderVM
@@ -35,34 +37,72 @@ public class AdminPaymentController : Controller
     }
 
     // 2️⃣ Show Verify Page
+    // 2️⃣ Show Verify Page
+    [HttpGet]
     public async Task<IActionResult> Verify(int id)
     {
-        var order = await _context.Set<OrderVM>()
-            .FirstOrDefaultAsync(x => x.Id == id);
+        var model = await _context.Orders
+            .Where(o => o.Id == id)
+            .Join(_context.SalesMasters,
+                  o => o.SalesId,
+                  s => s.SalesId,
+                  (o, s) => new VerifyPaymentVM
+                  {
+                      Id = o.Id,
+                      OrderNumber = o.OrderNumber,
+                      TotalAmount = o.TotalAmount,
+                      PaymentType = s.PaymentType,
+                      BankReference = o.BankReference
+                  })
+            .FirstOrDefaultAsync();
 
-        if (order == null)
+        if (model == null)
             return NotFound();
 
-        return View(order);
+        return View(model);
     }
+
+
+
 
     // 3️⃣ Confirm Payment
     [HttpPost]
-    public async Task<IActionResult> Verify(OrderVM model)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Verify(VerifyPaymentVM model)
     {
-        var order = await _context.Set<OrderVM>()
+        if (!ModelState.IsValid)
+            return View("Verify", model);
+
+        string customerId = HttpContext.Session.GetString("CustomerId");
+
+        if (string.IsNullOrEmpty(customerId))
+            return RedirectToAction("Login", "Account");
+
+        int userstId = Convert.ToInt32(customerId);
+
+        var order = await _context.Orders
             .FirstOrDefaultAsync(x => x.Id == model.Id);
 
         if (order == null)
             return NotFound();
 
+        if (order.PaymentStatus == "Paid")
+            return RedirectToAction("PendingPayments");
+
         order.PaymentStatus = "Paid";
         order.BankReference = model.BankReference;
-        order.VerifyId = 1; // Replace with logged-in Admin Id
+        order.VerifyId = userstId;
         order.VerifiedDate = DateTime.Now;
+
+        var sales = await _context.SalesMasters
+            .FirstOrDefaultAsync(x => x.SalesId == order.SalesId);
+
+        if (sales != null)
+            sales.paysts = 1;
 
         await _context.SaveChangesAsync();
 
         return RedirectToAction("PendingPayments");
     }
+
 }
