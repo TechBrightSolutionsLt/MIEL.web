@@ -24,6 +24,7 @@ namespace MIEL.web.Models.EntityModels
         public int paysts { get; set; }
         public int salesmode { get; set; }
 
+        public int CustomerId { get; set; }
         // ================= NAV =================
         public ICollection<SalesItem> SalesItems { get; set; }
     }
