@@ -8,9 +8,12 @@ namespace MIEL.web.Models.EntityModels
         [Key]
         public int SalesItemId { get; set; }
 
+        // 🔥 Foreign Key
         public int SalesId { get; set; }
-        [ForeignKey("SalesId")]   // ✅ Tell EF this is the FK for SalesMaster
+
+        [ForeignKey("SalesId")]
         public SalesMaster SalesMaster { get; set; }
+
         public int varientid { get; set; }
 
         [MaxLength(50)]
@@ -18,18 +21,17 @@ namespace MIEL.web.Models.EntityModels
 
         public int Quantity { get; set; }
 
-
         // GST INCLUDED price (AUD)
         public decimal SellingPrice { get; set; }
 
         // ================= DISCOUNT =================
-        public decimal DiscPercent { get; set; }     // eg: 10%
-        public decimal DiscAmount { get; set; }      // calculated
+        public decimal DiscPercent { get; set; }
+        public decimal DiscAmount { get; set; }
 
         // ================= TAX =================
-        public decimal TaxAmount { get; set; }       // GST portion (10% INCLUDED)
+        public decimal TaxAmount { get; set; }
 
         // ================= TOTAL =================
-        public decimal NetAmount { get; set; }       // final payable
+        public decimal NetAmount { get; set; }
     }
 }

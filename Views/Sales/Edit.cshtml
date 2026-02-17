@@ -1,0 +1,51 @@
+﻿@model MIEL.web.Models.ViewModel.SalesVM
+
+@{
+    ViewData["Title"] = "Edit Sale";
+}
+
+
+<h3>✏ Edit Sale</h3>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="SalesId" />
+
+    <div class="row">
+        <div class="col-md-4">
+            <label>Invoice No</label>
+            <input asp-for="InvoiceNo" class="form-control" readonly />
+        </div>
+
+        <div class="col-md-4">
+            <label>Sale Date</label>
+            <input asp-for="SalesDate" type="date" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label>Customer</label>
+            <select asp-for="CustomerId"
+                    asp-items="ViewBag.Customers"
+                    class="form-control">
+                <option value="">-- Select Customer --</option>
+            </select>
+        </div>
+
+    </div>
+
+    <hr />
+
+    <!-- 🔥 You can paste your full Items table + JS here -->
+    <!-- SAME CODE AS CREATE PAGE -->
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+            💾 Update Sale
+        </button>
+
+        <a asp-action="Details" class="btn btn-secondary">
+            Cancel
+        </a>
+    </div>
+
+</form>
