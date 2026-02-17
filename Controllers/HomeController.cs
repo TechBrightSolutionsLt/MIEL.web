@@ -597,42 +597,49 @@ namespace MIEL.web.Controllers
             if (existingSalesId == null)
             {
                 decimal totalAmount = cart.Sum(x => x.Price * x.Quantity);
-
                 decimal discount = 0;
-
-               // decimal gst = totalAmount * 0.10m; // 10% GST
-
-              //  decimal netAmount = totalAmount + gst - discount;
 
                 var salesMaster = new SalesMaster
                 {
                     SalesDate = DateTime.Now,
-
                     InvoiceNo = "SAL-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
-
-                    PaymentType = "Pending", // default
-
+                    PaymentType = "Pending",
                     CustomerId = customerId,
-
                     TotalAmount = totalAmount,
-
                     TotalDiscount = discount,
-
-                   // GstAmount = gst,
-
                     NetAmount = totalAmount,
-
-                    paysts = 0, // 🔴 THIS IS YOUR REQUIRED FIELD (Pending)
-
-                    salesmode = 2 // Online
+                    paysts = 0,
+                    salesmode = 2
                 };
 
                 _context.SalesMasters.Add(salesMaster);
-
                 _context.SaveChanges();
 
                 // Save SalesId in Session
                 HttpContext.Session.SetInt32("SalesId", salesMaster.SalesId);
+
+                // Assign to salesMasters so it’s not null
+                salesMasters = salesMaster;
+
+                foreach (var item in cart)
+                {
+                    var salesItem = new SalesItem
+                    {
+                        SalesId = salesMaster.SalesId,
+                        varientid = item.VariantId,
+                        BatchNo = "",
+                        Quantity = item.Quantity,
+                        SellingPrice = item.Price,
+                        DiscPercent = 0,
+                        DiscAmount = 0,
+                        TaxAmount = 0,
+                        NetAmount = item.Price * item.Quantity
+                    };
+
+                    _context.SalesItems.Add(salesItem);
+                }
+
+                _context.SaveChanges();
             }
 
 
@@ -649,14 +656,15 @@ namespace MIEL.web.Controllers
                 })
                 .FirstOrDefault();
 
-            var vm = new ReviewOrderVM
+            var paymentVM = new PaymentVM
             {
-                CartItems = cart,
-                Address = address,
-                TotalAmount = cart.Sum(x => x.Price * x.Quantity)
+                SalesId = salesMasters.SalesId,
+                InvoiceNo = salesMasters.InvoiceNo,
+                TotalAmount = salesMasters.TotalAmount,
+                Items = cart
             };
 
-            return View(vm);
+            return View("Payment", paymentVM);
         }
 
         [HttpPost]
@@ -705,6 +713,7 @@ namespace MIEL.web.Controllers
 
 
         [HttpGet]
+     
         public IActionResult ConfirmCOD(int salesId)
         {
             var sales = _context.SalesMasters
@@ -713,10 +722,7 @@ namespace MIEL.web.Controllers
             if (sales == null)
                 return RedirectToAction("Cart", "Cart");
 
-
             sales.PaymentType = "Cash";
-
-
             sales.paysts = 0;
 
             _context.SaveChanges();
@@ -726,11 +732,11 @@ namespace MIEL.web.Controllers
             var order = new OrderVM
             {
                 CustomerId = sales.CustomerId,
+                SalesId = sales.SalesId, // <-- Save the SalesMaster ID here
                 TotalAmount = sales.TotalAmount,
-                
-              
                 OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
-                 VerifyId = 0
+                PaymentStatus = "NotPaid",
+                VerifyId = 0
             };
 
             _context.Orders.Add(order);
@@ -738,9 +744,10 @@ namespace MIEL.web.Controllers
 
             // ✅ Clear customer's cart
             ClearCustomerCart(sales.CustomerId);
-            return RedirectToAction("OrderSuccess",
-                   new { salesId = salesId });
+
+            return RedirectToAction("OrderSuccess", new { salesId = salesId });
         }
+
 
         private void ClearCustomerCart(int customerId)
         {

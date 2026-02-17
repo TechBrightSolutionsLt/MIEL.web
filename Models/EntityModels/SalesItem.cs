@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MIEL.web.Models.EntityModels
 {
@@ -8,7 +9,8 @@ namespace MIEL.web.Models.EntityModels
         public int SalesItemId { get; set; }
 
         public int SalesId { get; set; }
-
+        [ForeignKey("SalesId")]   // ✅ Tell EF this is the FK for SalesMaster
+        public SalesMaster SalesMaster { get; set; }
         public int varientid { get; set; }
 
         [MaxLength(50)]

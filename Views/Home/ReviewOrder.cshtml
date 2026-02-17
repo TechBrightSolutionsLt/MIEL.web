@@ -1,5 +1,6 @@
 ﻿@using MIEL.web.Models.ViewModel
-@model ReviewOrderVM
+@model PaymentVM
+
 <!-- ===== CHECKOUT STEPS ===== -->
 <div class="container mt-4">
     <div class="checkout-steps d-flex justify-content-between align-items-center">
@@ -13,15 +14,15 @@
         <div class="line active-line"></div>
 
         <!-- REVIEW (Active) -->
-        <div class="step active">
-            <div class="circle">2</div>
+        <div class="step completed">
+            <div class="circle">✔</div>
             <div class="label">Review</div>
         </div>
 
         <div class="line"></div>
 
         <!-- PAYMENT (Upcoming) -->
-        <div class="step">
+        <div class="step active">
             <div class="circle">3</div>
             <div class="label">Payment</div>
         </div>
@@ -29,110 +30,123 @@
     </div>
 </div>
 
-<div class="container py-5">
+<!-- ===== PAYMENT SECTION ===== -->
+<div class="container mt-5 mb-5">
+
     <div class="row">
 
-        <!-- ITEMS -->
-        <div class="col-md-8">
-            <h4>Review Items</h4>
+        <!-- LEFT SIDE : PAYMENT OPTIONS -->
+        <div class="col-md-7">
 
-            @foreach (var item in Model.CartItems)
-            {
-                <div class="card mb-3 p-3">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <img src="@Url.Content(item.Image)" class="img-fluid" />
-                        </div>
+            <div class="card shadow-sm p-4">
 
-                        <div class="col-md-9">
-                            <h6>@item.ProductName</h6>
-                            <p>Color: @item.Color | Size: @item.Size</p>
-                            <p>Qty: @item.Quantity</p>
-                            <p class="fw-bold">$ @item.Price</p>
-                            <p>Subtotal: $ @(item.Price* item.Quantity)</p>
-                        </div>
+                <h4 class="mb-4">Select Payment Method</h4>
+
+                <!-- COD -->
+                <div class="payment-option mb-3 p-3"
+                     onclick="payCOD(@Model.SalesId)">
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="paymentOption">
+
+                        <label class="form-check-label fw-bold">
+                            Cash On Delivery
+                        </label>
                     </div>
+
+                    <small class="text-muted">
+                        Pay when your order is delivered
+                    </small>
+
                 </div>
-            }
+
+                <!-- ONLINE -->
+                <div class="payment-option p-3"
+                     onclick="payOnline(@Model.SalesId)">
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="paymentOption">
+
+                        <label class="form-check-label fw-bold">
+                            Pay Online (PayID)
+                        </label>
+                    </div>
+
+                    <small class="text-muted">
+                        Secure payment via PayID
+                    </small>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <!-- ADDRESS + TOTAL -->
-        <div class="col-md-4">
-            <div class="card p-3">
+        <!-- RIGHT SIDE : ORDER SUMMARY -->
+        <div class="col-md-5">
 
-                <h5>Delivery Address</h5>
+            <div class="card shadow-sm p-4">
 
-                @if (Model.Address != null)
+                <h5 class="mb-3">Order Summary</h5>
+
+                <p class="text-muted">
+                    Invoice: @Model.InvoiceNo
+                </p>
+
+                <hr />
+
+                @foreach (var item in Model.Items)
                 {
-                    <p>@Model.Address.Name</p>
-                    <p>@Model.Address.BuildingName</p>
-                    <p>@Model.Address.City - @Model.Address.Pin</p>
-                    <p>@Model.Address.Mobile</p>
+                    <div class="d-flex justify-content-between mb-2">
 
-                    <a href="@Url.Action("Profile", "Account")"
-                       class="btn btn-sm btn-outline-primary">
-                        Change Address
-                    </a>
-                }
-                else
-                {
-                    <!-- ADDRESS FORM -->
-                    <form asp-action="Profile" asp-controller="Account" method="post">
+                        <div>
+                            <strong>@item.ProductName</strong><br />
+                            <small>Qty: @item.Quantity</small>
+                        </div>
 
-                        <input type="text"
-                               name="Name"
-                               placeholder="Full Name"
-                               class="form-control mb-2"
-                               required />
+                        <div class="text-end">
+                            ₹@item.Price <br />
+                            <strong>
+                                ₹@(item.Price* item.Quantity)
+                            </strong>
+                        </div>
 
-                        <input type="text"
-                               name="BuildingName"
-                               placeholder="Building Name"
-                               class="form-control mb-2"
-                               required />
-
-                        <input type="text"
-                               name="City"
-                               placeholder="City"
-                               class="form-control mb-2"
-                               required />
-
-                        <input type="text"
-                               name="Pin"
-                               placeholder="PIN Code"
-                               class="form-control mb-2"
-                               required />
-
-                        <input type="text"
-                               name="Mobile"
-                               placeholder="Mobile"
-                               class="form-control mb-2"
-                               required />
-
-                        <button type="submit"
-                                class="btn btn-primary w-100">
-                            Save Address
-                        </button>
-
-                    </form>
+                    </div>
                 }
 
                 <hr />
 
-                <h5>Total: $ @Model.TotalAmount</h5>
+                <div class="d-flex justify-content-between">
+                    <span>Subtotal</span>
+                    <span>₹@Model.TotalAmount</span>
+                </div>
 
-                <form asp-action="ConfirmOrder" asp-controller="Home" method="post">
-                    <button class="btn btn-warning w-100 mt-2">
-                        CONFIRM ORDER
-                    </button>
-                </form>
-             
+                <div class="d-flex justify-content-between">
+                    <span>Shipping</span>
+                    <span class="text-success">FREE</span>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <span>Total</span>
+                    <span class="text-danger">
+                        ₹@Model.TotalAmount
+                    </span>
+                </div>
 
             </div>
+
         </div>
 
     </div>
+
 </div>
+
 <style>
     .checkout-steps {
         margin-bottom: 30px;
@@ -172,7 +186,6 @@
         color: #fff;
     }
 
-
     /* ACTIVE STEP */
     .step.active .circle {
         background: #f59e0b;
@@ -187,5 +200,30 @@
     .active-line {
         background: #f59e0b;
     }
+
+    .payment-option {
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .payment-option:hover {
+            border-color: #f59e0b;
+            background-color: #fffaf0;
+        }
+
+    .card {
+        border-radius: 10px;
+    }
 </style>
 
+<script>
+    function payCOD(salesId) {
+        window.location.href = '/Home/ConfirmCOD?salesId=' + salesId;
+    }
+
+    function payOnline(salesId) {
+        window.location.href = '/Home/ConfirmPayID?salesId=' + salesId;
+    }
+</script>
