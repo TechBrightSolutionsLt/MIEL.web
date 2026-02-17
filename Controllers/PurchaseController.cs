@@ -217,12 +217,12 @@ namespace MIEL.web.Controllers
                 query = query.Where(x => x.InvoiceNo.Contains(search));
             }
 
-            var list = query.Select(x => new
+            var list = query.Select(x => new PurchaseListVM
             {
-                x.PurchaseId,
-                x.InvoiceNo,
-                x.InvoiceDate,
-                x.GrandTotal,
+                PurchaseId = x.PurchaseId,
+                InvoiceNo = x.InvoiceNo,
+                InvoiceDate = x.InvoiceDate,
+                GrandTotal = x.GrandTotal,
                 SupplierName = _context.Suppliers
                     .Where(s => s.SupplierId == x.SupplierId)
                     .Select(s => s.Name)
@@ -231,6 +231,7 @@ namespace MIEL.web.Controllers
 
             return View(list);
         }
+
 
         // ===============================
         // PURCHASE DELETE

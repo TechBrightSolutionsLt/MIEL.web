@@ -1,0 +1,34 @@
+﻿@model List<MIEL.web.Models.EntityModels.OrderVM>
+@{
+    ViewData["Title"] = "payment list";
+    Layout = "_AdminLayout";
+}
+
+<h2>Pending PayID Payments</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Order No</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.OrderNumber</td>
+                <td>@item.CustomerId</td>
+                <td>@item.TotalAmount</td>
+                <td>@item.PaymentStatus</td>
+                <td>
+                    <a asp-action="Verify" asp-route-id="@item.Id"
+                       class="btn btn-primary">Verify</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
