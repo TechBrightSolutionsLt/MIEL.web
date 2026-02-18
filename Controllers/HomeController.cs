@@ -190,13 +190,21 @@ namespace MIEL.web.Controllers
                             && v.size == model.Size)
                 .Select(v => new
                 {
-                    v.varientid
+                    v.varientid,
+                    v.QuantityOnHand
                 })
                 .FirstOrDefault();
 
             if (variant == null)
                 return Json(new { success = false });
-
+            if (variant.QuantityOnHand <= 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Out of Stock"
+                });
+            }
             // GET RATE separately
             var rate = _context.PurchaseItems
                 .Where(pi => pi.varientid == variant.varientid)
@@ -276,12 +284,19 @@ namespace MIEL.web.Controllers
             var variant = _context.ProColorSizeVariants
                 .Where(v => v.ProductId == productId)
                 .OrderBy(v => v.varientid) // pick first
-                .Select(v => new { v.varientid, v.colour, v.size })
+                .Select(v => new { v.varientid, v.colour, v.size,v.QuantityOnHand })
                 .FirstOrDefault();
 
             if (variant == null)
                 return Json(new { success = false });
-
+            if (variant.QuantityOnHand <= 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Out of Stock"
+                });
+            }
             // get latest rate
             var rate = _context.PurchaseItems
                 .Where(pi => pi.varientid == variant.varientid)
@@ -316,7 +331,19 @@ namespace MIEL.web.Controllers
 
             // insert or update
             if (existingItem != null)
+            {
+                if (existingItem.Quantity + 1 > variant.QuantityOnHand)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Only " + variant.QuantityOnHand + " item(s) available in stock"
+                    });
+                }
+
                 existingItem.Quantity += 1;
+            }
+
             else
             {
                 _context.Cart.Add(new Cart
