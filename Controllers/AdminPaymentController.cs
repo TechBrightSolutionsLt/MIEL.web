@@ -13,30 +13,36 @@ public class AdminPaymentController : Controller
         _context = context;
     }
 
-    // 1️⃣ Show Pending Orders
-    public async Task<IActionResult> PendingPayments()
+    // 1️⃣ Show Pending Orders with Search
+    public async Task<IActionResult> PendingPayments(string search)
     {
-        
-        var orders = await _context.Orders
+        var query = _context.Orders
+            .Include(x => x.Customer)
             .Where(x => x.PaymentStatus == "NotPaid")
-            .Select(x => new OrderVM
-            {
-                Id = x.Id,
-                CustomerId = x.CustomerId,
-                OrderNumber = x.OrderNumber,
-                TotalAmount = x.TotalAmount,
-                PaymentStatus = x.PaymentStatus,
-                PayId = x.PayId,
-                VerifyId = x.VerifyId,
-                BankReference = x.BankReference,
-                VerifiedDate = x.VerifiedDate
-            })
-            .ToListAsync();
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            search = search.Trim().ToLower();
+
+            query = query.Where(x =>
+                x.OrderNumber.ToLower().Contains(search) ||
+                x.Customer.FirstName.ToLower().Contains(search) ||
+                x.Customer.LastName.ToLower().Contains(search) ||
+                (x.Customer.FirstName + " " + x.Customer.LastName)
+                    .ToLower().Contains(search)
+            );
+        }
+
+        var orders = await query.ToListAsync();
+
+        ViewBag.Search = search;
 
         return View(orders);
     }
 
-    // 2️⃣ Show Verify Page
+
+
     // 2️⃣ Show Verify Page
     [HttpGet]
     public async Task<IActionResult> Verify(int id)
