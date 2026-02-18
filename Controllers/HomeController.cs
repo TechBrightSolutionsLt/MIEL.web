@@ -190,13 +190,21 @@ namespace MIEL.web.Controllers
                             && v.size == model.Size)
                 .Select(v => new
                 {
-                    v.varientid
+                    v.varientid,
+                    v.QuantityOnHand
                 })
                 .FirstOrDefault();
 
             if (variant == null)
                 return Json(new { success = false });
-
+            if (variant.QuantityOnHand <= 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Out of Stock"
+                });
+            }
             // GET RATE separately
             var rate = _context.PurchaseItems
                 .Where(pi => pi.varientid == variant.varientid)
@@ -276,12 +284,19 @@ namespace MIEL.web.Controllers
             var variant = _context.ProColorSizeVariants
                 .Where(v => v.ProductId == productId)
                 .OrderBy(v => v.varientid) // pick first
-                .Select(v => new { v.varientid, v.colour, v.size })
+                .Select(v => new { v.varientid, v.colour, v.size,v.QuantityOnHand })
                 .FirstOrDefault();
 
             if (variant == null)
                 return Json(new { success = false });
-
+            if (variant.QuantityOnHand <= 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Out of Stock"
+                });
+            }
             // get latest rate
             var rate = _context.PurchaseItems
                 .Where(pi => pi.varientid == variant.varientid)
@@ -316,7 +331,19 @@ namespace MIEL.web.Controllers
 
             // insert or update
             if (existingItem != null)
+            {
+                if (existingItem.Quantity + 1 > variant.QuantityOnHand)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Only " + variant.QuantityOnHand + " item(s) available in stock"
+                    });
+                }
+
                 existingItem.Quantity += 1;
+            }
+
             else
             {
                 _context.Cart.Add(new Cart
@@ -447,43 +474,77 @@ namespace MIEL.web.Controllers
         }
 
 
+[HttpPost]
+public IActionResult UpdateCartQty([FromBody] CartItem model)
+{
+    string customerId = HttpContext.Session.GetString("CustomerId");
+    string guestId = GetGuestId();
 
-        [HttpPost]
-        public IActionResult UpdateCartQty([FromBody] CartItem model)
+    Cart item = null;
+
+    if (!string.IsNullOrEmpty(customerId))
+    {
+        int cid = Convert.ToInt32(customerId);
+        item = _context.Cart.FirstOrDefault(x =>
+            x.CustomerId == cid &&
+            x.VariantId == model.VariantId);
+    }
+    else if (!string.IsNullOrEmpty(guestId))
+    {
+        item = _context.Cart.FirstOrDefault(x =>
+            x.GuestId == guestId &&
+            x.VariantId == model.VariantId);
+    }
+
+    if (item == null)
+        return Json(new { success = false });
+
+    int newQty = item.Quantity + model.Change;
+
+    if (newQty < 0)
+        newQty = 0;
+
+    // 🔥 Get stock
+    var variant = _context.ProColorSizeVariants
+        .FirstOrDefault(x => x.varientid == model.VariantId);
+
+    if (variant == null)
+        return Json(new { success = false, message = "Variant not found" });
+
+    // 🚨 STOCK CHECK ONLY (NO UPDATE)
+    if (variant.QuantityOnHand == 0)
+    {
+        return Json(new
         {
-            string customerId = HttpContext.Session.GetString("CustomerId");
-            string guestId = GetGuestId();
+            success = false,
+            message = "Out of stock"
+        });
+    }
 
+    if (newQty > variant.QuantityOnHand)
+    {
+        return Json(new
+        {
+            success = false,
+            message = "Only " + variant.QuantityOnHand + " items available"
+        });
+    }
 
-            Cart item = null;
+    // ✅ Update cart only
+    if (newQty == 0)
+    {
+        _context.Cart.Remove(item);
+    }
+    else
+    {
+        item.Quantity = newQty;
+    }
 
-            if (!string.IsNullOrEmpty(customerId))
-            {
-                int cid = Convert.ToInt32(customerId);
+    _context.SaveChanges();
 
-                item = _context.Cart.FirstOrDefault(x =>
-                    x.CustomerId == cid &&
-                    x.VariantId == model.VariantId);
-            }
-            else if (!string.IsNullOrEmpty(guestId))
-            {
-                item = _context.Cart.FirstOrDefault(x =>
-                    x.GuestId == guestId &&
-                    x.VariantId == model.VariantId);
-            }
+    return Json(new { success = true });
+}
 
-            if (item == null)
-                return Json(new { success = false });
-
-            item.Quantity += model.Change;
-
-            if (item.Quantity <= 0)
-                _context.Cart.Remove(item);
-
-            _context.SaveChanges();
-
-            return Json(new { success = true });
-        }
 
 
 
@@ -717,9 +778,6 @@ namespace MIEL.web.Controllers
         }
 
 
-
-        [HttpGet]
-     
         public IActionResult ConfirmCOD(int salesId)
         {
             var sales = _context.SalesMasters
@@ -738,7 +796,7 @@ namespace MIEL.web.Controllers
             var order = new OrderVM
             {
                 CustomerId = sales.CustomerId,
-                SalesId = sales.SalesId, // <-- Save the SalesMaster ID here
+                SalesId = sales.SalesId,
                 TotalAmount = sales.TotalAmount,
                 OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 PaymentStatus = "NotPaid",
@@ -748,11 +806,45 @@ namespace MIEL.web.Controllers
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // ✅ Clear customer's cart
+            // ✅ UPDATE INVENTORY
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == sales.CustomerId)
+                .ToList();
+
+            foreach (var item in cartItems)
+            {
+                int variantId = item.VariantId;
+                int cartQty = item.Quantity;
+
+                // Update InventoryBatch
+                var batch = _context.InventoryBatch
+                    .Where(b => b.varientid == variantId)
+                    .OrderByDescending(b => b.InventoryBatchId)
+                    .FirstOrDefault();
+
+                if (batch != null)
+                {
+                    batch.QuantityOut += cartQty;
+                }
+
+                // Update QuantityOnHand
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == variantId);
+
+                if (variant != null)
+                {
+                    variant.QuantityOnHand -= cartQty;
+                }
+            }
+
+            _context.SaveChanges();
+
+            // ✅ Clear Cart
             ClearCustomerCart(sales.CustomerId);
 
             return RedirectToAction("OrderSuccess", new { salesId = salesId });
         }
+
 
 
         private void ClearCustomerCart(int customerId)
@@ -788,12 +880,11 @@ namespace MIEL.web.Controllers
             if (sales == null)
                 return RedirectToAction("Cart", "Cart");
 
-            // Mark as PayID payment type (pending confirmation)
+            // Mark payment type
             sales.PaymentType = "PayID";
-            sales.paysts = 0; // still pending
+            sales.paysts = 0; // pending
             _context.SaveChanges();
 
-            // ✅ Create an Order entry immediately
             var orderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             var order = new OrderVM
@@ -809,18 +900,53 @@ namespace MIEL.web.Controllers
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // Clear customer's cart/session if you want
-            // ClearCustomerCart(sales.CustomerId); 
-            // HttpContext.Session.Remove("SalesId");
+            // ✅ UPDATE INVENTORY
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == sales.CustomerId)
+                .ToList();
 
-            // Prepare ViewModel to show on PayIDPage
+            foreach (var item in cartItems)
+            {
+                int variantId = item.VariantId;
+                int cartQty = item.Quantity;
+
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == variantId);
+
+                // 🚨 Safety Check
+                if (variant == null || variant.QuantityOnHand < cartQty)
+                {
+                    return RedirectToAction("Cart", "Cart");
+                }
+
+                // 🔹 Update Batch
+                var batch = _context.InventoryBatch
+                    .Where(b => b.varientid == variantId)
+                    .OrderByDescending(b => b.InventoryBatchId)
+                    .FirstOrDefault();
+
+                if (batch != null)
+                {
+                    batch.QuantityOut += cartQty;
+                }
+
+                // 🔹 Reduce Stock
+                variant.QuantityOnHand -= cartQty;
+            }
+
+            _context.SaveChanges();
+
+            // ✅ Clear Cart
+            ClearCustomerCart(sales.CustomerId);
+
+            // Prepare ViewModel
             var vm = new PayIDViewModel
             {
                 SalesId = sales.SalesId,
-                OrderId = order.Id,               // <-- Order ID saved
-                OrderNumber = order.OrderNumber,  // <-- show this as invoice
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
                 TotalAmount = sales.TotalAmount,
-                PayId = 0430823457,               // static PayID
+                PayId = 0430823457,
                 Email = "binoyjoseph@y7mail.com"
             };
 
@@ -829,7 +955,8 @@ namespace MIEL.web.Controllers
 
 
 
-   
+
+
 
         public IActionResult Privacy()
         {

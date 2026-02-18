@@ -1,0 +1,242 @@
+﻿@model MIEL.web.Models.ViewModel.SalesVM
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Invoice - MIEL Collections</title>
+
+    <style>
+        body {
+            width: 210mm;
+            margin: 0 auto;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f6fa;
+            padding: 30px;
+            color: #333;
+        }
+
+        .invoice-container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #d9a59a;
+            padding-bottom: 20px;
+        }
+
+        .brand h2 {
+            margin: 0;
+            color: #c58f84;
+            font-size: 30px;
+        }
+
+        .brand p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .invoice-title {
+            text-align: right;
+        }
+
+        .invoice-title h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .invoice-title span {
+            color: #c58f84;
+            font-weight: bold;
+        }
+
+        .info-section {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th {
+            background: #c58f84;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .totals {
+            margin-top: 30px;
+            width: 350px;
+            float: right;
+        }
+
+        .totals table {
+            width: 100%;
+        }
+
+        .totals td {
+            padding: 8px;
+            text-align: right;
+        }
+
+        .grand {
+            font-size: 20px;
+            font-weight: bold;
+            color: #c58f84;
+            border-top: 2px solid #c58f84;
+        }
+
+        .footer {
+            clear: both;
+            margin-top: 80px;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #c58f84;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @@media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .invoice-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            button {
+                display: none;
+            }
+
+            @@page {
+                size: A4;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="invoice-container">
+
+    <div class="header">
+        <div class="brand">
+            <h2>MIEL Collections</h2>
+            <p>12 Woodbine Close Lisarow, NSW 2250</p>
+            <p>Email: minimuthuppu@mielcollections.com</p>
+            <p>Phone: 0450095524</p>
+        </div>
+
+        <div class="invoice-title">
+            <h1>INVOICE</h1>
+            <p><strong>No:</strong> <span>@Model.InvoiceNo</span></p>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <p><strong>Date:</strong> @Model.SalesDate.ToString("dd-MM-yyyy")</p>
+        <p><strong>Payment Method:</strong> @Model.PaymentType</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Variant</th>
+                <th>Batch</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>GST</th>
+                <th>Net</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>@item.varientid</td>
+                    <td>@item.BatchNo</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.SellingPrice.ToString("0.00")</td>
+                    <td>@item.DiscAmount.ToString("0.00")</td>
+                    <td>@item.TaxAmount.ToString("0.00")</td>
+                    <td>@item.NetAmount.ToString("0.00")</td>
+                </tr>
+                i++;
+            }
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <table>
+            <tr>
+                <td>Total Discount:</td>
+                <td>@Model.TotalDiscount.ToString("0.00")</td>
+            </tr>
+            <tr>
+                <td>GST:</td>
+                <td>@Model.GstAmount.ToString("0.00")</td>
+            </tr>
+            <tr class="grand">
+                <td>Grand Total:</td>
+                <td>@Model.NetAmount.ToString("0.00")</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        © Miel Collections. All Rights Reserved.
+        <br />
+        Thank you for shopping with us!
+    </div>
+
+    <button onclick="window.print()">Print Invoice</button>
+        <button onclick="history.back()">Back</button>
+
+</div>
+
+</body>
+</html>

@@ -45,39 +45,51 @@
                     </a>
                 </li>
                 <li>
-                    <a asp-controller="MainCategory" asp-action="Create">
-                        <i class="fas fa-tags me-2"></i> Categories
-                    </a>
-                </li>
+                    <a href="#">
+                        <i class="fas fa-chevron-down float-end"></i>
+                    MASTERS</a>
+                    <ul>
+                        <li>
+                            <a asp-controller="MainCategory" asp-action="Create">
+                                <i class="fas fa-tags me-2"></i> Categories
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="CategoryMaster" asp-action="CategoryMaster">
+                                <i class="fas fa-sitemap me-2"></i> Sub Categories
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="CategorySpecification" asp-action="Index">
+                                <i class="fas fa-sliders-h me-2"></i> Category Specification
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="ProductMaster" asp-action="Index">
+                                <i class="fas fa-box me-2"></i> Product Master
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Supplier" asp-action="Create">
+                                <i class="fas fa-dolly me-2"></i>  Supplier Master
+                            </a>
+                        </li>
 
-                <li>
-                    <a asp-controller="CategoryMaster" asp-action="CategoryMaster">
-                        <i class="fas fa-sitemap me-2"></i> Sub Categories
-                    </a>
-                </li>
+                        <li>
+                            <a asp-controller="Customer" asp-action="Create">
+                                <i class="fas fa-user me-2"></i>Customer Master
+                            </a>
+                        </li>
 
-                <li>
-                    <a asp-controller="CategorySpecification" asp-action="Index">
-                        <i class="fas fa-sliders-h me-2"></i> Category Specification
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="ProductMaster" asp-action="Index">
-                        <i class="fas fa-box me-2"></i> Product Master
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="Supplier" asp-action="Create">
-                        <i class="fas fa-dolly me-2"></i>  Supplier Master
-                    </a>
-                </li>
 
-                <li>
-                    <a asp-controller="Customer" asp-action="Create">
-                        <i class="fas fa-user me-2"></i>Customer Master
-                    </a>
+                    </ul>
+                   
                 </li>
+               
+               
 
+             
+             
                 <li>
                     <a asp-controller="Purchase" asp-action="Create">
                         <i class="fas fa-truck-loading me-2"></i>Purchase
@@ -96,14 +108,34 @@
 
                     </a>
                 </li>
-
+                <li >
+                    <a href="#">
+                        <i class=" fas fa-chevron-down float-end""></i>
+                        REPORTS
+                    </a>
+                    <ul>
                 <li>
-                    <a asp-controller="PurchaseReport" asp-action="Index">
-                        <i class="fas fa-shopping-cart me-2"></i>Purchase Report
+                    <a asp-controller="SalesReport" asp-action="Index">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>
+                                Sales Report
                     </a>
                 </li>
 
 
+                <li>
+                    <a asp-controller="PurchaseReport" asp-action="Index">
+                                <i class="fas fa-shopping-basket me-2"></i>
+                                Purchase Report
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Stock" asp-action="Index">
+                                <i class="fas fa-warehouse me-2"></i>
+                                Stock Report
+                    </a>
+                </li>
+                    </ul>
+                </li>
                 <li>
                     <a asp-controller="Account" asp-action="Logout">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout

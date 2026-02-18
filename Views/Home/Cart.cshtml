@@ -64,13 +64,13 @@
                                 </p>
 
                                 <p class="mb-1">
-                                    Price: <strong>$@item.Price</strong>
+                                    Price: <strong>A$@item.Price</strong>
                                 </p>
 
                                 <p class="mb-2">
                                     Subtotal:
                                     <strong>
-                                        $@(item.Price* item.Quantity)
+                                        A$@(item.Price* item.Quantity)
                                     </strong>
                                 </p>
 
@@ -115,7 +115,7 @@
                     <p>
                         Price (@totalQty item)
                         <span class="float-end">
-                            $@totalAmount
+                            A$@totalAmount
                         </span>
                     </p>
 
@@ -131,7 +131,7 @@
                     <h6>
                         Total Amount
                         <span class="float-end text-danger">
-                            $@totalAmount
+                            A$@totalAmount
                         </span>
                     </h6>
 
@@ -212,7 +212,7 @@
 
 </script>
 <script>
-        function updateQty(variantId, change) {
+    function updateQty(variantId, change) {
 
         fetch('/Home/UpdateCartQty', {
             method: 'POST',
@@ -224,6 +224,17 @@
         })
         .then(res => res.json())
         .then(data => {
+
+            // ✅ Check success
+            if (!data.success) {
+
+                // ✅ Show error message
+                alert(data.message);
+
+                return; // stop reload
+            }
+
+            // ✅ Reload only if success
             location.reload();
         });
     }
@@ -242,9 +253,13 @@
         })
         .then(res => res.json())
         .then(data => {
+
+            if (!data.success) {
+                alert(data.message);
+                return;
+            }
+
             location.reload();
         });
     }
-
-
 </script>

@@ -1,0 +1,295 @@
+﻿@model MIEL.web.Models.ViewModel.StockReportVM
+@{
+    ViewData["Title"] = "Stock Report";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+
+    <h2 class="mb-4">Stock Report</h2>
+
+    <!-- FILTER + ACTION BUTTONS -->
+    <form method="get" class="row mb-4 no-print">
+       @*  <div class="col-md-3">
+            <label>From Date</label>
+            <input type="date" name="fromDate"
+                   value="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-3">
+            <label>To Date</label>
+            <input type="date" name="toDate"
+                   value="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-primary w-100">
+                Filter
+            </button>
+        </div> *@
+
+        <div class="col-md-2 d-flex align-items-end">
+            <a asp-action="ExportExcel"
+               class="btn btn-success w-100">
+                Export Excel
+            </a>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="button"
+                    onclick="printReport()"
+                    class="btn btn-dark w-100">
+                Print
+            </button>
+        </div>
+    </form>
+
+
+    <!-- PRINT AREA START -->
+    <div id="printArea">
+
+        <!-- COMPANY HEADER -->
+        <div class="text-center mb-4">
+            <h3>MIEL Pvt Ltd</h3>
+            <h5>Stock Report</h5>
+            <p>
+                From:
+                @(Model.FromDate?.ToShortDateString() ?? "All")
+                -
+                To:
+                @(Model.ToDate?.ToShortDateString() ?? "All")
+            </p>
+        </div>
+
+
+       @*  <!-- PRODUCT SUMMARY -->
+        <h4 class="mt-4">📊 Product Summary</h4>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Product</th>
+                    <th>Total In</th>
+                    <th>Total Out</th>
+                    <th>Current Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ProductSummary)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@item.TotalIn</td>
+                        <td>@item.TotalOut</td>
+                        <td>
+                            @if (item.CurrentStock <= 0)
+                            {
+                                <span class="badge bg-danger">
+                                    @item.CurrentStock
+                                </span>
+                            }
+                            else if (item.CurrentStock < 5)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    @item.CurrentStock
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    @item.CurrentStock
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+
+        <!-- VARIANT SUMMARY -->
+        <h4 class="mt-5">👕 Variant Summary</h4>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Product</th>
+                    <th>Colour</th>
+                    <th>Size</th>
+                    <th>Current Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.VariantSummary)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@item.Colour</td>
+                        <td>@item.Size</td>
+                        <td>
+                            @if (item.CurrentStock <= 0)
+                            {
+                                <span class="badge bg-danger">
+                                    @item.CurrentStock
+                                </span>
+                            }
+                            else if (item.CurrentStock < 5)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    @item.CurrentStock
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    @item.CurrentStock
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table> *@
+
+
+        <!-- BATCH DETAIL -->
+        <h4 class="mt-5">📦 Batch Detail</h4>
+
+        @{
+            var totalCostValue = Model.BatchDetails.Sum(x => x.CostPrice * x.CurrentStock);
+            var totalSellingValue = Model.BatchDetails.Sum(x => x.SellingPrice * x.CurrentStock);
+        }
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Product</th>
+                        <th>Colour</th>
+                        <th>Size</th>
+                        <th>Batch</th>
+                        <th>Qty In</th>
+                        <th>Qty Out</th>
+                        <th>Current</th>
+                        <th>Cost(INR)</th>
+                        <th>Selling(AUD)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.BatchDetails)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td>@item.Colour</td>
+                            <td>@item.Size</td>
+                            <td>@item.BatchNo</td>
+                            <td>@item.QuantityIn</td>
+                            <td>@item.QuantityOut</td>
+                            <td>
+                                @if (item.CurrentStock <= 0)
+                                {
+                                    <span class="badge bg-danger">@item.CurrentStock</span>
+                                }
+                                else if (item.CurrentStock < 5)
+                                {
+                                    <span class="badge bg-warning text-dark">@item.CurrentStock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-dark border">@item.CurrentStock</span>
+                                }
+                            </td>
+                            <td>@item.CostPrice</td>
+                            <td>@item.SellingPrice</td>
+                        </tr>
+                    }
+                </tbody>
+
+                <tfoot class="print-total">
+                    <tr>
+                        <td colspan="7" class="text-end fw-bold">
+                            Total Stock Value :
+                        </td>
+                        <td colspan="2" class="fw-bold">
+                            ₹ @totalCostValue.ToString("N2")
+                            &nbsp;&nbsp;
+                            AUD @totalSellingValue.ToString("N2")
+                        </td>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+      
+
+
+        <!-- FOOTER -->
+        <div class="mt-5 text-end">
+            <p>Generated On: @DateTime.Now.ToString("dd-MM-yyyy HH:mm")</p>
+        </div>
+
+    </div>
+    <!-- PRINT AREA END -->
+
+</div>
+
+
+<!-- PRINT SCRIPT -->
+@section Scripts {
+    <script>
+        function printReport() {
+            var printContents = document.getElementById('printArea').innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload();
+        }
+    </script>
+}
+
+
+<!-- PRINT STYLES -->
+<style>
+@@page {
+    size: A4 landscape;
+    margin: 10mm;
+}
+
+@@media print {
+
+    body {
+        font-size: 10px;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid black !important;
+        padding: 4px !important;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+}
+
+
+</style>
