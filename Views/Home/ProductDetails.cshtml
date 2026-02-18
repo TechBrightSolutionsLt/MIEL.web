@@ -360,7 +360,7 @@
 
         /* ================= ADD TO CART ================= */
 
-    window.addToCart = function (productId) {
+      window.addToCart = function (productId) {
 
         if (!selectedColor) {
             alert("Please select a color");
@@ -387,41 +387,24 @@
         .then(res => res.json())
         .then(data => {
 
-            // ✅ SHOW LOGIN MESSAGE ONLY
-          if (data.success) {
+            if (data.success) {
 
-        fetch('/Home/GetCartCount')
-        .then(res => res.json())
-        .then(c => {
-            const cartCount =
-                document.getElementById("cartCount");
+                fetch('/Home/GetCartCount')
+                .then(res => res.json())
+                .then(c => {
+                    const cartCount = document.getElementById("cartCount");
 
-            if (cartCount) {
-                cartCount.textContent = c.count;
-            }
-        });
+                    if (cartCount) {
+                        cartCount.textContent = c.count;
+                    }
+                });
 
-        alert("Added to cart ");
-    }
+                alert("Added to cart");
 
+            } else {
 
-            // if (data.success) {
+                alert(data.message || "Something went wrong");
 
-            //     fetch('/Home/GetCartCount')
-            //     .then(res => res.json())
-            //     .then(c => {
-            //         const cartCount =
-            //             document.getElementById("cartCount");
-
-            //         if (cartCount) {
-            //             cartCount.textContent = c.count;
-            //         }
-            //     });
-
-            //     alert("Added to cart successfully");
-            // }
-            else {
-                alert("Something went wrong");
             }
 
         });
