@@ -107,6 +107,7 @@ public class AdminPaymentController : Controller
             sales.paysts = 1;
 
         await _context.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Payment confirmed successfully.";
 
         return RedirectToAction("PendingPayments");
     }
