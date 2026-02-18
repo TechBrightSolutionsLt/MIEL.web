@@ -76,8 +76,11 @@ namespace MIEL.web.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("GuestId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -480,6 +483,9 @@ namespace MIEL.web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalesId"));
 
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("GstAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -504,6 +510,12 @@ namespace MIEL.web.Migrations
 
                     b.Property<decimal>("TotalDiscount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("paysts")
+                        .HasColumnType("int");
+
+                    b.Property<int>("salesmode")
+                        .HasColumnType("int");
 
                     b.HasKey("SalesId");
 

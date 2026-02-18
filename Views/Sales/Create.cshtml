@@ -9,12 +9,13 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <div class="container-fluid">
-    @if (TempData["SuccessMessage"] != null)
+   @*  @if (TempData["SuccessMessage"] != null)
     {
         <script>
             alert('@TempData["SuccessMessage"]');
         </script>
     }
+ *@
 
     <h4 class="mb-3">Create Sales</h4>
     <a asp-action="Details"
@@ -24,7 +25,8 @@
 
 
     @* <form asp-action="Create" method="post"> *@
-    <form asp-action="Create" method="post">
+    <form id="salesForm" asp-action="Create" method="post">
+
         @Html.AntiForgeryToken()
 
         <div class="row mb-3">
@@ -152,6 +154,45 @@
 
 <!-- ================= script ================= -->
 <script>
+        // =============================================
+    // AJAX FORM SUBMIT
+    // =============================================
+    $('#salesForm').on('submit', function (e) {
+
+        e.preventDefault();
+
+        calculateTotals(); // make sure totals are updated
+
+        $.ajax({
+            url: '/Sales/Create',
+            type: 'POST',
+            data: $(this).serialize(),
+               success: function (response) {
+
+        if (response.success) {
+
+            alert("Sales saved successfully!");
+
+            if (confirm("Do you want to print?")) {
+
+                window.location.href = '/Sales/Print/' + response.salesId;
+
+            } else {
+
+                window.location.href = '/Sales/Create';
+            }
+        }
+        else {
+            alert(response.message);
+        }
+    },
+
+            error: function () {
+                alert("Something went wrong.");
+            }
+        });
+    });
+
     let itemIndex = 0;
 
     $(document).ready(function () {
