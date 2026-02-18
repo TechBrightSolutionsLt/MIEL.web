@@ -447,43 +447,77 @@ namespace MIEL.web.Controllers
         }
 
 
+[HttpPost]
+public IActionResult UpdateCartQty([FromBody] CartItem model)
+{
+    string customerId = HttpContext.Session.GetString("CustomerId");
+    string guestId = GetGuestId();
 
-        [HttpPost]
-        public IActionResult UpdateCartQty([FromBody] CartItem model)
+    Cart item = null;
+
+    if (!string.IsNullOrEmpty(customerId))
+    {
+        int cid = Convert.ToInt32(customerId);
+        item = _context.Cart.FirstOrDefault(x =>
+            x.CustomerId == cid &&
+            x.VariantId == model.VariantId);
+    }
+    else if (!string.IsNullOrEmpty(guestId))
+    {
+        item = _context.Cart.FirstOrDefault(x =>
+            x.GuestId == guestId &&
+            x.VariantId == model.VariantId);
+    }
+
+    if (item == null)
+        return Json(new { success = false });
+
+    int newQty = item.Quantity + model.Change;
+
+    if (newQty < 0)
+        newQty = 0;
+
+    // 🔥 Get stock
+    var variant = _context.ProColorSizeVariants
+        .FirstOrDefault(x => x.varientid == model.VariantId);
+
+    if (variant == null)
+        return Json(new { success = false, message = "Variant not found" });
+
+    // 🚨 STOCK CHECK ONLY (NO UPDATE)
+    if (variant.QuantityOnHand == 0)
+    {
+        return Json(new
         {
-            string customerId = HttpContext.Session.GetString("CustomerId");
-            string guestId = GetGuestId();
+            success = false,
+            message = "Out of stock"
+        });
+    }
 
+    if (newQty > variant.QuantityOnHand)
+    {
+        return Json(new
+        {
+            success = false,
+            message = "Only " + variant.QuantityOnHand + " items available"
+        });
+    }
 
-            Cart item = null;
+    // ✅ Update cart only
+    if (newQty == 0)
+    {
+        _context.Cart.Remove(item);
+    }
+    else
+    {
+        item.Quantity = newQty;
+    }
 
-            if (!string.IsNullOrEmpty(customerId))
-            {
-                int cid = Convert.ToInt32(customerId);
+    _context.SaveChanges();
 
-                item = _context.Cart.FirstOrDefault(x =>
-                    x.CustomerId == cid &&
-                    x.VariantId == model.VariantId);
-            }
-            else if (!string.IsNullOrEmpty(guestId))
-            {
-                item = _context.Cart.FirstOrDefault(x =>
-                    x.GuestId == guestId &&
-                    x.VariantId == model.VariantId);
-            }
+    return Json(new { success = true });
+}
 
-            if (item == null)
-                return Json(new { success = false });
-
-            item.Quantity += model.Change;
-
-            if (item.Quantity <= 0)
-                _context.Cart.Remove(item);
-
-            _context.SaveChanges();
-
-            return Json(new { success = true });
-        }
 
 
 
@@ -823,7 +857,7 @@ namespace MIEL.web.Controllers
                 PayId = 0430823457,               // static PayID
                 Email = "binoyjoseph@y7mail.com"
             };
-
+            ClearCustomerCart(sales.CustomerId);
             return View("PayIDPage", vm);
         }
 
