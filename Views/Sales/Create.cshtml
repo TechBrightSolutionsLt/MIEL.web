@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <div class="container-fluid">
-   @*  @if (TempData["SuccessMessage"] != null)
+    @*  @if (TempData["SuccessMessage"] != null)
     {
         <script>
             alert('@TempData["SuccessMessage"]');
@@ -19,9 +19,9 @@
 
     <h4 class="mb-3">Create Sales</h4>
     <a asp-action="Details"
-   class="btn btn-info w-100">
-    View
-</a>
+       class="btn btn-info w-100">
+        View
+    </a>
 
 
     @* <form asp-action="Create" method="post"> *@
@@ -88,7 +88,7 @@
                 <input id="SellingPrice" class="form-control" readonly />
             </div>
 
-           
+
             <div class="col-md-1">
                 <label>Qty</label>
                 <input id="Quantity" type="number" value="1" class="form-control" min="1" />
@@ -154,58 +154,133 @@
 
 <!-- ================= script ================= -->
 <script>
+            // =============================================
+        // AJAX FORM SUBMIT
         // =============================================
-    // AJAX FORM SUBMIT
-    // =============================================
-    $('#salesForm').on('submit', function (e) {
+        $('#salesForm').on('submit', function (e) {
 
-        e.preventDefault();
+            e.preventDefault();
 
-        calculateTotals(); // make sure totals are updated
+            calculateTotals(); // make sure totals are updated
 
-        $.ajax({
-            url: '/Sales/Create',
-            type: 'POST',
-            data: $(this).serialize(),
-               success: function (response) {
+            $.ajax({
+                url: '/Sales/Create',
+                type: 'POST',
+                data: $(this).serialize(),
+                   success: function (response) {
 
-        if (response.success) {
+            if (response.success) {
 
-            alert("Sales saved successfully!");
+                alert("Sales saved successfully!");
 
-            if (confirm("Do you want to print?")) {
+                if (confirm("Do you want to print?")) {
 
-                window.location.href = '/Sales/Print/' + response.salesId;
+                    window.location.href = '/Sales/Print/' + response.salesId;
 
-            } else {
+                } else {
 
-                window.location.href = '/Sales/Create';
+                    window.location.href = '/Sales/Create';
+                }
             }
-        }
-        else {
-            alert(response.message);
-        }
-    },
-
-            error: function () {
-                alert("Something went wrong.");
+            else {
+                alert(response.message);
             }
+        },
+
+                error: function () {
+                    alert("Something went wrong.");
+                }
+            });
         });
-    });
 
-    let itemIndex = 0;
+        let itemIndex = 0;
 
-    $(document).ready(function () {
+        $(document).ready(function () {
+                $('#Quantity').on('input', function () {
+            validateQuantity();
+        });
 
+
+            // =====================================================
+            // PRODUCT SEARCH (SELECT2)
+            // =====================================================
+            $('#ProductId').select2({
+                width: '100%',
+                placeholder: "Search Product",
+                minimumInputLength: 1,
+                ajax: {
+                    url: '/Sales/SearchProducts',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return { term: params.term };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return { id: item.id, text: item.text };
+                            })
+                        };
+                    }
+                }
+            });
+                // =====================================================
+        // PROFESSIONAL STOCK VALIDATION
         // =====================================================
-        // PRODUCT SEARCH (SELECT2)
+              function validateQuantity() {
+
+            let qty = parseInt($('#Quantity').val()) || 0;
+
+            // 🔥 This is QuantityOut from DB
+            let quantityOut = parseInt($('#AvailableQty').val()) || 0;
+
+            // Reset UI
+            $('#qtyError').text('');
+            $('#Quantity').removeClass('is-invalid');
+            $('#btnAdd').prop('disabled', false);
+
+            // No stock
+                if (quantityOut >= qty) {
+                $('#qtyError').text('No stock available now');
+                $('#Quantity').addClass('is-invalid');
+                $('#btnAdd').prop('disabled', true);
+                return false;
+            }
+
+            // Invalid qty
+            if (qty <= 0) {
+                $('#qtyError').text('Quantity must be greater than zero');
+                $('#Quantity').addClass('is-invalid');
+                $('#btnAdd').prop('disabled', true);
+                return false;
+            }
+
+            // 🔥 MAIN CONDITION YOU ASKED
+            if (qty > quantityOut) {
+
+                alert("Only " + quantityOut + " QuantityOut available now");
+
+                $('#qtyError').text('Only ' + quantityOut + ' available');
+                $('#Quantity').addClass('is-invalid');
+                $('#btnAdd').prop('disabled', true);
+
+                return false;
+            }
+
+            return true;
+        }
+
+
+
+         // =====================================================
+        // CUSTOMER SEARCH (SELECT2)
         // =====================================================
-        $('#ProductId').select2({
+          $('#CustomerId').select2({
             width: '100%',
-            placeholder: "Search Product",
+            placeholder: "Search Customer",
             minimumInputLength: 1,
             ajax: {
-                url: '/Sales/SearchProducts',
+                url: '/Sales/SearchCustomers',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
@@ -213,359 +288,289 @@
                 },
                 processResults: function (data) {
                     return {
-                        results: $.map(data, function (item) {
-                            return { id: item.id, text: item.text };
+                        results: $.map(data, function (cust) {
+                            return {
+                                id: cust.id,
+                                text: cust.text
+                            };
                         })
                     };
                 }
             }
         });
+
+
+
+
+
+
+
             // =====================================================
-    // PROFESSIONAL STOCK VALIDATION
-    // =====================================================
-    function validateQuantity() {
+            // LOAD VARIANTS
+            // =====================================================
+            $('#ProductId').on('change', function () {
 
-        let qty = parseInt($('#Quantity').val()) || 0;
-        let available = parseInt($('#AvailableQty').val()) || 0;
+                let productId = $(this).val();
 
-        $('#qtyError').text('');
-        $('#Quantity').removeClass('is-invalid');
-        $('#btnAdd').prop('disabled', false);
+                $('#VariantId').empty().append('<option value="">-- Select Variant --</option>');
+                $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
+                $('#AvailableQty').val('');
+                $('#SellingPrice').val('');
 
-        if (available <= 0) {
-            $('#qtyError').text('No stock available for this batch');
-            $('#Quantity').addClass('is-invalid');
-            $('#btnAdd').prop('disabled', true);
-            return false;
-        }
+                if (!productId) return;
 
-        if (qty <= 0) {
-            $('#qtyError').text('Quantity must be greater than zero');
-            $('#Quantity').addClass('is-invalid');
-            $('#btnAdd').prop('disabled', true);
-            return false;
-        }
+                $.get('/Sales/GetVariants',
+                    { productId: productId },
+                    function (data) {
 
-        if (qty > available) {
-            $('#qtyError').text('Only ' + available + ' items available');
-            $('#Quantity').addClass('is-invalid');
-            $('#btnAdd').prop('disabled', true);
-            return false;
-        }
-
-        return true;
-    }
-
-    // Trigger on typing
-    $('#Quantity').on('input', function () {
-        validateQuantity();
-    });
-
-    // Trigger when batch changes
-    $('#BatchNo').on('change', function () {
-        setTimeout(function () {
-            validateQuantity();
-        }, 200);
-    });
-
-     // =====================================================
-    // CUSTOMER SEARCH (SELECT2)
-    // =====================================================
-      $('#CustomerId').select2({
-        width: '100%',
-        placeholder: "Search Customer",
-        minimumInputLength: 1,
-        ajax: {
-            url: '/Sales/SearchCustomers',
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return { term: params.term };
-            },
-            processResults: function (data) {
-                return {
-                    results: $.map(data, function (cust) {
-                        return {
-                            id: cust.id,
-                            text: cust.text
-                        };
-                    })
-                };
-            }
-        }
-    });
-
-
-
-
-
-
-
-        // =====================================================
-        // LOAD VARIANTS
-        // =====================================================
-        $('#ProductId').on('change', function () {
-
-            let productId = $(this).val();
-
-            $('#VariantId').empty().append('<option value="">-- Select Variant --</option>');
-            $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
-            $('#AvailableQty').val('');
-            $('#SellingPrice').val('');
-
-            if (!productId) return;
-
-            $.get('/Sales/GetVariants',
-                { productId: productId },
-                function (data) {
-
-                    $.each(data, function (i, item) {
-                        $('#VariantId').append(
-                            `<option value="${item.id}">${item.text}</option>`
-                        );
+                        $.each(data, function (i, item) {
+                            $('#VariantId').append(
+                                `<option value="${item.id}">${item.text}</option>`
+                            );
+                        });
                     });
-                });
-        });
+            });
 
-        // =====================================================
-        // LOAD BATCHES
-        // =====================================================
-        $('#VariantId').on('change', function () {
+            // =====================================================
+            // LOAD BATCHES
+            // =====================================================
+            $('#VariantId').on('change', function () {
 
-            let variantId = $(this).val();
+                let variantId = $(this).val();
 
-            $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
-            $('#AvailableQty').val('');
-            $('#SellingPrice').val('');
+                $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
+                $('#AvailableQty').val('');
+                $('#SellingPrice').val('');
 
-            if (!variantId) return;
+                if (!variantId) return;
 
-            $.get('/Sales/GetBatches',
-                { variantId: variantId },
-                function (data) {
+                $.get('/Sales/GetBatches',
+                    { variantId: variantId },
+                    function (data) {
 
-                    $.each(data, function (i, item) {
-                        $('#BatchNo').append(
-                            `<option value="${item.batchNo}">
-                                ${item.batchNo} (Stock: ${item.availableQty})
-                             </option>`
-                        );
+                        $.each(data, function (i, item) {
+                            $('#BatchNo').append(
+                                `<option value="${item.batchNo}">
+                                    ${item.batchNo} (Stock: ${item.availableQty})
+                                 </option>`
+                            );
+                        });
                     });
-                });
+            });
+
+            // =====================================================
+            // LOAD STOCK + SELLING PRICE
+            // =====================================================
+            $('#BatchNo').on('change', function () {
+
+                let batchNo = $(this).val();
+                let variantId = $('#VariantId').val();
+
+                $('#AvailableQty').val('');
+                $('#SellingPrice').val('');
+
+                if (!batchNo || !variantId) return;
+
+                $.get('/Sales/GetBatchDetails',
+                    {
+                        variantId: variantId,
+                        batchNo: batchNo
+                    },
+                    function (data) {
+
+                        if (data) {
+                            $('#AvailableQty').val(data.availableQty);
+                            $('#SellingPrice').val(data.sellingPrice);
+                                validateQuantity();  // 🔥 re-check immediately
+                        }
+                    });
+            });
+
+            // =====================================================
+            // DISCOUNT CALCULATION
+            // =====================================================
+            $('#DiscPercent').on('input', function () {
+
+                let price = parseFloat($('#SellingPrice').val()) || 0;
+                let qty = parseInt($('#Quantity').val()) || 0;
+                let percent = parseFloat($(this).val()) || 0;
+
+                let gross = price * qty;
+                let discAmt = (gross * percent) / 100;
+
+                $('#DiscAmount').val(discAmt.toFixed(2));
+            });
+
+            $('#DiscAmount').on('input', function () {
+
+                let price = parseFloat($('#SellingPrice').val()) || 0;
+                let qty = parseInt($('#Quantity').val()) || 0;
+                let amount = parseFloat($(this).val()) || 0;
+
+                let gross = price * qty;
+                if (gross === 0) return;
+
+                let percent = (amount / gross) * 100;
+                $('#DiscPercent').val(percent.toFixed(2));
+            });
+
+            // =====================================================
+            // ADD ITEM
+            // =====================================================
+               $('#btnAdd').on('click', function ()
+        {
+
+                let productData = $('#ProductId').select2('data');
+
+                if (!productData || productData.length === 0) {
+                    alert("Select product first");
+                    return;
+                }
+
+                let productName = productData[0].text;
+                let variantId = $('#VariantId').val();
+                let variantText = $('#VariantId option:selected').text();
+                let batchNo = $('#BatchNo').val();
+                let available = parseInt($('#AvailableQty').val()) || 0;
+                let price = parseFloat($('#SellingPrice').val()) || 0;
+                let qty = parseInt($('#Quantity').val()) || 1;
+                let discPercent = parseFloat($('#DiscPercent').val()) || 0;
+                let discAmount = parseFloat($('#DiscAmount').val()) || 0;
+
+                if (!variantId || !batchNo) {
+                    alert("Select product, variant and batch");
+                    return;
+                }
+
+                // if (qty <= 0) {
+                //     alert("Quantity must be greater than zero");
+                //     return;
+                // }
+
+                // if (available <= 0) {
+                //     alert("No stock available for this batch");
+                //     return;
+                // }
+
+                // if (qty > available) {
+                //     alert("Insufficient stock available");
+                //     return;
+                // }
+                if (!validateQuantity()) {
+        return;
+    }
+
+                // PREVENT DUPLICATE
+                if ($(`tr[data-key="${variantId}-${batchNo}"]`).length > 0) {
+                    alert("This batch already added");
+                    return;
+                }
+
+                let gross = price * qty;
+                let taxable = gross - discAmount;
+
+                // GST INCLUDED (10%)
+                let gst = taxable * 10 / 110;
+                let net = taxable;
+
+                // ADD ROW
+                let row = `
+                    <tr data-key="${variantId}-${batchNo}">
+                        <td>${productName}</td>
+                        <td>${variantText}</td>
+                        <td>${batchNo}</td>
+                        <td class="text-end">${price.toFixed(2)}</td>
+                        <td class="text-end">${qty}</td>
+                        <td class="text-end">${discPercent.toFixed(2)}%</td>
+                        <td class="text-end">${discAmount.toFixed(2)}</td>
+                        <td class="text-end">${gst.toFixed(2)}</td>
+                        <td class="text-end">${net.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-danger btn-remove">✖</button>
+                        </td>
+                    </tr>`;
+
+               $('#itemsBody').append(row);
+
+
+                // HIDDEN INPUTS
+                $('#hiddenItems').append(`
+                    <div class="hidden-item" data-key="${variantId}-${batchNo}">
+                        <input type="hidden" name="Items[${itemIndex}].varientid" value="${variantId}" />
+                        <input type="hidden" name="Items[${itemIndex}].BatchNo" value="${batchNo}" />
+                        <input type="hidden" name="Items[${itemIndex}].Quantity" value="${qty}" />
+                        <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${price}" />
+                        <input type="hidden" name="Items[${itemIndex}].DiscPercent" value="${discPercent}" />
+                        <input type="hidden" name="Items[${itemIndex}].DiscAmount" value="${discAmount}" />
+                        <input type="hidden" name="Items[${itemIndex}].TaxAmount" value="${gst}" />
+                        <input type="hidden" name="Items[${itemIndex}].NetAmount" value="${net}" />
+                    </div>
+                `);
+
+                itemIndex++;
+
+                calculateTotals();
+                resetFields();
+            });
+
+            // =====================================================
+            // REMOVE ITEM
+            // =====================================================
+            $(document).on('click', '.btn-remove', function () {
+
+                let row = $(this).closest('tr');
+                let key = row.data('key');
+
+                row.remove();
+                $(`.hidden-item[data-key="${key}"]`).remove();
+
+                calculateTotals();
+            });
+
         });
 
         // =====================================================
-        // LOAD STOCK + SELLING PRICE
+        // CALCULATE TOTALS
         // =====================================================
-        $('#BatchNo').on('change', function () {
+        function calculateTotals() {
 
-            let batchNo = $(this).val();
-            let variantId = $('#VariantId').val();
+            let totalDiscount = 0;
+            let totalGst = 0;
+            let netTotal = 0;
+
+            $('#hiddenItems .hidden-item').each(function () {
+
+                totalDiscount += parseFloat($(this).find('[name$=".DiscAmount"]').val()) || 0;
+                totalGst += parseFloat($(this).find('[name$=".TaxAmount"]').val()) || 0;
+                netTotal += parseFloat($(this).find('[name$=".NetAmount"]').val()) || 0;
+            });
+
+            $('#lblDiscount').text(totalDiscount.toFixed(2));
+
+            $('#lblGst').text(totalGst.toFixed(2));
+            $('#lblNet').text(netTotal.toFixed(2));
+
+            // IMPORTANT → Send to controller
+            $('#hdTotalAmount').val(netTotal.toFixed(2));
+            $('#hdTotalDiscount').val(totalDiscount.toFixed(2));
+            $('#hdGstAmount').val(totalGst.toFixed(2));
+            $('#hdNetAmount').val(netTotal.toFixed(2));
+        }
+
+        // =====================================================
+        // RESET FIELDS
+        // =====================================================
+            function resetFields() {
+
+            $('#Quantity').val(1);
+            $('#DiscPercent').val('');
+            $('#DiscAmount').val('');
+
+            $('#VariantId').val('').trigger('change');
+            $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
 
             $('#AvailableQty').val('');
             $('#SellingPrice').val('');
-
-            if (!batchNo || !variantId) return;
-
-            $.get('/Sales/GetBatchDetails',
-                {
-                    variantId: variantId,
-                    batchNo: batchNo
-                },
-                function (data) {
-
-                    if (data) {
-                        $('#AvailableQty').val(data.availableQty);
-                        $('#SellingPrice').val(data.sellingPrice);
-                    }
-                });
-        });
-
-        // =====================================================
-        // DISCOUNT CALCULATION
-        // =====================================================
-        $('#DiscPercent').on('input', function () {
-
-            let price = parseFloat($('#SellingPrice').val()) || 0;
-            let qty = parseInt($('#Quantity').val()) || 0;
-            let percent = parseFloat($(this).val()) || 0;
-
-            let gross = price * qty;
-            let discAmt = (gross * percent) / 100;
-
-            $('#DiscAmount').val(discAmt.toFixed(2));
-        });
-
-        $('#DiscAmount').on('input', function () {
-
-            let price = parseFloat($('#SellingPrice').val()) || 0;
-            let qty = parseInt($('#Quantity').val()) || 0;
-            let amount = parseFloat($(this).val()) || 0;
-
-            let gross = price * qty;
-            if (gross === 0) return;
-
-            let percent = (amount / gross) * 100;
-            $('#DiscPercent').val(percent.toFixed(2));
-        });
-
-        // =====================================================
-        // ADD ITEM
-        // =====================================================
-           $('#btnAdd').on('click', function ()
-    {
-
-            let productData = $('#ProductId').select2('data');
-
-            if (!productData || productData.length === 0) {
-                alert("Select product first");
-                return;
-            }
-
-            let productName = productData[0].text;
-            let variantId = $('#VariantId').val();
-            let variantText = $('#VariantId option:selected').text();
-            let batchNo = $('#BatchNo').val();
-            let available = parseInt($('#AvailableQty').val()) || 0;
-            let price = parseFloat($('#SellingPrice').val()) || 0;
-            let qty = parseInt($('#Quantity').val()) || 1;
-            let discPercent = parseFloat($('#DiscPercent').val()) || 0;
-            let discAmount = parseFloat($('#DiscAmount').val()) || 0;
-
-            if (!variantId || !batchNo) {
-                alert("Select product, variant and batch");
-                return;
-            }
-
-            // if (qty <= 0) {
-            //     alert("Quantity must be greater than zero");
-            //     return;
-            // }
-
-            // if (available <= 0) {
-            //     alert("No stock available for this batch");
-            //     return;
-            // }
-
-            // if (qty > available) {
-            //     alert("Insufficient stock available");
-            //     return;
-            // }
-            if (!validateQuantity()) {
-    return;
-}
-
-            // PREVENT DUPLICATE
-            if ($(`tr[data-key="${variantId}-${batchNo}"]`).length > 0) {
-                alert("This batch already added");
-                return;
-            }
-
-            let gross = price * qty;
-            let taxable = gross - discAmount;
-
-            // GST INCLUDED (10%)
-            let gst = taxable * 10 / 110;
-            let net = taxable;
-
-            // ADD ROW
-            let row = `
-                <tr data-key="${variantId}-${batchNo}">
-                    <td>${productName}</td>
-                    <td>${variantText}</td>
-                    <td>${batchNo}</td>
-                    <td class="text-end">${price.toFixed(2)}</td>
-                    <td class="text-end">${qty}</td>
-                    <td class="text-end">${discPercent.toFixed(2)}%</td>
-                    <td class="text-end">${discAmount.toFixed(2)}</td>
-                    <td class="text-end">${gst.toFixed(2)}</td>
-                    <td class="text-end">${net.toFixed(2)}</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-danger btn-remove">✖</button>
-                    </td>
-                </tr>`;
-
-           $('#itemsBody').append(row);
-
-
-            // HIDDEN INPUTS
-            $('#hiddenItems').append(`
-                <div class="hidden-item" data-key="${variantId}-${batchNo}">
-                    <input type="hidden" name="Items[${itemIndex}].varientid" value="${variantId}" />
-                    <input type="hidden" name="Items[${itemIndex}].BatchNo" value="${batchNo}" />
-                    <input type="hidden" name="Items[${itemIndex}].Quantity" value="${qty}" />
-                    <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${price}" />
-                    <input type="hidden" name="Items[${itemIndex}].DiscPercent" value="${discPercent}" />
-                    <input type="hidden" name="Items[${itemIndex}].DiscAmount" value="${discAmount}" />
-                    <input type="hidden" name="Items[${itemIndex}].TaxAmount" value="${gst}" />
-                    <input type="hidden" name="Items[${itemIndex}].NetAmount" value="${net}" />
-                </div>
-            `);
-
-            itemIndex++;
-
-            calculateTotals();
-            resetFields();
-        });
-
-        // =====================================================
-        // REMOVE ITEM
-        // =====================================================
-        $(document).on('click', '.btn-remove', function () {
-
-            let row = $(this).closest('tr');
-            let key = row.data('key');
-
-            row.remove();
-            $(`.hidden-item[data-key="${key}"]`).remove();
-
-            calculateTotals();
-        });
-
-    });
-
-    // =====================================================
-    // CALCULATE TOTALS
-    // =====================================================
-    function calculateTotals() {
-
-        let totalDiscount = 0;
-        let totalGst = 0;
-        let netTotal = 0;
-
-        $('#hiddenItems .hidden-item').each(function () {
-
-            totalDiscount += parseFloat($(this).find('[name$=".DiscAmount"]').val()) || 0;
-            totalGst += parseFloat($(this).find('[name$=".TaxAmount"]').val()) || 0;
-            netTotal += parseFloat($(this).find('[name$=".NetAmount"]').val()) || 0;
-        });
-
-        $('#lblDiscount').text(totalDiscount.toFixed(2));
-
-        $('#lblGst').text(totalGst.toFixed(2));
-        $('#lblNet').text(netTotal.toFixed(2));
-
-        // IMPORTANT → Send to controller
-        $('#hdTotalAmount').val(netTotal.toFixed(2));
-        $('#hdTotalDiscount').val(totalDiscount.toFixed(2));
-        $('#hdGstAmount').val(totalGst.toFixed(2));
-        $('#hdNetAmount').val(netTotal.toFixed(2));
-    }
-
-    // =====================================================
-    // RESET FIELDS
-    // =====================================================
-        function resetFields() {
-
-        $('#Quantity').val(1);
-        $('#DiscPercent').val('');
-        $('#DiscAmount').val('');
-
-        $('#VariantId').val('').trigger('change');
-        $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
-
-        $('#AvailableQty').val('');
-        $('#SellingPrice').val('');
-    }
+        }
 
 </script>

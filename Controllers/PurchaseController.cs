@@ -97,6 +97,9 @@ namespace MIEL.web.Controllers
 
             _context.PurchaseMasters.Add(purchase);
             _context.SaveChanges();
+            TempData["SuccessMessage"] = "Purchase Created Successfully";
+
+
 
             // ===========================
             // 2️⃣ LOOP ITEMS
@@ -368,14 +371,20 @@ namespace MIEL.web.Controllers
             );
 
             _context.SaveChanges();
-
+          
             // 🔥 SAVE AGAIN USING CREATE LOGIC
             model.PurchaseCode = _context.PurchaseMasters
                 .Where(x => x.PurchaseId == id)
                 .Select(x => x.InvoiceNo)
                 .FirstOrDefault();
 
-            return Create(model);
+            //return Create(model);
+            Create(model); // save updated data
+
+            TempData["SuccessMessage"] = "Purchase Updated Successfully";
+
+            return RedirectToAction("Create");
+
         }
 
         //[HttpPost]

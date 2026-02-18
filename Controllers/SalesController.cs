@@ -32,10 +32,7 @@ namespace MIEL.web.Controllers
                 SalesDate = DateTime.Today
             };
 
-            
-
-
-
+           
             return View(vm);
         }
 
@@ -113,8 +110,22 @@ namespace MIEL.web.Controllers
 
                     _context.SalesItems.Add(salesItem);
 
-                    // 🔥 Reduce stock
+                    
+                    // 🔥 Reduce Batch Stock
                     batch.QuantityOut += item.Quantity;
+
+                    // 🔥 Reduce Variant Stock (QuantityOnHand)
+                    var variant = await _context.ProColorSizeVariants
+                        .FirstOrDefaultAsync(v => v.varientid == item.varientid);
+
+                    if (variant == null)
+                        throw new Exception("Variant not found.");
+
+                    if (variant.QuantityOnHand < item.Quantity)
+                        throw new Exception("Variant stock mismatch.");
+
+                    variant.QuantityOnHand -= item.Quantity;
+
                 }
 
                 await _context.SaveChangesAsync();
@@ -243,25 +254,17 @@ namespace MIEL.web.Controllers
         public async Task<IActionResult> GetBatchDetails(int variantId, string batchNo)
         {
             var batch = await _context.InventoryBatch
-                .FirstOrDefaultAsync(x =>
-                    x.varientid == variantId &&
-                    x.BatchNo == batchNo);
-
-            if (batch == null)
-            {
-                return Json(new
+                .Where(x => x.varientid == variantId && x.BatchNo == batchNo)
+                .Select(x => new
                 {
-                    availableQty = 0,
-                    sellingPrice = 0
-                });
-            }
+                    availableQty = x.QuantityOut,   // 🔥 YOUR REQUIREMENT
+                    sellingPrice = x.SellingPrice
+                })
+                .FirstOrDefaultAsync();
 
-            return Json(new
-            {
-                availableQty = batch.QuantityIn - batch.QuantityOut,
-                sellingPrice = batch.CostPrice   // ✅ CHANGE HERE
-            });
+            return Json(batch);
         }
+
 
         public async Task<IActionResult> Details()
         {
