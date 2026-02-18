@@ -580,6 +580,75 @@ namespace MIEL.web.Controllers
             if (cart == null || !cart.Any())
                 return RedirectToAction("Cart", "Cart");
 
+
+
+
+            int? existingSalesId = HttpContext.Session.GetInt32("SalesId");
+            SalesMaster salesMasters = null;
+
+            if (existingSalesId != null)
+            {
+                // Check if SalesMaster exists in database
+                salesMasters = _context.SalesMasters
+                    .FirstOrDefault(x => x.SalesId == existingSalesId.Value);
+            }
+
+
+            if (existingSalesId == null)
+            {
+                decimal totalAmount = cart.Sum(x => x.Price * x.Quantity);
+                decimal discount = 0;
+
+                var salesMaster = new SalesMaster
+                {
+                    SalesDate = DateTime.Now,
+                    InvoiceNo = "SAL-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    PaymentType = "Pending",
+                    CustomerId = customerId,
+                    TotalAmount = totalAmount,
+                    TotalDiscount = discount,
+                    NetAmount = totalAmount,
+                    paysts = 0,
+                    salesmode = 2
+                };
+
+                _context.SalesMasters.Add(salesMaster);
+                _context.SaveChanges();
+
+                // Save SalesId in Session
+                HttpContext.Session.SetInt32("SalesId", salesMaster.SalesId);
+
+                // Assign to salesMasters so it’s not null
+                salesMasters = salesMaster;
+
+                foreach (var item in cart)
+                {
+                    var batch = _context.InventoryBatch
+        .Where(b => b.varientid == item.VariantId && (b.QuantityIn - b.QuantityOut) > 0)
+        .OrderBy(b => b.CreatedDate) // FIFO: earliest created batch first
+        .FirstOrDefault();
+
+                    string batchNo = batch != null ? batch.BatchNo : "";
+                    var salesItem = new SalesItem
+                    {
+                        SalesId = salesMaster.SalesId,
+                        varientid = item.VariantId,
+                        BatchNo = batchNo,
+                        Quantity = item.Quantity,
+                        SellingPrice = item.Price,
+                        DiscPercent = 0,
+                        DiscAmount = 0,
+                        TaxAmount = 0,
+                        NetAmount = item.Price * item.Quantity
+                    };
+
+                    _context.SalesItems.Add(salesItem);
+                }
+
+                _context.SaveChanges();
+            }
+
+
             var address = _context.users_TB
                 .Where(a => a.CustomerId == customerId)
                 .Select(a => new Customer
@@ -593,17 +662,174 @@ namespace MIEL.web.Controllers
                 })
                 .FirstOrDefault();
 
-            var vm = new ReviewOrderVM
+            var paymentVM = new PaymentVM
             {
-                CartItems = cart,
-                Address = address,
-                TotalAmount = cart.Sum(x => x.Price * x.Quantity)
+                SalesId = salesMasters.SalesId,
+                InvoiceNo = salesMasters.InvoiceNo,
+                TotalAmount = salesMasters.TotalAmount,
+                Items = cart
             };
 
-            return View(vm);
+            return View("Payment", paymentVM);
+        }
+
+        [HttpPost]
+        public IActionResult ConfirmOrder()
+        {
+            int? salesId = HttpContext.Session.GetInt32("SalesId");
+
+            if (salesId == null)
+            {
+                return RedirectToAction("Cart", "Cart");
+            }
+
+            // Redirect to payment page
+            return RedirectToAction("Payment", "Home", new { salesId = salesId });
+        }
+        public IActionResult Payment(int salesId)
+        {
+            var order = _context.SalesMasters
+                .Where(x => x.SalesId == salesId)
+                .Select(x => new PaymentVM
+                {
+                    SalesId = x.SalesId,
+                    InvoiceNo = x.InvoiceNo,
+                    TotalAmount = x.NetAmount,
+                    PayStatus = x.paysts,
+
+                    // LOAD ITEMS
+                    Items = _context.Cart
+                        .Where(c => c.CustomerId == x.CustomerId)
+                        .Select(c => new CartItem
+                        {
+                            ProductName = c.ProductName,
+                            Quantity = c.Quantity,
+                            Price = c.Price,
+                            Image = c.Image
+                        }).ToList()
+                })
+                .FirstOrDefault();
+
+            if (order == null)
+                return RedirectToAction("Cart", "Cart");
+
+            return View(order);
         }
 
 
+
+        [HttpGet]
+     
+        public IActionResult ConfirmCOD(int salesId)
+        {
+            var sales = _context.SalesMasters
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            if (sales == null)
+                return RedirectToAction("Cart", "Cart");
+
+            sales.PaymentType = "Cash";
+            sales.paysts = 0;
+
+            _context.SaveChanges();
+
+            HttpContext.Session.Remove("SalesId");
+
+            var order = new OrderVM
+            {
+                CustomerId = sales.CustomerId,
+                SalesId = sales.SalesId, // <-- Save the SalesMaster ID here
+                TotalAmount = sales.TotalAmount,
+                OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                PaymentStatus = "NotPaid",
+                VerifyId = 0
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            // ✅ Clear customer's cart
+            ClearCustomerCart(sales.CustomerId);
+
+            return RedirectToAction("OrderSuccess", new { salesId = salesId });
+        }
+
+
+        private void ClearCustomerCart(int customerId)
+        {
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == customerId)
+                .ToList();
+
+            if (cartItems.Any())
+            {
+                _context.Cart.RemoveRange(cartItems);
+                _context.SaveChanges();
+            }
+        }
+        public IActionResult OrderSuccess(int salesId)
+        {
+            var order = _context.Orders
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            if (order == null)
+                return RedirectToAction("Cart", "Cart");
+
+            return View(order);
+        }
+
+
+        [HttpGet]
+        public IActionResult ConfirmPayID(int salesId)
+        {
+            var sales = _context.SalesMasters
+                .FirstOrDefault(x => x.SalesId == salesId);
+
+            if (sales == null)
+                return RedirectToAction("Cart", "Cart");
+
+            // Mark as PayID payment type (pending confirmation)
+            sales.PaymentType = "PayID";
+            sales.paysts = 0; // still pending
+            _context.SaveChanges();
+
+            // ✅ Create an Order entry immediately
+            var orderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            var order = new OrderVM
+            {
+                CustomerId = sales.CustomerId,
+                SalesId = sales.SalesId,
+                TotalAmount = sales.TotalAmount,
+                OrderNumber = orderNumber,
+                PaymentStatus = "NotPaid",
+                VerifyId = 0
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            // Clear customer's cart/session if you want
+            // ClearCustomerCart(sales.CustomerId); 
+            // HttpContext.Session.Remove("SalesId");
+
+            // Prepare ViewModel to show on PayIDPage
+            var vm = new PayIDViewModel
+            {
+                SalesId = sales.SalesId,
+                OrderId = order.Id,               // <-- Order ID saved
+                OrderNumber = order.OrderNumber,  // <-- show this as invoice
+                TotalAmount = sales.TotalAmount,
+                PayId = 0430823457,               // static PayID
+                Email = "binoyjoseph@y7mail.com"
+            };
+
+            return View("PayIDPage", vm);
+        }
+
+
+
+   
 
         public IActionResult Privacy()
         {

@@ -18,15 +18,14 @@
 
     <h4 class="mb-3">Create Sales</h4>
     <a asp-action="Details"
-       class="btn btn-primary mb-3">
-        View All Sales
-    </a>
+   class="btn btn-info w-100">
+    View
+</a>
 
 
     @* <form asp-action="Create" method="post"> *@
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
-       
 
         <div class="row mb-3">
             <div class="col-md-3">
@@ -39,21 +38,22 @@
                 <input asp-for="SalesDate" type="date" class="form-control" />
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Customer</label>
-
-               @*  <select id="CustomerId" name="CustomerId" class="form-select"></select> *@
-                <select asp-for="CustomerId" id="CustomerId" class="form-select"></select>
-
-
+                <select asp-for="CustomerId"
+                        asp-items="ViewBag.Customers"
+                        class="form-control">
+                    <option value="">-- Select Customer --</option>
+                </select>
             </div>
+
 
             <div class="col-md-3">
                 <label>Payment</label>
                 <select asp-for="PaymentType" class="form-select">
                     <option>Cash</option>
                     <option>Pay_ID</option>
-                   
+
                 </select>
             </div>
         </div>
@@ -86,10 +86,14 @@
                 <input id="SellingPrice" class="form-control" readonly />
             </div>
 
+           
             <div class="col-md-1">
                 <label>Qty</label>
-                <input id="Quantity" type="number" value="1" class="form-control" />
+                <input id="Quantity" type="number" value="1" class="form-control" min="1" />
+                <small id="qtyError" class="text-danger"></small>
             </div>
+
+
 
             <div class="col-md-1">
                 <label>Disc %</label>
@@ -102,13 +106,8 @@
             </div>
 
             <div class="col-md-1 d-flex align-items-end">
-                <button type="button" id="btnAdd" class="btn btn-primary w-100">
-                    Add
-                </button>
+                <button type="button" id="btnAdd" class="btn btn-primary w-100">Add</button>
             </div>
-
-           
-
         </div>
 
         <div id="hiddenItems"></div>
@@ -180,6 +179,53 @@
                 }
             }
         });
+            // =====================================================
+    // PROFESSIONAL STOCK VALIDATION
+    // =====================================================
+    function validateQuantity() {
+
+        let qty = parseInt($('#Quantity').val()) || 0;
+        let available = parseInt($('#AvailableQty').val()) || 0;
+
+        $('#qtyError').text('');
+        $('#Quantity').removeClass('is-invalid');
+        $('#btnAdd').prop('disabled', false);
+
+        if (available <= 0) {
+            $('#qtyError').text('No stock available for this batch');
+            $('#Quantity').addClass('is-invalid');
+            $('#btnAdd').prop('disabled', true);
+            return false;
+        }
+
+        if (qty <= 0) {
+            $('#qtyError').text('Quantity must be greater than zero');
+            $('#Quantity').addClass('is-invalid');
+            $('#btnAdd').prop('disabled', true);
+            return false;
+        }
+
+        if (qty > available) {
+            $('#qtyError').text('Only ' + available + ' items available');
+            $('#Quantity').addClass('is-invalid');
+            $('#btnAdd').prop('disabled', true);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Trigger on typing
+    $('#Quantity').on('input', function () {
+        validateQuantity();
+    });
+
+    // Trigger when batch changes
+    $('#BatchNo').on('change', function () {
+        setTimeout(function () {
+            validateQuantity();
+        }, 200);
+    });
 
      // =====================================================
     // CUSTOMER SEARCH (SELECT2)
@@ -350,20 +396,23 @@
                 return;
             }
 
-            if (qty <= 0) {
-                alert("Quantity must be greater than zero");
-                return;
-            }
+            // if (qty <= 0) {
+            //     alert("Quantity must be greater than zero");
+            //     return;
+            // }
 
-            if (available <= 0) {
-                alert("No stock available for this batch");
-                return;
-            }
+            // if (available <= 0) {
+            //     alert("No stock available for this batch");
+            //     return;
+            // }
 
-            if (qty > available) {
-                alert("Insufficient stock available");
-                return;
-            }
+            // if (qty > available) {
+            //     alert("Insufficient stock available");
+            //     return;
+            // }
+            if (!validateQuantity()) {
+    return;
+}
 
             // PREVENT DUPLICATE
             if ($(`tr[data-key="${variantId}-${batchNo}"]`).length > 0) {
