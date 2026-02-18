@@ -21,23 +21,20 @@ namespace MIEL.web.Controllers
         {
             _context = context;
         }
-
         // =====================================================
         // CREATE GET
         // =====================================================
         public IActionResult Create()
         {
-            ViewBag.Customers = new SelectList(
-         _context.users_TB.ToList(),   // table name
-         "CustomerId",                 // value field
-         "FirstName"                   // text field (customer name)
-     );
-
             var vm = new SalesVM
             {
                 InvoiceNo = "SAL-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 SalesDate = DateTime.Today
             };
+
+            
+
+
 
             return View(vm);
         }
@@ -53,6 +50,9 @@ namespace MIEL.web.Controllers
             if (vm.Items == null || vm.Items.Count == 0)
             {
                 ModelState.AddModelError("", "Please add items.");
+
+                
+
                 return View(vm);
             }
 
@@ -60,69 +60,28 @@ namespace MIEL.web.Controllers
 
             try
             {
-                SalesMaster master;
-
                 // =============================
-                // 🔵 UPDATE MODE
+                // 🟢 INSERT MODE
                 // =============================
-                if (vm.SalesId > 0)
+                var master = new SalesMaster
                 {
-                    master = await _context.SalesMasters
-                        .Include(x => x.SalesItems)
-                        .FirstOrDefaultAsync(x => x.SalesId == vm.SalesId);
+                    InvoiceNo = vm.InvoiceNo,
+                    SalesDate = vm.SalesDate,
+                    CustomerId = vm.CustomerId,
+                    PaymentType = vm.PaymentType,
+                    TotalAmount = vm.TotalAmount,
+                    TotalDiscount = vm.TotalDiscount,
+                    GstAmount = vm.GstAmount,
+                    NetAmount = vm.NetAmount,
+                    paysts = 1,      // 🔥 Always 1
+                    salesmode = 1    // 🔥 Always 1
+                };
 
-                    if (master == null)
-                        return NotFound();
-
-                    // Restore old stock
-                    foreach (var oldItem in master.SalesItems)
-                    {
-                        var oldBatch = await _context.InventoryBatch
-                            .FirstOrDefaultAsync(x =>
-                                x.varientid == oldItem.varientid &&
-                                x.BatchNo == oldItem.BatchNo);
-
-                        if (oldBatch != null)
-                            oldBatch.QuantityOut -= oldItem.Quantity;
-                    }
-
-                    // Remove old items
-                    _context.SalesItems.RemoveRange(master.SalesItems);
-
-                    // Update master fields
-                    master.InvoiceNo = vm.InvoiceNo;
-                    master.SalesDate = vm.SalesDate;
-                    master.CustomerId = vm.CustomerId;   // 🔥 ADD THIS
-
-                    master.PaymentType = vm.PaymentType;
-                    master.TotalAmount = vm.TotalAmount;
-                    master.TotalDiscount = vm.TotalDiscount;
-                    master.GstAmount = vm.GstAmount;
-                    master.NetAmount = vm.NetAmount;
-                }
-                else
-                {
-                    // =============================
-                    // 🟢 INSERT MODE
-                    // =============================
-                    master = new SalesMaster
-                    {
-                        InvoiceNo = vm.InvoiceNo,
-                        SalesDate = vm.SalesDate,
-                        CustomerId = vm.CustomerId,   // 🔥 ADD THIS
-                        PaymentType = vm.PaymentType,
-                        TotalAmount = vm.TotalAmount,
-                        TotalDiscount = vm.TotalDiscount,
-                        GstAmount = vm.GstAmount,
-                        NetAmount = vm.NetAmount
-                    };
-
-                    _context.SalesMasters.Add(master);
-                    await _context.SaveChangesAsync();
-                }
+                _context.SalesMasters.Add(master);
+                await _context.SaveChangesAsync();
 
                 // =============================
-                // ADD NEW ITEMS
+                // ADD ITEMS
                 // =============================
                 foreach (var item in vm.Items)
                 {
@@ -154,27 +113,27 @@ namespace MIEL.web.Controllers
 
                     _context.SalesItems.Add(salesItem);
 
-                    // Reduce stock
+                    // 🔥 Reduce stock
                     batch.QuantityOut += item.Quantity;
                 }
 
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
 
-                TempData["SuccessMessage"] = vm.SalesId > 0
-                    ? "Sales updated successfully!"
-                    : "Sales saved successfully!";
+                TempData["SuccessMessage"] = "Sales saved successfully!";
 
                 return RedirectToAction("Create");
             }
             catch (Exception ex)
             {
                 await tx.RollbackAsync();
+
+                
+
                 ModelState.AddModelError("", ex.Message);
                 return View(vm);
             }
         }
-
 
         // =====================================================
         // SEARCH PRODUCT
@@ -193,14 +152,19 @@ namespace MIEL.web.Controllers
         // SEARCH CUSTOMER
         public async Task<IActionResult> SearchCustomers(string term)
         {
-            var data = await _context.Customers
-                .Where(x => x.Name.Contains(term))
-                .Select(x => new { id = x.CustomerId, text = x.Name })
+            var data = await _context.users_TB
+                .Where(x => x.FirstName.Contains(term))
+                .Select(x => new
+                {
+                    id = x.CustomerId,
+                    text = x.FirstName
+                })
                 .Take(20)
                 .ToListAsync();
 
             return Json(data);
         }
+
 
         // LOAD VARIANTS
         public async Task<IActionResult> GetVariants(int productId)

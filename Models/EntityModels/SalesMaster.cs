@@ -22,9 +22,6 @@ namespace MIEL.web.Models.EntityModels
         public decimal GstAmount { get; set; }        // GST INCLUDED (10%)
         public decimal NetAmount { get; set; }        // Final payable
         public int paysts { get; set; }
-
-      
-
         public int salesmode { get; set; }
 
         // 🔥 Foreign Key to Customer (users_TB)
