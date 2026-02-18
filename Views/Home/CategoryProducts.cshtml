@@ -141,7 +141,7 @@
 <script>
     function addToCartFromCategory(productId) {
 
-        fetch(`/Home/AddToCartFromCategory?productId=A${productId}`, {
+        fetch(`/Home/AddToCartFromCategory?productId=${productId}`, {
             method: 'POST'
         })
         .then(res => res.json())

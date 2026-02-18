@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MIEL.web.Models.EntityModels
 {
@@ -16,16 +17,22 @@ namespace MIEL.web.Models.EntityModels
         public string PaymentType { get; set; }
 
         // ================= TOTALS =================
-       
-        public decimal TotalAmount { get; set; }      // Sum of item gross (before discount)
-        public decimal TotalDiscount { get; set; }    // 🔴 REQUIRED
-        public decimal GstAmount { get; set; }        // GST INCLUDED (10%)
-        public decimal NetAmount { get; set; }        // Final payable
+        public decimal TotalAmount { get; set; }
+        public decimal TotalDiscount { get; set; }
+        public decimal GstAmount { get; set; }
+        public decimal NetAmount { get; set; }
+
         public int paysts { get; set; }
         public int salesmode { get; set; }
 
-        // 🔥 Foreign Key to Customer (users_TB)
+        // ================= FOREIGN KEY =================
+
+        [ForeignKey("Customer")]
         public int CustomerId { get; set; }
+
+        // ✅ ADD THIS (VERY IMPORTANT)
+        public userModel Customer { get; set; }
+
 
         // ================= NAVIGATION =================
 
