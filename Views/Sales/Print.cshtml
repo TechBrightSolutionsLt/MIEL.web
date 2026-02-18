@@ -15,121 +15,185 @@
             width: 210mm;
             margin: 0 auto;
             font-family: 'Segoe UI', sans-serif;
-            background: #f5f6fa;
-            padding: 30px;
+            background: #f4f6f9;
+            padding: 25px;
             color: #333;
         }
 
         .invoice-container {
             background: #ffffff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 45px;
+            border-radius: 12px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.06);
         }
+
+        /* ================= HEADER ================= */
 
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #d9a59a;
+            align-items: flex-start;
+            border-bottom: 2px solid #e6c2ba;
             padding-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .brand h2 {
             margin: 0;
-            color: #c58f84;
-            font-size: 30px;
+            font-size: 32px;
+            letter-spacing: 1px;
+            color: #b67c72;
         }
 
         .brand p {
-            margin: 5px 0;
+            margin: 3px 0;
             font-size: 13px;
+            color: #666;
         }
 
         .invoice-title {
             text-align: right;
         }
 
-        .invoice-title h1 {
-            margin: 0;
-            font-size: 28px;
+            .invoice-title h1 {
+                margin: 0;
+                font-size: 30px;
+                font-weight: 600;
+            }
+
+            .invoice-title span {
+                color: #b67c72;
+                font-weight: 600;
+                font-size: 15px;
+            }
+
+        /* ================= BILL SECTION ================= */
+
+        .bill-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
         }
 
-        .invoice-title span {
-            color: #c58f84;
-            font-weight: bold;
+        .bill-left {
+            width: 50%;
         }
 
-        .info-section {
-            margin-top: 20px;
+            .bill-left h3 {
+                margin-bottom: 10px;
+                color: #b67c72;
+                font-size: 16px;
+            }
+
+            .bill-left p {
+                margin: 4px 0;
+                font-size: 14px;
+            }
+
+        .bill-right {
+            width: 50%;
+            text-align: right;
             font-size: 14px;
         }
+
+            .bill-right p {
+                margin: 5px 0;
+            }
+
+        /* ================= TABLE ================= */
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
+        }
+
+        thead {
+            background: #f3e4e1;
         }
 
         th {
-            background: #c58f84;
-            color: white;
             padding: 12px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #555;
+            border-bottom: 2px solid #e2b9b1;
         }
 
         td {
-            border-bottom: 1px solid #eee;
-            padding: 10px;
-            text-align: center;
+            padding: 12px;
             font-size: 14px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
         }
 
-        tr:nth-child(even) {
-            background: #fafafa;
+        tbody tr:hover {
+            background: #faf6f5;
         }
+
+        /* ================= TOTALS ================= */
 
         .totals {
-            margin-top: 30px;
-            width: 350px;
-            float: right;
+            width: 380px;
+            margin-left: auto;
+            margin-top: 35px;
         }
 
-        .totals table {
-            width: 100%;
-        }
+            .totals table td {
+                padding: 6px 0;
+                font-size: 14px;
+            }
 
-        .totals td {
-            padding: 8px;
-            text-align: right;
-        }
+                .totals table td:first-child {
+                    text-align: left;
+                }
+
+                .totals table td:last-child {
+                    text-align: right;
+                    font-weight: 500;
+                }
 
         .grand {
             font-size: 20px;
             font-weight: bold;
-            color: #c58f84;
-            border-top: 2px solid #c58f84;
+            color: #b67c72;
+            border-top: 2px solid #e2b9b1;
+            padding-top: 10px;
         }
 
+        /* ================= FOOTER ================= */
+
         .footer {
-            clear: both;
             margin-top: 80px;
             text-align: center;
             font-size: 13px;
-            color: #777;
-            border-top: 1px solid #ddd;
+            color: #888;
+            border-top: 1px solid #eee;
             padding-top: 15px;
         }
 
+        /* ================= BUTTONS ================= */
+
+        .btn-group {
+            margin-top: 25px;
+        }
+
         button {
-            margin-top: 30px;
             padding: 10px 20px;
-            background: #c58f84;
+            background: #b67c72;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
         }
+
+            button:hover {
+                background: #9d665c;
+            }
+
+        /* ================= PRINT ================= */
 
         @@media print {
             body {
@@ -142,101 +206,123 @@
                 border-radius: 0;
             }
 
-            button {
+            .btn-group {
                 display: none;
             }
 
             @@page {
                 size: A4;
-                margin: 10mm;
+                margin: 12mm;
             }
         }
     </style>
 </head>
+
 <body>
 
-<div class="invoice-container">
+    <div class="invoice-container">
 
-    <div class="header">
-        <div class="brand">
-            <h2>MIEL Collections</h2>
-            <p>12 Woodbine Close Lisarow, NSW 2250</p>
-            <p>Email: minimuthuppu@mielcollections.com</p>
-            <p>Phone: 0450095524</p>
+        <!-- HEADER -->
+        <div class="header">
+            <div class="brand">
+                <h2>MIEL Collections</h2>
+                <p>12 Woodbine Close Lisarow, NSW 2250</p>
+                <p>Email: minimuthuppu@mielcollections.com</p>
+                <p>Phone: 0450095524</p>
+            </div>
+
+            <div class="invoice-title">
+                <h1>INVOICE</h1>
+                <p>No: <span>@Model.InvoiceNo</span></p>
+            </div>
         </div>
 
-        <div class="invoice-title">
-            <h1>INVOICE</h1>
-            <p><strong>No:</strong> <span>@Model.InvoiceNo</span></p>
+        <!-- BILL SECTION -->
+        <div class="bill-section">
+
+            <div class="bill-left">
+                <h3>Bill To</h3>
+                <p><strong>@Model.CustomerName</strong></p>
+                <p>@Model.CustomerAddress</p>
+                <p>@Model.CustomerCity - @Model.CustomerPostcode</p>
+                <p>Email: @Model.CustomerEmail</p>
+                <p>Mobile: @Model.CustomerMobile</p>
+            </div>
+
+            <div class="bill-right">
+                <p><strong>Date:</strong> @Model.SalesDate.ToString("dd-MM-yyyy")</p>
+                <p><strong>Payment Method:</strong> @Model.PaymentType</p>
+                <p><strong>Customer ID:</strong> @Model.CustomerId</p>
+            </div>
+
         </div>
-    </div>
 
-    <div class="info-section">
-        <p><strong>Date:</strong> @Model.SalesDate.ToString("dd-MM-yyyy")</p>
-        <p><strong>Payment Method:</strong> @Model.PaymentType</p>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Variant</th>
-                <th>Batch</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Discount</th>
-                <th>GST</th>
-                <th>Net</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                int i = 1;
-            }
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-                    <td>@i</td>
-                    <td>@item.varientid</td>
-                    <td>@item.BatchNo</td>
-                    <td>@item.Quantity</td>
-                    <td>@item.SellingPrice.ToString("0.00")</td>
-                    <td>@item.DiscAmount.ToString("0.00")</td>
-                    <td>@item.TaxAmount.ToString("0.00")</td>
-                    <td>@item.NetAmount.ToString("0.00")</td>
-                </tr>
-                i++;
-            }
-        </tbody>
-    </table>
-
-    <div class="totals">
+        <!-- ITEMS TABLE -->
         <table>
-            <tr>
-                <td>Total Discount:</td>
-                <td>@Model.TotalDiscount.ToString("0.00")</td>
-            </tr>
-            <tr>
-                <td>GST:</td>
-                <td>@Model.GstAmount.ToString("0.00")</td>
-            </tr>
-            <tr class="grand">
-                <td>Grand Total:</td>
-                <td>@Model.NetAmount.ToString("0.00")</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Variant</th>
+                    <th>Batch</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>GST</th>
+                    <th>Net</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 1;
+                }
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.varientid</td>
+                        <td>@item.BatchNo</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.SellingPrice.ToString("0.00")</td>
+                        <td>@item.DiscAmount.ToString("0.00")</td>
+                        <td>@item.TaxAmount.ToString("0.00")</td>
+                        <td>@item.NetAmount.ToString("0.00")</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
         </table>
+
+        <!-- TOTALS -->
+        <div class="totals">
+            <table>
+                <tr>
+                    <td>Total Discount</td>
+                    <td>@Model.TotalDiscount.ToString("0.00")</td>
+                </tr>
+                <tr>
+                    <td>GST</td>
+                    <td>@Model.GstAmount.ToString("0.00")</td>
+                </tr>
+                <tr class="grand">
+                    <td>Grand Total</td>
+                    <td>@Model.NetAmount.ToString("0.00")</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            © Miel Collections. All Rights Reserved.<br />
+            Thank you for shopping with us!
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="btn-group">
+            <button onclick="window.print()">Print Invoice</button>
+            <button onclick="history.back()">Back</button>
+        </div>
+
     </div>
-
-    <div class="footer">
-        © Miel Collections. All Rights Reserved.
-        <br />
-        Thank you for shopping with us!
-    </div>
-
-    <button onclick="window.print()">Print Invoice</button>
-        <button onclick="history.back()">Back</button>
-
-</div>
 
 </body>
 </html>
