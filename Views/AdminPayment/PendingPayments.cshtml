@@ -3,6 +3,7 @@
     ViewData["Title"] = "payment list";
     Layout = "_AdminLayout";
 }
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <h2>Pending PayID Payments</h2>
 
@@ -32,3 +33,24 @@
         }
     </tbody>
 </table>
+@{
+    var message = TempData["SuccessMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '@message',
+            confirmButtonText: 'OK'
+        });
+    </script>
+}
+
+
+
+
+
+
