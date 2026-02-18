@@ -6,6 +6,9 @@
         public string Size { get; set; }
         public decimal Rate { get; set; }
         public int VariantId { get; set; }
+        public int QuantityOnHand { get; set; }
+        public int DefaultQty { get; set; } = 1;
+
     }
     public class SpecificationVM
     {

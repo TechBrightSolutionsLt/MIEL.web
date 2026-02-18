@@ -38,9 +38,15 @@
                             <td>@item.SupplierName</td>
                             <td class="text-end">@item.GrandTotal.ToString("0.00")</td>
                             <td>
-                                <a asp-action="Edit"
+                                @* <a asp-action="Edit"
                                    asp-route-id="@item.PurchaseId"
                                    class="btn btn-sm btn-warning">
+                                    Edit
+                                </a> *@
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.PurchaseId"
+                                   class="btn btn-sm btn-warning"
+                                   onclick="return confirm(' Do you want to edit this purchase record?')">
                                     Edit
                                 </a>
 
