@@ -20,6 +20,7 @@ namespace MIEL.web.Models.ViewModel
 
         // Item entry
         public int ProductId { get; set; }
+        public string ProductCode { get; set; }
         public string Color { get; set; }
         public string Size { get; set; }
         public string VariantCode { get; set; }
