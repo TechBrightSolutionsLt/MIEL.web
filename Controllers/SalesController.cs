@@ -161,6 +161,7 @@ namespace MIEL.web.Controllers
         {
             var sale = await _context.SalesMasters
                 .Include(s => s.SalesItems)
+                .Include(s => s.Customer)   // ✅ CORRECT NAVIGATION NAME
                 .FirstOrDefaultAsync(s => s.SalesId == id);
 
             if (sale == null)
@@ -175,6 +176,16 @@ namespace MIEL.web.Controllers
                 TotalDiscount = sale.TotalDiscount,
                 GstAmount = sale.GstAmount,
                 NetAmount = sale.NetAmount,
+
+                // ✅ CUSTOMER DETAILS
+                CustomerId = sale.Customer.CustomerId,
+                CustomerName = sale.Customer.FirstName + " " + sale.Customer.LastName,
+                CustomerEmail = sale.Customer.Email,
+                CustomerMobile = sale.Customer.MobileNumber,
+                CustomerAddress = sale.Customer.Address,
+                CustomerCity = sale.Customer.City,
+                CustomerPostcode = sale.Customer.Postcode,
+
                 Items = sale.SalesItems.Select(i => new SalesItemVM
                 {
                     varientid = i.varientid,
