@@ -778,9 +778,6 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
         }
 
 
-
-        [HttpGet]
-     
         public IActionResult ConfirmCOD(int salesId)
         {
             var sales = _context.SalesMasters
@@ -799,7 +796,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             var order = new OrderVM
             {
                 CustomerId = sales.CustomerId,
-                SalesId = sales.SalesId, // <-- Save the SalesMaster ID here
+                SalesId = sales.SalesId,
                 TotalAmount = sales.TotalAmount,
                 OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 PaymentStatus = "NotPaid",
@@ -809,11 +806,45 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // ✅ Clear customer's cart
+            // ✅ UPDATE INVENTORY
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == sales.CustomerId)
+                .ToList();
+
+            foreach (var item in cartItems)
+            {
+                int variantId = item.VariantId;
+                int cartQty = item.Quantity;
+
+                // Update InventoryBatch
+                var batch = _context.InventoryBatch
+                    .Where(b => b.varientid == variantId)
+                    .OrderByDescending(b => b.InventoryBatchId)
+                    .FirstOrDefault();
+
+                if (batch != null)
+                {
+                    batch.QuantityOut += cartQty;
+                }
+
+                // Update QuantityOnHand
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == variantId);
+
+                if (variant != null)
+                {
+                    variant.QuantityOnHand -= cartQty;
+                }
+            }
+
+            _context.SaveChanges();
+
+            // ✅ Clear Cart
             ClearCustomerCart(sales.CustomerId);
 
             return RedirectToAction("OrderSuccess", new { salesId = salesId });
         }
+
 
 
         private void ClearCustomerCart(int customerId)
@@ -849,12 +880,11 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             if (sales == null)
                 return RedirectToAction("Cart", "Cart");
 
-            // Mark as PayID payment type (pending confirmation)
+            // Mark payment type
             sales.PaymentType = "PayID";
-            sales.paysts = 0; // still pending
+            sales.paysts = 0; // pending
             _context.SaveChanges();
 
-            // ✅ Create an Order entry immediately
             var orderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             var order = new OrderVM
@@ -870,27 +900,63 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // Clear customer's cart/session if you want
-            // ClearCustomerCart(sales.CustomerId); 
-            // HttpContext.Session.Remove("SalesId");
+            // ✅ UPDATE INVENTORY
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == sales.CustomerId)
+                .ToList();
 
-            // Prepare ViewModel to show on PayIDPage
+            foreach (var item in cartItems)
+            {
+                int variantId = item.VariantId;
+                int cartQty = item.Quantity;
+
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == variantId);
+
+                // 🚨 Safety Check
+                if (variant == null || variant.QuantityOnHand < cartQty)
+                {
+                    return RedirectToAction("Cart", "Cart");
+                }
+
+                // 🔹 Update Batch
+                var batch = _context.InventoryBatch
+                    .Where(b => b.varientid == variantId)
+                    .OrderByDescending(b => b.InventoryBatchId)
+                    .FirstOrDefault();
+
+                if (batch != null)
+                {
+                    batch.QuantityOut += cartQty;
+                }
+
+                // 🔹 Reduce Stock
+                variant.QuantityOnHand -= cartQty;
+            }
+
+            _context.SaveChanges();
+
+            // ✅ Clear Cart
+            ClearCustomerCart(sales.CustomerId);
+
+            // Prepare ViewModel
             var vm = new PayIDViewModel
             {
                 SalesId = sales.SalesId,
-                OrderId = order.Id,               // <-- Order ID saved
-                OrderNumber = order.OrderNumber,  // <-- show this as invoice
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
                 TotalAmount = sales.TotalAmount,
-                PayId = 0430823457,               // static PayID
+                PayId = 0430823457,
                 Email = "binoyjoseph@y7mail.com"
             };
-            ClearCustomerCart(sales.CustomerId);
+
             return View("PayIDPage", vm);
         }
 
 
 
-   
+
+
 
         public IActionResult Privacy()
         {
