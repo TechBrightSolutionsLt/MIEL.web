@@ -1,6 +1,7 @@
 ﻿@model MIEL.web.Models.ViewModel.StockReportVM
 @{
     ViewData["Title"] = "Stock Report";
+    Layout = "_AdminLayout";
 }
 
 <div class="container-fluid">
@@ -159,59 +160,68 @@
             var totalSellingValue = Model.BatchDetails.Sum(x => x.SellingPrice * x.CurrentStock);
         }
 
-        <table class="table table-striped table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>Product</th>
-                    <th>Colour</th>
-                    <th>Size</th>
-                    <th>Batch</th>
-                    <th>Qty In</th>
-                    <th>Qty Out</th>
-                    <th>Current</th>
-                    <th>Cost(INR)</th>
-                    <th>Selling(AUD)</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach (var item in Model.BatchDetails)
-                {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
                     <tr>
-                        <td>@item.ProductName</td>
-                        <td>@item.Colour</td>
-                        <td>@item.Size</td>
-                        <td>@item.BatchNo</td>
-                        <td>@item.QuantityIn</td>
-                        <td>@item.QuantityOut</td>
-                        <td>
-                            @if (item.CurrentStock <= 0)
-                            {
-                                <span class="badge bg-danger">@item.CurrentStock</span>
-                            }
-                            else if (item.CurrentStock < 5)
-                            {
-                                <span class="badge bg-warning text-dark">@item.CurrentStock</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-light text-dark border">@item.CurrentStock</span>
-                            }
-                        </td>
-                        <td>@item.CostPrice</td>
-                        <td>@item.SellingPrice</td>
+                        <th>Product</th>
+                        <th>Colour</th>
+                        <th>Size</th>
+                        <th>Batch</th>
+                        <th>Qty In</th>
+                        <th>Qty Out</th>
+                        <th>Current</th>
+                        <th>Cost(INR)</th>
+                        <th>Selling(AUD)</th>
                     </tr>
-                }
-            </tbody>
+                </thead>
 
-            <tfoot>
-                <tr class="table-dark">
-                    <th colspan="7" class="text-end">Total Stock Value :</th>
-                    <th>@totalCostValue.ToString("N2")</th>
-                    <th>@totalSellingValue.ToString("N2")</th>
-                </tr>
-            </tfoot>
-        </table>
+                <tbody>
+                    @foreach (var item in Model.BatchDetails)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td>@item.Colour</td>
+                            <td>@item.Size</td>
+                            <td>@item.BatchNo</td>
+                            <td>@item.QuantityIn</td>
+                            <td>@item.QuantityOut</td>
+                            <td>
+                                @if (item.CurrentStock <= 0)
+                                {
+                                    <span class="badge bg-danger">@item.CurrentStock</span>
+                                }
+                                else if (item.CurrentStock < 5)
+                                {
+                                    <span class="badge bg-warning text-dark">@item.CurrentStock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-dark border">@item.CurrentStock</span>
+                                }
+                            </td>
+                            <td>@item.CostPrice</td>
+                            <td>@item.SellingPrice</td>
+                        </tr>
+                    }
+                </tbody>
+
+                <tfoot class="print-total">
+                    <tr>
+                        <td colspan="7" class="text-end fw-bold">
+                            Total Stock Value :
+                        </td>
+                        <td colspan="2" class="fw-bold">
+                            ₹ @totalCostValue.ToString("N2")
+                            &nbsp;&nbsp;
+                            AUD @totalSellingValue.ToString("N2")
+                        </td>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+      
 
 
         <!-- FOOTER -->
@@ -243,33 +253,43 @@
 
 <!-- PRINT STYLES -->
 <style>
-    @@media print {
+@@page {
+    size: A4 landscape;
+    margin: 10mm;
+}
 
-        body {
-            font-size: 12px;
-        }
+@@media print {
 
-        .no-print {
-            display: none !important;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table, th, td {
-            border: 1px solid black;
-        }
-
-        th {
-            background-color: #f2f2f2 !important;
-            color: black !important;
-        }
-
-        h4 {
-            margin-top: 25px;
-        }
-
+    body {
+        font-size: 10px;
     }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid black !important;
+        padding: 4px !important;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+}
+
+
 </style>
