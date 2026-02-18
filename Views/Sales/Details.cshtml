@@ -42,20 +42,29 @@
                         <td>@item.NetAmount.ToString("0.00")</td>
 
                         <td>
-                           
+
+                            <a asp-action="Print"
+                               asp-route-id="@sale.SalesId"
+                               target="_blank"
+                               class="btn btn-info btn-sm">
+                                🖨 Print
+                            </a>
+
                             <a asp-action="Edit"
                                asp-route-id="@sale.SalesId"
                                class="btn btn-warning btn-sm">
-                                Edit
+                                ✏ Edit
                             </a>
-                           
 
-                                        <a asp-action="Delete" asp-route-id="@sale.SalesId"
+                            <a asp-action="Delete"
+                               asp-route-id="@sale.SalesId"
                                class="btn btn-danger btn-sm"
                                onclick="return confirm('Are you sure you want to delete this sale?');">
                                 🗑 Delete
                             </a>
+
                         </td>
+
 
 
                     </tr>

@@ -1,11 +1,12 @@
 ﻿@model List<MIEL.web.Models.EntityModels.OrderVM>
+
 @{
-    ViewData["Title"] = "payment list";
+    ViewData["Title"] = "Pending Payments";
     Layout = "_AdminLayout";
 }
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<h2>Pending PayID Payments</h2>
+<div class="container-fluid">
 
 <table class="table table-bordered">
     <thead>
@@ -54,3 +55,114 @@
 
 
 
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Verification Pending Payments</h3>
+    </div>
+
+    <!-- 🔎 Search Section -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <form method="get">
+                <div class="input-group">
+                    <input type="text"
+                           name="search"
+                           value="@ViewBag.Search"
+                           class="form-control"
+                           placeholder="Search by Order No or Customer Name" />
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+
+                    <a asp-action="PendingPayments"
+                       class="btn btn-secondary">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📋 Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order No</th>
+                            <th>Customer</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th width="120">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.OrderNumber</td>
+
+                                    <td>
+                                        @item.Customer?.FirstName
+                                        @item.Customer?.LastName
+                                    </td>
+
+                                    <td>
+                                        ₹ @item.TotalAmount.ToString("N2")
+                                    </td>
+
+                                    <td>
+                                        @if (item.PaymentStatus == "NotPaid")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Not Paid
+                                            </span>
+                                        }
+                                        else if (item.PaymentStatus == "Paid")
+                                        {
+                                            <span class="badge bg-success">
+                                                Paid
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @item.PaymentStatus
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <a asp-action="Verify"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-primary">
+                                            Verify
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center text-muted py-4">
+                                    No pending payments found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
