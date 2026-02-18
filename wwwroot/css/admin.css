@@ -178,6 +178,41 @@ body {
     right: 0;
     z-index: 999;
 }
+/* ===============================
+   SIDEBAR SUBMENU (HOVER EXPAND)
+================================ */
+
+/* Parent li (like MASTERS / REPORTS) */
+.admin-sidebar ul li {
+    position: relative;
+}
+
+    /* Hide submenu by default */
+    .admin-sidebar ul li ul {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+        background-color: #f9f9f9;
+    }
+
+    /* Show submenu on hover */
+    .admin-sidebar ul li:hover > ul {
+        max-height: 500px; /* big enough to fit submenu */
+    }
+
+    /* Submenu links styling */
+    .admin-sidebar ul li ul li a {
+        padding-left: 40px;
+        font-size: 14px;
+        background: #f9f9f9;
+    }
+
+        /* Submenu hover */
+        .admin-sidebar ul li ul li a:hover {
+            background: #eaeaea;
+            color: #D19C97;
+        }
+
 
 /* ===============================
    RESPONSIVE
