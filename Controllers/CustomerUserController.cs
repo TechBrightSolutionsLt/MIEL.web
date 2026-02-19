@@ -4,6 +4,7 @@ using MIEL.web.Data; // your DbContext namespace
 using MIEL.web.Models.EntityModels;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
 
 namespace MIEL.web.Controllers
 {
@@ -19,7 +20,7 @@ namespace MIEL.web.Controllers
         // ================= LIST =================
         public async Task<IActionResult> Index()
         {
-            var users = await _context.users_TB.ToListAsync(); // Assuming DbSet<UserModel> Users
+            var users = await _context.users_TB.ToListAsync();
             return View(users);
         }
 
@@ -36,10 +37,14 @@ namespace MIEL.web.Controllers
             if (ModelState.IsValid)
             {
                 user.CreatedDate = DateTime.Now;
+                user.RoleId = 2;
                 _context.Add(user);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "User created successfully!";
                 return RedirectToAction(nameof(Index));
             }
+
+            // If validation fails, stay on the same page
             return View(user);
         }
 
@@ -58,45 +63,51 @@ namespace MIEL.web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, userModel user)
         {
-            if (id != user.CustomerId) return NotFound();
+            if (id != user.CustomerId)
+                return NotFound();
+
+            // 🔥 Remove Password validation for Edit
+            ModelState.Remove("Password");
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.CustomerId))
-                        return NotFound();
-                    else
-                        throw;
-                }
+                var existingUser = await _context.users_TB.FindAsync(id);
+                if (existingUser == null)
+                    return NotFound();
+
+                // Update only editable fields
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.Email = user.Email;
+                existingUser.MobileNumber = user.MobileNumber;
+                existingUser.Gender = user.Gender;
+                existingUser.Address = user.Address;
+                existingUser.City = user.City;
+                existingUser.Postcode = user.Postcode;
+
+                // DO NOT TOUCH PASSWORD
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "User Updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
+
             return View(user);
         }
+
 
         // ================= DELETE =================
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var user = await _context.users_TB.FirstOrDefaultAsync(u => u.CustomerId == id);
-            if (user == null) return NotFound();
-
-            return View(user);
-        }
-
-        [HttpPost, ActionName("Delete")]
+        // No separate Delete view now; handled in Index via POST
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var user = await _context.users_TB.FindAsync(id);
-            _context.users_TB.Remove(user);
-            await _context.SaveChangesAsync();
+            if (user != null)
+            {
+                _context.users_TB.Remove(user);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
