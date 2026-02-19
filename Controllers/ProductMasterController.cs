@@ -265,7 +265,7 @@ namespace MIEL.web.Controllers
 
             // ---------- 1. UPDATE PRODUCT ----------
             var product = _db.ProductMasters.First(p => p.ProductId == productId);
-
+            product.ProductCode = Convert.ToString(Request.Form["ProductCode"]);
             product.ProductName = Request.Form["ProductName"];
             product.CategoryId = Convert.ToInt32(Request.Form["CategoryId"]);
             product.ProductDescription = Request.Form["Description"];
