@@ -190,6 +190,7 @@
         });
 
 
+
     </script>
 }
 
@@ -210,4 +211,14 @@
         </script>
     }
 
-    
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        Swal.fire({
+            title: "Error!",
+            text: "@TempData["ErrorMessage"]",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+    </script>
+}
