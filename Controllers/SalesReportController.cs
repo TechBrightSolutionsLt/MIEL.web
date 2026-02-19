@@ -179,10 +179,97 @@ namespace MIEL.web.Controllers
         //}
         //}
         public async Task<IActionResult> Export(DateTime? fromDate, DateTime? toDate,
-     int? customerId, int? salesMode, string paymentType)
+       int? customerId, int? salesMode, string paymentType)
         {
-            var count = await _context.SalesMasters.CountAsync();
-            return Content("Total SalesMasters: " + count);
+            if (!fromDate.HasValue && !toDate.HasValue)
+            {
+                fromDate = DateTime.Today;
+                toDate = DateTime.Today;
+            }
+
+            var query = from s in _context.SalesMasters
+                        join u in _context.users_TB
+                            on s.CustomerId equals u.CustomerId
+                        join si in _context.SalesItems
+                            on s.SalesId equals si.SalesId
+                        join p in _context.ProColorSizeVariants
+                            on si.varientid equals p.varientid into pvGroup
+                        from p in pvGroup.DefaultIfEmpty()
+                        join n in _context.ProductMasters
+                            on p.ProductId equals n.ProductId into pmGroup
+                        from n in pmGroup.DefaultIfEmpty()
+                        select new { s, u, si, n };
+
+            if (fromDate.HasValue)
+            {
+                var from = fromDate.Value.Date;
+                query = query.Where(x => x.s.SalesDate >= from);
+            }
+
+            if (toDate.HasValue)
+            {
+                var to = toDate.Value.Date.AddDays(1);
+                query = query.Where(x => x.s.SalesDate < to);
+            }
+
+            if (customerId.HasValue)
+                query = query.Where(x => x.s.CustomerId == customerId);
+
+            if (salesMode.HasValue)
+                query = query.Where(x => x.s.salesmode == salesMode);
+
+            if (!string.IsNullOrEmpty(paymentType))
+                query = query.Where(x => x.s.PaymentType == paymentType);
+
+            var data = await query
+                .Select(x => new
+                {
+                    x.s.InvoiceNo,
+                    x.s.SalesDate,
+                    CustomerName = x.u.FirstName + " " + x.u.LastName,
+                    ProductName = x.n != null ? x.n.ProductName : "",
+                    BatchNumber = x.si.BatchNo ?? "",
+                    x.s.NetAmount
+                })
+                .OrderByDescending(x => x.SalesDate)
+                .ToListAsync();
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Sales Report");
+
+                worksheet.Cell(1, 1).Value = "Invoice No";
+                worksheet.Cell(1, 2).Value = "Date";
+                worksheet.Cell(1, 3).Value = "Customer";
+                worksheet.Cell(1, 4).Value = "Product";
+                worksheet.Cell(1, 5).Value = "Batch";
+                worksheet.Cell(1, 6).Value = "Net Amount";
+
+                int row = 2;
+
+                foreach (var item in data)
+                {
+                    worksheet.Cell(row, 1).Value = item.InvoiceNo ?? "";
+                    worksheet.Cell(row, 2).Value = item.SalesDate;
+                    worksheet.Cell(row, 2).Style.DateFormat.Format = "dd-MM-yyyy";
+                    worksheet.Cell(row, 3).Value = item.CustomerName ?? "";
+                    worksheet.Cell(row, 4).Value = item.ProductName ?? "";
+                    worksheet.Cell(row, 5).Value = item.BatchNumber ?? "";
+                    worksheet.Cell(row, 6).Value = item.NetAmount;
+
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    return File(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "SalesReport.xlsx");
+                }
+            }
         }
     }
     }
