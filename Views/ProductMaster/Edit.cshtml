@@ -15,6 +15,15 @@
 
 <input type="hidden" name="ProductId" value="@Model.Product.ProductId" />
 
+<label>Product Code</label>
+<input type="text" name="ProductCode"
+           value="@Model.Product.ProductCode"
+       class="form-control" />
+
+
+
+
+
 <label>Product Name</label>
 <input type="text" name="ProductName"
        value="@Model.Product.ProductName"
@@ -31,10 +40,18 @@
         }
     </select>
 
+    <label>Description</label>
+    <textarea name="Description"
+              class="form-control"
+              rows="4">@Model.Product.ProductDescription</textarea>
+
+
+
 <h4>Specifications</h4>
 @foreach (var s in Model.Specifications)
 {
-    <label>@s.Id</label>
+ @*    <label>@s.Id</label> *@
+        <label>@s.CategorySpecification.SpecName</label>
     <input type="text"
            name="Specs[@s.Id]"
            value="@s.specificationvalue"

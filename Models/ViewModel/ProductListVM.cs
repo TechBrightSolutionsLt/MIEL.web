@@ -23,6 +23,7 @@
         public string ImagePath { get; set; }
 
         public decimal? NetAmount { get; set; }
+        public string? sizechartPath { get; set; }
 
         public string ProductDescription { get; set; }
         public List<string> Images { get; set; }

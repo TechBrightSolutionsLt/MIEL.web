@@ -115,7 +115,7 @@ namespace MIEL.web.Controllers
                     ProductName = p.ProductName,
                     Brand = p.Brand,
                     ProductDescription = p.ProductDescription,
-
+                    sizechartPath = p.sizechartPath,
                     ImagePath = _context.ProductImages
                         .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
                         .Select(i => i.ImgPath)
@@ -723,15 +723,14 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 })
                 .FirstOrDefault();
 
-            var paymentVM = new PaymentVM
+            var reviewVM = new ReviewOrderVM
             {
-                SalesId = salesMasters.SalesId,
-                InvoiceNo = salesMasters.InvoiceNo,
-                TotalAmount = salesMasters.TotalAmount,
-                Items = cart
+                CartItems = cart,
+                Address = address,
+                TotalAmount = salesMasters.TotalAmount
             };
 
-            return View("Payment", paymentVM);
+            return View("ReviewOrder", reviewVM);
         }
 
         [HttpPost]

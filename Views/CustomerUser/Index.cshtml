@@ -1,0 +1,65 @@
+﻿@model IEnumerable<MIEL.web.Models.EntityModels.userModel>
+@{
+    ViewData["Title"] = "User List";
+    Layout = "_AdminLayout";
+}
+
+<h2>User List</h2>
+
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Add New User</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Gender</th>
+            <th>City</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.FirstName</td>
+                <td>@user.LastName</td>
+                <td>@user.Email</td>
+                <td>@user.MobileNumber</td>
+                <td>@user.Gender</td>
+                <td>@user.City</td>
+                <td>@user.CreatedDate.ToString("dd-MM-yyyy")</td>
+                <td>
+                    <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@user.CustomerId" onclick="return confirm('Are you sure you want to edit?')">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@user.CustomerId" method="post" style="display:inline-block">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@section Scripts {
+    <script>
+        // Read TempData message
+        var successMessage = '@TempData["SuccessMessage"]';
+        if (successMessage) {
+            Swal.fire({
+                icon: 'success',            // popup type
+                title: 'Success',            // popup title
+                text: successMessage,        // message from TempData
+                confirmButtonText: 'OK'      // button text
+            });
+        }
+    </script>
+}
+

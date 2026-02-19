@@ -11,10 +11,13 @@ namespace MIEL.web.Models.EntityModels
 
         [ForeignKey("ProductMaster")]
         public int ProductId { get; set; }
-        
-        [ForeignKey("Specifications")]
+
+        //[ForeignKey("Specifications")]
+        [ForeignKey("CategorySpecification")]
         public int Id { get; set; }
         public string specificationvalue { get; set; }
-       
+
+        public virtual CategorySpecification CategorySpecification { get; set; }
+
     }
 }

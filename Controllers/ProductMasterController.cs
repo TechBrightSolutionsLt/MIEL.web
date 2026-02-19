@@ -6,6 +6,7 @@ using MIEL.web.Models.ViewModel;
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MIEL.web.Controllers
 {
@@ -42,20 +43,26 @@ namespace MIEL.web.Controllers
         [HttpPost]
         public JsonResult GetSpecifications(int categoryId)
         {
-            var specs = _db.Specifications
-                .Where(s => s.CategoryId == categoryId)
-                .Select(s => new
-                {
-                    id = s.Id,                 // IMPORTANT
-                    specName = s.SpecName,
-                    optionType = s.OptionType,
-                    options = s.Options
-                })
-                .ToList();
+            try
+            {
+                var specs = _db.Specifications
+                    .Where(s => s.CategoryId == categoryId)
+                    .Select(s => new
+                    {
+                        id = s.Id,                 // IMPORTANT
+                        specName = s.SpecName,
+                        optionType = s.OptionType,
+                        options = s.Options
+                    })
+                    .ToList();
 
-            return Json(specs);
+                return Json(specs);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
-
         // ================= SAVE PRODUCT (MAIN SAVE BUTTON) =================
         [HttpPost]
         public IActionResult SaveProduct()
@@ -195,9 +202,10 @@ namespace MIEL.web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
+                // TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
+                TempData["ErrorMessage"] = "ProductCode already Exists";
                 return RedirectToAction("Index");
-            }
+            } 
         }
 
         // ================= LIST =================
@@ -228,9 +236,15 @@ namespace MIEL.web.Controllers
             {
                 Product = _db.ProductMasters.First(p => p.ProductId == id),
                 Categories = _db.Categories.ToList(),
+                //Specifications = _db.productspecifications
+                //                    .Where(s => s.ProductId == id)
+                //                    .ToList(),
                 Specifications = _db.productspecifications
-                                    .Where(s => s.ProductId == id)
-                                    .ToList(),
+                    .Where(s => s.ProductId == id)
+                    .Include(s => s.CategorySpecification)
+                    .ToList(),
+
+              
                 Variants = _db.ProColorSizeVariants
                                     .Where(v => v.ProductId == id)
                                     .ToList(),
@@ -248,163 +262,173 @@ namespace MIEL.web.Controllers
         [HttpPost]
         public IActionResult Update()
         {
-            int productId = Convert.ToInt32(Request.Form["ProductId"]);
-
-            // ---------- 1. UPDATE PRODUCT ----------
-            var product = _db.ProductMasters.First(p => p.ProductId == productId);
-
-            product.ProductName = Request.Form["ProductName"];
-            product.CategoryId = Convert.ToInt32(Request.Form["CategoryId"]);
-
-            _db.SaveChanges();
-            TempData["SuccessMessage"] = "Product Updated successfully!";
-
-
-            // =====================================================
-            // 🔥 IMAGE UPDATE CODE GOES HERE (YOUR CODE)
-            // =====================================================
-
-            var uploadDir = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot/proimg"
-            );
-
-            if (!Directory.Exists(uploadDir))
-                Directory.CreateDirectory(uploadDir);
-
-            // ---------- MAIN IMAGE ----------
-            var mainFile = Request.Form.Files["Image"];
-            if (mainFile != null && mainFile.Length > 0)
+            try
             {
-                var oldMainId = Convert.ToInt32(Request.Form["OldMainImageId"]);
-                var oldMain = _db.ProductImages
-                                 .First(x => x.ImgId == oldMainId);
+                int productId = Convert.ToInt32(Request.Form["ProductId"]);
 
-                var fileName = Guid.NewGuid() + Path.GetExtension(mainFile.FileName);
-                var path = Path.Combine(uploadDir, fileName);
+                // ---------- 1. UPDATE PRODUCT ----------
+                var product = _db.ProductMasters.First(p => p.ProductId == productId);
+                product.ProductCode = Convert.ToString(Request.Form["ProductCode"]);
+                product.ProductName = Request.Form["ProductName"];
+                product.CategoryId = Convert.ToInt32(Request.Form["CategoryId"]);
+                product.ProductDescription = Request.Form["Description"];
 
-                using var stream = new FileStream(path, FileMode.Create);
-                mainFile.CopyTo(stream);
-
-                oldMain.ImgPath = "/proimg/" + fileName;
-            }
-
-            _db.SaveChanges();
-
-            // ---------- OTHER IMAGES ----------
-            var oldImageIds = Request.Form["OldImageIds"];
-
-            for (int i = 0; i < oldImageIds.Count; i++)
-            {
-                var file = Request.Form.Files["Image" + (i + 2)];
-                if (file == null || file.Length == 0)
-                    continue;
-
-                int imgId = Convert.ToInt32(oldImageIds[i]);
-
-                var oldImg = _db.ProductImages
-                    .First(x => x.ImgId == imgId);
-
-                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                var path = Path.Combine(uploadDir, fileName);
-
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    file.CopyTo(stream);
-                }
-
-                oldImg.ImgPath = "/proimg/" + fileName;
-            }
-
-            _db.SaveChanges();
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Product Updated successfully!";
 
 
-            // ---------- UPDATE SIZE CHART ----------
-            var sizeChartFile = Request.Form.Files["SizeChartImg"];
+                // =====================================================
+                // 🔥 IMAGE UPDATE CODE GOES HERE (YOUR CODE)
+                // =====================================================
 
-            if (sizeChartFile != null && sizeChartFile.Length > 0)
-            {
-                var sizeChartDir = Path.Combine(
+                var uploadDir = Path.Combine(
                     Directory.GetCurrentDirectory(),
-                    "wwwroot/sizecharts"
+                    "wwwroot/proimg"
                 );
 
-                if (!Directory.Exists(sizeChartDir))
-                    Directory.CreateDirectory(sizeChartDir);
+                if (!Directory.Exists(uploadDir))
+                    Directory.CreateDirectory(uploadDir);
 
-                // delete old file
-                if (!string.IsNullOrEmpty(product.sizechartPath))
+                // ---------- MAIN IMAGE ----------
+                var mainFile = Request.Form.Files["Image"];
+                if (mainFile != null && mainFile.Length > 0)
                 {
-                    var oldPath = Path.Combine(
+                    var oldMainId = Convert.ToInt32(Request.Form["OldMainImageId"]);
+                    var oldMain = _db.ProductImages
+                                     .First(x => x.ImgId == oldMainId);
+
+                    var fileName = Guid.NewGuid() + Path.GetExtension(mainFile.FileName);
+                    var path = Path.Combine(uploadDir, fileName);
+
+                    using var stream = new FileStream(path, FileMode.Create);
+                    mainFile.CopyTo(stream);
+
+                    oldMain.ImgPath = "/proimg/" + fileName;
+                }
+
+                _db.SaveChanges();
+
+                // ---------- OTHER IMAGES ----------
+                var oldImageIds = Request.Form["OldImageIds"];
+
+                for (int i = 0; i < oldImageIds.Count; i++)
+                {
+                    var file = Request.Form.Files["Image" + (i + 2)];
+                    if (file == null || file.Length == 0)
+                        continue;
+
+                    int imgId = Convert.ToInt32(oldImageIds[i]);
+
+                    var oldImg = _db.ProductImages
+                        .First(x => x.ImgId == imgId);
+
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var path = Path.Combine(uploadDir, fileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+
+                    oldImg.ImgPath = "/proimg/" + fileName;
+                }
+
+                _db.SaveChanges();
+
+
+                // ---------- UPDATE SIZE CHART ----------
+                var sizeChartFile = Request.Form.Files["SizeChartImg"];
+
+                if (sizeChartFile != null && sizeChartFile.Length > 0)
+                {
+                    var sizeChartDir = Path.Combine(
                         Directory.GetCurrentDirectory(),
-                        "wwwroot",
-                        product.sizechartPath.TrimStart('/')
+                        "wwwroot/sizecharts"
                     );
 
-                    if (System.IO.File.Exists(oldPath))
-                        System.IO.File.Delete(oldPath);
+                    if (!Directory.Exists(sizeChartDir))
+                        Directory.CreateDirectory(sizeChartDir);
+
+                    // delete old file
+                    if (!string.IsNullOrEmpty(product.sizechartPath))
+                    {
+                        var oldPath = Path.Combine(
+                            Directory.GetCurrentDirectory(),
+                            "wwwroot",
+                            product.sizechartPath.TrimStart('/')
+                        );
+
+                        if (System.IO.File.Exists(oldPath))
+                            System.IO.File.Delete(oldPath);
+                    }
+
+                    var fileName = Guid.NewGuid() + Path.GetExtension(sizeChartFile.FileName);
+                    var path = Path.Combine(sizeChartDir, fileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        sizeChartFile.CopyTo(stream);
+                    }
+
+                    product.sizechartPath = "/sizecharts/" + fileName;
+                    _db.SaveChanges();
                 }
 
-                var fileName = Guid.NewGuid() + Path.GetExtension(sizeChartFile.FileName);
-                var path = Path.Combine(sizeChartDir, fileName);
+                // ---------- 2. UPDATE SPECIFICATIONS ----------
+                var specs = Request.Form
+                    .Where(x => x.Key.StartsWith("Specs["))
+                    .ToList();
 
-                using (var stream = new FileStream(path, FileMode.Create))
+                foreach (var spec in specs)
                 {
-                    sizeChartFile.CopyTo(stream);
+                    int specId = int.Parse(
+                        spec.Key.Replace("Specs[", "").Replace("]", "")
+                    );
+
+                    var ps = _db.productspecifications
+                        .FirstOrDefault(x => x.ProductId == productId && x.Id == specId);
+
+                    if (ps != null)
+                    {
+                        ps.specificationvalue = spec.Value;
+                    }
                 }
 
-                product.sizechartPath = "/sizecharts/" + fileName;
                 _db.SaveChanges();
-            }
 
-            // ---------- 2. UPDATE SPECIFICATIONS ----------
-            var specs = Request.Form
-                .Where(x => x.Key.StartsWith("Specs["))
-                .ToList();
+                // ---------- 3. UPDATE COLOR–SIZE VARIANTS ----------
+                // Remove existing variants
+                var oldVariants = _db.ProColorSizeVariants
+                    .Where(v => v.ProductId == productId)
+                    .ToList();
 
-            foreach (var spec in specs)
-            {
-                int specId = int.Parse(
-                    spec.Key.Replace("Specs[", "").Replace("]", "")
-                );
+                _db.ProColorSizeVariants.RemoveRange(oldVariants);
+                _db.SaveChanges();
 
-                var ps = _db.productspecifications
-                    .FirstOrDefault(x => x.ProductId == productId && x.Id == specId);
+                // Insert new variants
+                var colours = Request.Form["colour[]"];
+                var sizes = Request.Form["size[]"];
 
-                if (ps != null)
+                for (int i = 0; i < colours.Count; i++)
                 {
-                    ps.specificationvalue = spec.Value;
+                    _db.ProColorSizeVariants.Add(new procolrsizevarnt
+                    {
+                        ProductId = productId,
+                        colour = colours[i],
+                        size = sizes[i]
+                    });
                 }
+
+                _db.SaveChanges();
+
+                return RedirectToAction("List");
             }
-
-            _db.SaveChanges();
-
-            // ---------- 3. UPDATE COLOR–SIZE VARIANTS ----------
-            // Remove existing variants
-            var oldVariants = _db.ProColorSizeVariants
-                .Where(v => v.ProductId == productId)
-                .ToList();
-
-            _db.ProColorSizeVariants.RemoveRange(oldVariants);
-            _db.SaveChanges();
-
-            // Insert new variants
-            var colours = Request.Form["colour[]"];
-            var sizes = Request.Form["size[]"];
-
-            for (int i = 0; i < colours.Count; i++)
+            catch (Exception ex)
             {
-                _db.ProColorSizeVariants.Add(new procolrsizevarnt
-                {
-                    ProductId = productId,
-                    colour = colours[i],
-                    size = sizes[i]
-                });
+              // TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
+               TempData["ErrorMessage"] = "Product Code already exists!";
+                return RedirectToAction("Index");
             }
-
-            _db.SaveChanges();
-
-            return RedirectToAction("List");
         }
 
 
