@@ -6,6 +6,7 @@ using MIEL.web.Models.ViewModel;
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace MIEL.web.Controllers
 {
@@ -228,9 +229,15 @@ namespace MIEL.web.Controllers
             {
                 Product = _db.ProductMasters.First(p => p.ProductId == id),
                 Categories = _db.Categories.ToList(),
+                //Specifications = _db.productspecifications
+                //                    .Where(s => s.ProductId == id)
+                //                    .ToList(),
                 Specifications = _db.productspecifications
-                                    .Where(s => s.ProductId == id)
-                                    .ToList(),
+                    .Where(s => s.ProductId == id)
+                    .Include(s => s.CategorySpecification)
+                    .ToList(),
+
+              
                 Variants = _db.ProColorSizeVariants
                                     .Where(v => v.ProductId == id)
                                     .ToList(),
@@ -255,6 +262,7 @@ namespace MIEL.web.Controllers
 
             product.ProductName = Request.Form["ProductName"];
             product.CategoryId = Convert.ToInt32(Request.Form["CategoryId"]);
+            product.ProductDescription = Request.Form["Description"];
 
             _db.SaveChanges();
             TempData["SuccessMessage"] = "Product Updated successfully!";
