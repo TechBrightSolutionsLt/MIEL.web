@@ -78,14 +78,18 @@
                             <option value="">-- Search Product --</option>
                         </select>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Product Code</label>
+                        <input asp-for="ProductCode" id="ProductCode" class="form-control" readonly />
 
+                    </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Color</label>
                         <input id="Color"
                                name="Color"
                                class="form-control"
-                               placeholder="eg:- Red" />
+                               placeholder="eg:- Red"  />
                     </div>
 
                     <div class="col-md-2">
@@ -372,6 +376,12 @@
         // ✅ Update hidden inputs
         let hidden = $(`.hidden-item[data-index="${editingIndex}"]`);
 
+
+              hidden.find('.h-product-id').val(productId);
+    hidden.find('.h-product-code').val($('#ProductCode').val());
+    hidden.find('.h-color').val(color);
+    hidden.find('.h-size').val(size);
+
         hidden.find('[name$=".ProductName"]').val(productName);
         hidden.find('[name$=".VariantCode"]').val(variantCode);
         hidden.find('[name$=".Color"]').val(color);
@@ -431,6 +441,14 @@
                     <input type="hidden" name="Items[${itemIndex}].GstAmount" value="${gstAmount}">
                     <input type="hidden" name="Items[${itemIndex}].Amount" value="${netAmount}">
                     <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${sellingPrice}">
+
+
+        <input type="hidden" class="h-product-id" value="${productId}">
+        <input type="hidden" class="h-product-code" value="${$('#ProductCode').val()}">
+        <input type="hidden" class="h-color" value="${color}">
+        <input type="hidden" class="h-size" value="${size}">
+
+
                 </div>
             `);
 
@@ -446,8 +464,8 @@
             $(`.hidden-item[data-index="${index}"]`).remove();
         });
 
-        // ================= EDIT =================
-           $(document).on('click', '.btn-edit-item', function () {debugger;
+         // ================= EDIT =================
+           $(document).on('click', '.btn-edit-item', function () {
 
         let row = $(this).closest('tr');
         editingIndex = row.data('index');
@@ -456,15 +474,24 @@
            .siblings()
            .removeClass('table-warning');
 
-        // Load product + variant
-        $('#ProductId').val(row.data('product')).trigger('change');
-        $('#VariantCode').val(row.data('variant'));
+        let hidden = $(`.hidden-item[data-index="${editingIndex}"]`);
 
-        // Load color & size
-        $('#Color').val(row.data('color'));
-        $('#Size').val(row.data('size'));
+        // ===== LOAD PRODUCT =====
+        let productId = hidden.find('.h-product-id').val();
+        let productName = row.find('td:eq(0)').text();
+        let productCode = hidden.find('.h-product-code').val();
 
-        // Load pricing fields
+        let newOption = new Option(productName, productId, true, true);
+        $('#ProductId').append(newOption).trigger('change');
+
+        $('#ProductCode').val(productCode);
+
+        // ===== LOAD COLOR & SIZE =====
+        $('#Color').val(hidden.find('.h-color').val());
+        $('#Size').val(hidden.find('.h-size').val());
+
+        // ===== LOAD OTHER FIELDS =====
+        $('#VariantCode').val(row.find('td:eq(1)').text());
         $('#CostPrice').val(row.find('td:eq(2)').text());
         $('#Quantity').val(row.find('td:eq(3)').text());
         $('#DiscPercent').val(row.find('td:eq(4)').text().replace('%', ''));
@@ -474,17 +501,27 @@
     });
 
 
-    });
 
 
-        // ================= LOAD ITEMS FOR EDIT =================
-      var existingItems = @Html.Raw(
-                Newtonsoft.Json.JsonConvert.SerializeObject(Model.Items)
+
+    // ================= SAFE LOAD ITEMS FOR EDIT =================
+
+    var existingItems = @Html.Raw(
+                Newtonsoft.Json.JsonConvert.SerializeObject(
+                        Model.Items ?? new List<MIEL.web.Models.ViewModel.PurchaseItemVM>()
+                )
         );
+
+    console.log("Loaded Items:", existingItems);
 
     if (existingItems && existingItems.length > 0) {
 
         existingItems.forEach(function (item) {
+
+            let productId = item.ProductId || 0;
+            let productName = item.ProductName || '';
+           
+            let variantCode = item.VariantCode || '';
 
             let rate = parseFloat(item.Rate) || 0;
             let qty = parseInt(item.Quantity) || 0;
@@ -494,11 +531,28 @@
             let gstAmount = parseFloat(item.GstAmount) || 0;
             let netAmount = parseFloat(item.Amount) || 0;
             let sellingPrice = parseFloat(item.SellingPrice) || 0;
-            let variantCode = item.VariantCode || '';
-             let productName = item.ProductName || '';
 
+            // ===== SPLIT VARIANT CODE =====
+    let productCode = '';
+    let color = '';
+    let size = '';
+
+    let parts = variantCode.split('-');
+
+    if (parts.length >= 3) {
+        size = parts.pop();
+        color = parts.pop();
+        productCode = parts.join('-');
+    }
+
+
+            // ===== ADD TABLE ROW =====
             $('#itemsTableBody').append(`
-                <tr data-index="${itemIndex}" data-variant="${variantCode}">
+                <tr data-index="${itemIndex}"
+                    data-variant="${variantCode}"
+                    data-product="${productName}"
+                    data-color="${color}"
+                    data-size="${size}">
                     <td>${productName}</td>
                     <td>${variantCode}</td>
                     <td class="text-end">${rate.toFixed(2)}</td>
@@ -509,19 +563,18 @@
                     <td class="text-end">${gstAmount.toFixed(2)}</td>
                     <td class="text-end">${netAmount.toFixed(2)}</td>
                     <td class="text-end">${sellingPrice.toFixed(2)}</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-warning btn-edit-item">✎</button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-danger btn-remove-item">✖</button>
-                    </td>
+                    <td><button type="button" class="btn btn-sm btn-warning btn-edit-item">✎</button></td>
+                    <td><button type="button" class="btn btn-sm btn-danger btn-remove-item">✖</button></td>
                 </tr>
             `);
 
+            // ===== ADD HIDDEN FIELDS =====
             $('#hiddenItems').append(`
                 <div class="hidden-item" data-index="${itemIndex}">
                     <input type="hidden" name="Items[${itemIndex}].ProductName" value="${productName}">
                     <input type="hidden" name="Items[${itemIndex}].VariantCode" value="${variantCode}">
+                    <input type="hidden" name="Items[${itemIndex}].Color" value="${color}">
+                    <input type="hidden" name="Items[${itemIndex}].Size" value="${size}">
                     <input type="hidden" name="Items[${itemIndex}].Rate" value="${rate}">
                     <input type="hidden" name="Items[${itemIndex}].Quantity" value="${qty}">
                     <input type="hidden" name="Items[${itemIndex}].DiscPercent" value="${discPercent}">
@@ -530,12 +583,21 @@
                     <input type="hidden" name="Items[${itemIndex}].GstAmount" value="${gstAmount}">
                     <input type="hidden" name="Items[${itemIndex}].Amount" value="${netAmount}">
                     <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${sellingPrice}">
+
+                
+
+                  <input type="hidden" class="h-product-code" value="${productCode}">
+            <input type="hidden" class="h-color" value="${color}">
+            <input type="hidden" class="h-size" value="${size}">
                 </div>
             `);
 
             itemIndex++;
         });
     }
+
+
+       });
 
 
 

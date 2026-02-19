@@ -31,6 +31,7 @@
                         <input asp-for="PurchaseCode" class="form-control" readonly />
                     </div>
 
+
                     <div class="col-md-4">
                         <label class="form-label">Purchase Date</label>
                         <input asp-for="PurchaseDate" type="date" class="form-control" />
@@ -77,7 +78,11 @@
                                 <option value="">-- Search Product --</option>
                             </select>
                         </div>
-                 
+                    <div class="col-md-4">
+                        <label class="form-label">Product Code</label>
+                        <input asp-for="ProductCode" id="ProductCode" class="form-control" readonly />
+
+                    </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Color</label>
@@ -182,6 +187,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Product</th>
+                          
                             <th>Variant</th>
                             <th class="text-end">Rate</th>
                             <th class="text-end">Qty</th>
@@ -253,7 +259,8 @@
                         results: $.map(data, function (item) {
                             return {
                                 id: item.id,
-                                text: item.text
+                                text: item.text,
+                                code: item.code
                             };
                         })
                     };
@@ -261,12 +268,22 @@
             }
         });
 
+            $('#ProductId').on('select2:select', function (e) {
+
+        let selected = e.params.data; 
+
+        // Set Product Code
+        $('#ProductCode').val(selected.code);
+
+        // Generate variant also
+        generateVariantCode();
+    });
         // ================= VARIANT CODE =================
         $('#ProductId').on('select2:select', generateVariantCode);
         $('#Color, #Size').on('keyup', generateVariantCode);
 
         function generateVariantCode() {
-            let product = $('#ProductId').select2('data')[0]?.text;
+            let product = $('#ProductId').select2('data')[0]?.code;
             let color = $('#Color').val();
             let size = $('#Size').val();
 
@@ -364,6 +381,15 @@
                     .find('td:eq(9)').text(sellingPrice.toFixed(2));
 
                 let hidden = $(`.hidden-item[data-index="${editingIndex}"]`);
+
+
+              hidden.find('.h-product-id').val(productId);
+    hidden.find('.h-product-code').val($('#ProductCode').val());
+    hidden.find('.h-color').val(color);
+    hidden.find('.h-size').val(size);
+
+
+
                 hidden.find('[name$=".Rate"]').val(rate);
                 hidden.find('[name$=".Quantity"]').val(qty);
                 hidden.find('[name$=".DiscPercent"]').val(discPercent);
@@ -409,6 +435,13 @@
                     <input type="hidden" name="Items[${itemIndex}].GstAmount" value="${gstAmount}">
                     <input type="hidden" name="Items[${itemIndex}].Amount" value="${netAmount}">
                     <input type="hidden" name="Items[${itemIndex}].SellingPrice" value="${sellingPrice}">
+
+                    
+        <input type="hidden" name="ProductId_${itemIndex}" class="h-product-id" value="${productId}">
+        <input type="hidden"  name="ProductCode_${itemIndex}" class="h-product-code" value="${$('#ProductCode').val()}">
+        <input type="hidden" name="Color_${itemIndex}" class="h-color" value="${color}">
+        <input type="hidden" name="Size_${itemIndex}" class="h-size" value="${size}">
+
                 </div>
             `);
 
@@ -425,20 +458,41 @@
         });
 
         // ================= EDIT =================
-        $(document).on('click', '.btn-edit-item', function () {
-            let row = $(this).closest('tr');
-            editingIndex = row.data('index');
+           $(document).on('click', '.btn-edit-item', function () {
 
-            row.addClass('table-warning').siblings().removeClass('table-warning');
+        let row = $(this).closest('tr');
+        editingIndex = row.data('index');
 
-            $('#VariantCode').val(row.find('td:eq(1)').text());
-            $('#CostPrice').val(row.find('td:eq(2)').text());
-            $('#Quantity').val(row.find('td:eq(3)').text());
-            $('#DiscPercent').val(row.find('td:eq(4)').text().replace('%', ''));
-            $('#DiscAmount').val(row.find('td:eq(5)').text());
-            $('#GstPercent').val(row.find('td:eq(6)').text().replace('%', ''));
-            $('#SellingPrice').val(row.find('td:eq(9)').text());
-        });
+        row.addClass('table-warning')
+           .siblings()
+           .removeClass('table-warning');
+
+        let hidden = $(`.hidden-item[data-index="${editingIndex}"]`);
+
+        // ===== LOAD PRODUCT =====
+        let productId = hidden.find('.h-product-id').val();
+        let productName = row.find('td:eq(0)').text();
+        let productCode = hidden.find('.h-product-code').val();
+
+        let newOption = new Option(productName, productId, true, true);
+        $('#ProductId').append(newOption).trigger('change');
+
+        $('#ProductCode').val(productCode);
+
+        // ===== LOAD COLOR & SIZE =====
+        $('#Color').val(hidden.find('.h-color').val());
+        $('#Size').val(hidden.find('.h-size').val());
+
+        // ===== LOAD OTHER FIELDS =====
+        $('#VariantCode').val(row.find('td:eq(1)').text());
+        $('#CostPrice').val(row.find('td:eq(2)').text());
+        $('#Quantity').val(row.find('td:eq(3)').text());
+        $('#DiscPercent').val(row.find('td:eq(4)').text().replace('%', ''));
+        $('#DiscAmount').val(row.find('td:eq(5)').text());
+        $('#GstPercent').val(row.find('td:eq(6)').text().replace('%', ''));
+        $('#SellingPrice').val(row.find('td:eq(9)').text());
+    });
+
 
     });
 </script>
