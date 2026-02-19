@@ -26,7 +26,7 @@ namespace MIEL.web.Controllers
         {
             var data = _context.ProductMasters
                 .Where(x => x.ProductName.Contains(term))
-                .Select(x => new { id = x.ProductId, text = x.ProductName })
+                .Select(x => new { id = x.ProductId, text = x.ProductName , code = x.ProductCode })
                 .Take(20)
                 .ToList();
 

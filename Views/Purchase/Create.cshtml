@@ -31,6 +31,7 @@
                         <input asp-for="PurchaseCode" class="form-control" readonly />
                     </div>
 
+
                     <div class="col-md-4">
                         <label class="form-label">Purchase Date</label>
                         <input asp-for="PurchaseDate" type="date" class="form-control" />
@@ -77,7 +78,11 @@
                                 <option value="">-- Search Product --</option>
                             </select>
                         </div>
-                 
+                    <div class="col-md-4">
+                        <label class="form-label">Product Code</label>
+                        <input asp-for="ProductCode" id="ProductCode" class="form-control" readonly />
+
+                    </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Color</label>
@@ -253,7 +258,8 @@
                         results: $.map(data, function (item) {
                             return {
                                 id: item.id,
-                                text: item.text
+                                text: item.text,
+                                code: item.code
                             };
                         })
                     };
@@ -261,6 +267,16 @@
             }
         });
 
+            $('#ProductId').on('select2:select', function (e) {
+
+        let selected = e.params.data; 
+
+        // Set Product Code
+        $('#ProductCode').val(selected.code);
+
+        // Generate variant also
+        generateVariantCode();
+    });
         // ================= VARIANT CODE =================
         $('#ProductId').on('select2:select', generateVariantCode);
         $('#Color, #Size').on('keyup', generateVariantCode);
