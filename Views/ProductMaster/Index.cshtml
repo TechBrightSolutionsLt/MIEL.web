@@ -171,6 +171,25 @@
                 </tr>
             `);
         }
+
+                $(document).ready(function () {
+
+            $("input[name='ProductCode']").on("keydown", function (e) {
+
+                if (e.key === "-") {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Invalid Character",
+                        text: "- is not allowed in Product Code"
+                    });
+                }
+            });
+
+        });
+
+
     </script>
 }
 
@@ -190,4 +209,5 @@
             });
         </script>
     }
-        
+
+    
