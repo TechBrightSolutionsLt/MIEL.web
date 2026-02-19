@@ -43,20 +43,26 @@ namespace MIEL.web.Controllers
         [HttpPost]
         public JsonResult GetSpecifications(int categoryId)
         {
-            var specs = _db.Specifications
-                .Where(s => s.CategoryId == categoryId)
-                .Select(s => new
-                {
-                    id = s.Id,                 // IMPORTANT
-                    specName = s.SpecName,
-                    optionType = s.OptionType,
-                    options = s.Options
-                })
-                .ToList();
+            try
+            {
+                var specs = _db.Specifications
+                    .Where(s => s.CategoryId == categoryId)
+                    .Select(s => new
+                    {
+                        id = s.Id,                 // IMPORTANT
+                        specName = s.SpecName,
+                        optionType = s.OptionType,
+                        options = s.Options
+                    })
+                    .ToList();
 
-            return Json(specs);
+                return Json(specs);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
-
         // ================= SAVE PRODUCT (MAIN SAVE BUTTON) =================
         [HttpPost]
         public IActionResult SaveProduct()
@@ -198,7 +204,7 @@ namespace MIEL.web.Controllers
             {
                 TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
                 return RedirectToAction("Index");
-            }
+            } 
         }
 
         // ================= LIST =================
