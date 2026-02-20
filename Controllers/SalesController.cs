@@ -19,7 +19,7 @@ namespace MIEL.web.Controllers
 
         public SalesController(AppDBContext context)
         {
-            _context = context;
+            _context = context;                         
         }
         // =====================================================
         // CREATE GET
@@ -268,14 +268,13 @@ namespace MIEL.web.Controllers
                 .Where(x => x.varientid == variantId && x.BatchNo == batchNo)
                 .Select(x => new
                 {
-                    availableQty = x.QuantityOut,   // 🔥 YOUR REQUIREMENT
-                    sellingPrice = x.SellingPrice
+                    availableQty = x.QuantityIn - x.QuantityOut, // ✅ correct
+                    sellingPrice = x.SellingPrice                // ✅ correct
                 })
                 .FirstOrDefaultAsync();
 
             return Json(batch);
         }
-
 
         public async Task<IActionResult> Details()
         {

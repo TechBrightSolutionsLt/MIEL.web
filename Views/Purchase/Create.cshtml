@@ -282,23 +282,46 @@
         $('#ProductId').on('select2:select', generateVariantCode);
         $('#Color, #Size').on('keyup', generateVariantCode);
 
-        function generateVariantCode() {
-            let product = $('#ProductId').select2('data')[0]?.code;
-            let color = $('#Color').val();
-            let size = $('#Size').val();
 
-            if (!product || !color || !size) {
-                $('#VariantCode').val('');
-                return;
-            }
+            function generateVariantCode() {
 
-            let code =
-                product.replace(/\s+/g, '-').toUpperCase() + '-' +
-                color.toUpperCase() + '-' +
-                size.toUpperCase();
+        let product = $('#ProductId').select2('data')[0]?.code;
+        let color = $('#Color').val();
+        let size = $('#Size').val();
 
-            $('#VariantCode').val(code);
+        if (!product || !color || !size) {
+            $('#VariantCode').val('');
+            return;
         }
+
+        let code = [
+            product.replace(/^-+/, '').trim(),
+            color.trim(),
+            size.trim()
+        ]
+        .map(x => x.toUpperCase())
+        .join('-');
+
+        $('#VariantCode').val(code);
+    }
+
+        // function generateVariantCode() {
+        //     let product = $('#ProductId').select2('data')[0]?.code;
+        //     let color = $('#Color').val();
+        //     let size = $('#Size').val();
+
+        //     if (!product || !color || !size) {
+        //         $('#VariantCode').val('');
+        //         return;
+        //     }
+
+        //     let code =
+        //         product.replace(/\s+/g, '-').toUpperCase() + '-' +
+        //         color.toUpperCase() + '-' +
+        //         size.toUpperCase();
+
+        //     $('#VariantCode').val(code);
+        // }
 
         // ================= DISCOUNT SYNC =================
         $('#DiscPercent').on('input', function () {
