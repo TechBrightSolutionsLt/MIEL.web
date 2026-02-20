@@ -41,7 +41,7 @@
 
             <h6>MRP RS.</h6>
            
-            <p class="product-title" id="productPrice">$ @Model.NetAmount</p>
+            <p class="product-title" id="productPrice">A$ @Model.NetAmount</p>
 
             <!-- ================= COLOR ================= -->
             @if (Model.Variants != null && Model.Variants.Any())
@@ -380,7 +380,7 @@
 
         if (matchedVariant) {
             document.getElementById("productPrice")
-                .innerText = "$ " + matchedVariant.Rate;
+                .innerText = "A$ " + matchedVariant.Rate;
         }
     });
 
