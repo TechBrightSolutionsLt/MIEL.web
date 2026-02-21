@@ -357,183 +357,132 @@ namespace MIEL.web.Controllers
         [HttpPost]
         public IActionResult Edit(int id, PurchaseVM model)
         {
-            var oldItems = _context.PurchaseItems
-                .Where(x => x.PurchaseId == id)
-                .ToList();
-
-            // 🔥 REVERSE OLD STOCK
-            foreach (var item in oldItems)
+            try
             {
-                var variant = _context.ProColorSizeVariants
-                    .FirstOrDefault(v => v.varientid == item.varientid);
+                var purchase = _context.PurchaseMasters
+                    .FirstOrDefault(x => x.PurchaseId == id);
 
-                if (variant != null)
+                if (purchase == null)
+                    return RedirectToAction("Index");
+
+                // ===========================
+                // 1️⃣ GET OLD ITEMS
+                // ===========================
+                var oldItems = _context.PurchaseItems
+                    .Where(x => x.PurchaseId == id)
+                    .ToList();
+
+                // ===========================
+                // 2️⃣ REVERSE OLD STOCK
+                // ===========================
+                foreach (var item in oldItems)
                 {
-                    variant.QuantityOnHand -= item.Quantity;
+                    var variant = _context.ProColorSizeVariants
+                        .FirstOrDefault(v => v.varientid == item.varientid);
+
+                    if (variant != null)
+                    {
+                        variant.QuantityOnHand -= item.Quantity;
+                    }
+
+                    // remove correct batch
+                    var batch = _context.InventoryBatch
+                        .FirstOrDefault(b => b.varientid == item.varientid && b.BatchNo == item.BatchNo);
+
+                    if (batch != null)
+                        _context.InventoryBatch.Remove(batch);
                 }
+
+                _context.PurchaseItems.RemoveRange(oldItems);
+
+                // ===========================
+                // 3️⃣ UPDATE PURCHASE MASTER
+                // ===========================
+                purchase.SupplierId = model.SupplierId;
+                purchase.InvoiceDate = model.PurchaseDate;
+                purchase.TotalDisc = model.Items.Sum(x => x.DiscAmount);
+                purchase.TotalTax = model.Items.Sum(x => x.GstAmount);
+                purchase.TotalTaxable = model.Items.Sum(x => (x.Rate * x.Quantity) - x.DiscAmount);
+                purchase.GrandTotal = model.Items.Sum(x => x.Amount);
+
+                _context.SaveChanges();
+
+                // ===========================
+                // 4️⃣ ADD NEW ITEMS
+                // ===========================
+                foreach (var item in model.Items)
+                {
+                    var variant = _context.ProColorSizeVariants
+                        .FirstOrDefault(x => x.varientCode == item.VariantCode);
+
+                    if (variant == null)
+                        continue;
+
+                    // save purchase item
+                    var newItem = new PurchaseItem
+                    {
+                        PurchaseId = id,
+                        varientid = variant.varientid,
+                        Quantity = item.Quantity,
+                        Rate = item.Rate,
+                        BatchNo = model.BatchNo,
+                        GstPercent = item.GstPercent,
+                        GstAmount = item.GstAmount,
+                        DiscPercent = item.DiscPercent,
+                        DiscAmount = item.DiscAmount,
+                        TaxableAmount = (item.Rate * item.Quantity) - item.DiscAmount,
+                        NetAmount = item.Amount
+                    };
+
+                    _context.PurchaseItems.Add(newItem);
+
+                    // save inventory batch
+                    var batch = new InventoryBatch
+                    {
+                        varientid = variant.varientid,
+                        BatchNo = model.BatchNo,
+                        QuantityIn = item.Quantity,
+                        QuantityOut = 0,
+                        CostPrice = item.Rate,
+                        SellingPrice = item.SellingPrice,
+                        CreatedDate = DateTime.Now
+                    };
+
+                    _context.InventoryBatch.Add(batch);
+
+                    // update stock
+                    variant.QuantityOnHand += item.Quantity;
+
+                    // update selling price
+                    var oldPrices = _context.VariantPrices
+                        .Where(x => x.varientid == variant.varientid && x.IsActive)
+                        .ToList();
+
+                    foreach (var price in oldPrices)
+                        price.IsActive = false;
+
+                    _context.VariantPrices.Add(new VariantPrice
+                    {
+                        varientid = variant.varientid,
+                        SellingPrice = item.SellingPrice,
+                        IsActive = true
+                    });
+                }
+
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = "Purchase Updated Successfully";
+
+                return RedirectToAction("Index");
             }
-
-            _context.PurchaseItems.RemoveRange(oldItems);
-            _context.InventoryBatch.RemoveRange(
-                _context.InventoryBatch.Where(x => oldItems.Select(o => o.varientid).Contains(x.varientid))
-            );
-
-            _context.SaveChanges();
-          
-            // 🔥 SAVE AGAIN USING CREATE LOGIC
-            model.PurchaseCode = _context.PurchaseMasters
-                .Where(x => x.PurchaseId == id)
-                .Select(x => x.InvoiceNo)
-                .FirstOrDefault();
-
-            //return Create(model);
-            Create(model); // save updated data
-
-            TempData["SuccessMessage"] = "Purchase Updated Successfully";
-
-            return RedirectToAction("Create");
-
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View(model);
+            }
         }
 
-        //[HttpPost]
-        //public IActionResult Create(PurchaseVM model)
-        //{
-        //    if (model.Items == null || !model.Items.Any())
-        //    {
-        //        ModelState.AddModelError("", "Add at least one item");
-        //    }
 
-        //    if (!ModelState.IsValid)
-        //    {
-        //        model.Suppliers = _context.Suppliers
-        //            .Select(x => new SelectListItem
-        //            {
-        //                Value = x.SupplierId.ToString(),
-        //                Text = x.Name
-        //            }).ToList();
-        //        return View(model);
-        //    }
-
-        //    // ===========================
-        //    // 1️⃣ PURCHASE MASTER
-        //    // ===========================
-        //    var purchase = new PurchaseMaster
-        //    {
-        //        SupplierId = model.SupplierId,
-        //        InvoiceNo = model.PurchaseCode,
-        //        InvoiceDate = model.PurchaseDate,
-        //        TotalDisc = model.Items.Sum(x => x.DiscAmount),
-        //        TotalTax = model.Items.Sum(x => x.GstAmount),
-        //        TotalTaxable = model.Items.Sum(x => (x.Rate * x.Quantity) - x.DiscAmount),
-        //        GrandTotal = model.Items.Sum(x => x.Amount)
-        //    };
-
-        //    _context.PurchaseMasters.Add(purchase);
-        //    _context.SaveChanges(); // GET PurchaseId
-
-        //    // ===========================
-        //    // 2️⃣ LOOP ITEMS
-        //    // ===========================
-        //    foreach (var item in model.Items)
-        //    {
-        //        // ---------------------------
-        //        // VARIANT (FIND OR CREATE)
-        //        // ---------------------------
-        //        var variant = _context.ProColorSizeVariants
-        //            .FirstOrDefault(x => x.varientCode == item.VariantCode);
-
-        //        if (variant == null)
-        //        {
-        //            variant = new procolrsizevarnt
-        //            {
-        //                ProductId = model.ProductId,
-        //                colour = model.Color,
-        //                size = model.Size,
-        //                varientCode = item.VariantCode,
-        //                QuantityOnHand = 0,
-        //                AverageCost = item.Rate
-        //            };
-
-        //            _context.ProColorSizeVariants.Add(variant);
-        //            _context.SaveChanges();
-        //        }
-
-        //        // ---------------------------
-        //        // PURCHASE ITEM
-        //        // ---------------------------
-        //        var pItem = new PurchaseItem
-        //        {
-        //            PurchaseId = purchase.PurchaseId,
-        //            varientid = variant.varientid,
-        //            Quantity = item.Quantity,
-        //            Rate = item.Rate,
-        //            BatchNo = model.BatchNo,
-        //            GstPercent = item.GstPercent,
-        //            GstAmount = item.GstAmount,
-        //            DiscPercent = item.DiscPercent,
-        //            DiscAmount = item.DiscAmount,
-        //            TaxableAmount = (item.Rate * item.Quantity) - item.DiscAmount,
-        //            NetAmount = item.Amount
-        //        };
-
-        //        _context.PurchaseItems.Add(pItem);
-
-        //        // ---------------------------
-        //        // INVENTORY BATCH
-        //        // ---------------------------
-        //        var batch = new InventoryBatch
-        //        {
-        //            varientid = variant.varientid,
-        //            BatchNo = model.BatchNo,
-        //            QuantityIn = item.Quantity,
-        //            QuantityOut = 0,
-        //            CostPrice = item.Rate,
-        //            CreatedDate = DateTime.Now
-        //        };
-
-        //        _context.InventoryBatch.Add(batch);
-
-        //        // ---------------------------
-        //        // UPDATE STOCK
-        //        // ---------------------------
-        //        variant.QuantityOnHand += item.Quantity;
-        //        variant.AverageCost = item.Rate;
-
-        //        // ---------------------------
-        //        // VARIANT PRICE (OPTIONAL)
-        //        // ---------------------------
-        //        var oldPrices = _context.VariantPrices
-        //         .Where(x => x.varientid == variant.varientid && x.IsActive)
-        //        .ToList();
-
-        //        foreach (var price in oldPrices)
-        //        {
-        //            price.IsActive = false;
-        //        }
-
-
-
-
-        //        if (!_context.VariantPrices.Any(x => x.varientid == variant.varientid))
-        //        {
-        //            _context.VariantPrices.Add(new VariantPrice
-        //            {
-        //                varientid = variant.varientid,
-        //                SellingPrice = item.SellingPrice,
-        //                IsActive = true
-        //            });
-
-        //        }
-        //    }
-
-        //    _context.SaveChanges();
-
-        //    return RedirectToAction("Create");
-        //}
-
-        // ===========================
-        // AUTO CODES
-        // ===========================
         private string GeneratePurchaseCode()
         {
             return "PUR-" + DateTime.Now.ToString("yyyyMMddHHmmss");

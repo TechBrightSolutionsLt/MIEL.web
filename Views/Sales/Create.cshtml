@@ -227,50 +227,48 @@
                 // =====================================================
         // PROFESSIONAL STOCK VALIDATION
         // =====================================================
-              function validateQuantity() {
+               function validateQuantity() {
 
-            let qty = parseInt($('#Quantity').val()) || 0;
+        let qty = parseInt($('#Quantity').val()) || 0;
 
-            // 🔥 This is QuantityOut from DB
-            let quantityOut = parseInt($('#AvailableQty').val()) || 0;
+        // This is AVAILABLE stock (QuantityIn - QuantityOut)
+        let availableQty = parseInt($('#AvailableQty').val()) || 0;
 
-            // Reset UI
-            $('#qtyError').text('');
-            $('#Quantity').removeClass('is-invalid');
-            $('#btnAdd').prop('disabled', false);
+        // Reset UI
+        $('#qtyError').text('');
+        $('#Quantity').removeClass('is-invalid');
+        $('#btnAdd').prop('disabled', false);
 
-            // No stock
-                if (quantityOut >= qty) {
-                $('#qtyError').text('No stock available now');
-                $('#Quantity').addClass('is-invalid');
-                $('#btnAdd').prop('disabled', true);
-                return false;
-            }
-
-            // Invalid qty
-            if (qty <= 0) {
-                $('#qtyError').text('Quantity must be greater than zero');
-                $('#Quantity').addClass('is-invalid');
-                $('#btnAdd').prop('disabled', true);
-                return false;
-            }
-
-            // 🔥 MAIN CONDITION YOU ASKED
-            if (qty > quantityOut) {
-
-                alert("Only " + quantityOut + " QuantityOut available now");
-
-                $('#qtyError').text('Only ' + quantityOut + ' available');
-                $('#Quantity').addClass('is-invalid');
-                $('#btnAdd').prop('disabled', true);
-
-                return false;
-            }
-
-            return true;
+        // 1️⃣ No stock
+        if (availableQty <= 0) {
+            $('#qtyError').text('No stock available now');
+            $('#Quantity').addClass('is-invalid');
+            $('#btnAdd').prop('disabled', true);
+            return false;
         }
 
+        // 2️⃣ Invalid qty
+        if (qty <= 0) {
+            $('#qtyError').text('Quantity must be greater than zero');
+            $('#Quantity').addClass('is-invalid');
+            $('#btnAdd').prop('disabled', true);
+            return false;
+        }
 
+        // 3️⃣ Qty greater than available stock
+        if (qty > availableQty) {
+
+            alert("Only " + availableQty + " available now");
+
+            $('#qtyError').text('Only ' + availableQty + ' available');
+            $('#Quantity').addClass('is-invalid');
+            $('#btnAdd').prop('disabled', true);
+
+            return false;
+        }
+
+        return true;
+    }
 
          // =====================================================
         // CUSTOMER SEARCH (SELECT2)
