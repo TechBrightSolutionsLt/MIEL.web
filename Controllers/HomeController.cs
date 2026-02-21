@@ -5,6 +5,8 @@ using MIEL.web.Models.EntityModels;
 using MIEL.web.Models.ViewModel;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Mail;
 
 namespace MIEL.web.Controllers
 {
@@ -938,6 +940,11 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             // ✅ Clear Cart
             ClearCustomerCart(sales.CustomerId);
 
+            SendOrderEmail(
+    "binoyjoseph@y7mail.com",
+    order.OrderNumber,
+    sales.TotalAmount
+);
             // Prepare ViewModel
             var vm = new PayIDViewModel
             {
@@ -954,7 +961,33 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
 
 
 
+        private void SendOrderEmail(string toEmail, string orderNumber, decimal amount)
+        {
+            var fromEmail = "yourgmail@gmail.com";
+            var password = "abcd efgh ijkl mnop"; // App password
 
+            MailMessage message = new MailMessage();
+
+            message.From = new MailAddress(fromEmail);
+            message.To.Add(toEmail);
+
+            message.Subject = "New Order Placed - " + orderNumber;
+
+            message.Body =
+                "Hello,<br><br>" +
+                "New order received.<br><br>" +
+                "Order Number: " + orderNumber + "<br>" +
+                "Amount: ₹" + amount + "<br><br>" +
+                "Thank you.";
+
+            message.IsBodyHtml = true;
+
+            SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
+            smtp.Credentials = new NetworkCredential(fromEmail, password);
+            smtp.EnableSsl = true;
+
+            smtp.Send(message);
+        }
 
 
         public IActionResult Privacy()

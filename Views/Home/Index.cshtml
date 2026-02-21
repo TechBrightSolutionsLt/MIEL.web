@@ -90,14 +90,14 @@
             <div class="carousel-item active" style="height:500px;">
                 <img class="img-fluid w-100 h-100"
                      style="object-fit:cover"
-                     src="~/img/carousel-1.jpg"
+                     src="~/img/banner.webp"
                      alt="Default Banner">
             </div>
 
             <div class="carousel-item" style="height:500px;">
                 <img class="img-fluid w-100 h-100"
                      style="object-fit:cover"
-                     src="~/img/carousel-2.jpg"
+                     src="~/img/meba.jpg"
                      alt="Default Banner">
             </div>
         }
@@ -184,50 +184,7 @@
 <!-- Categories End -->
 
 
-<!-- Offer Start -->
-<div class="container-fluid offer pt-5">
-    <div class="row px-xl-5">
-        <div class="col-md-6 pb-4">
-            <div class="position-relative bg-secondary text-center text-md-right text-white mb-2 py-5 px-5">
-                <img src="~/img/offer-1.png" alt="">
-                <div class="position-relative" style="z-index: 1;">
-                    <h5 class="text-uppercase text-primary mb-3">20% off the all order</h5>
-                    <h1 class="mb-4 font-weight-semi-bold">Spring Collection</h1>
-                    <a href="#" class="btn btn-outline-primary py-md-2 px-md-3">Shop Now</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 pb-4">
-            <div class="position-relative bg-secondary text-center text-md-left text-white mb-2 py-5 px-5">
-                <img src="~/img/offer-2.png" alt="">
-                <div class="position-relative" style="z-index: 1;">
-                    <h5 class="text-uppercase text-primary mb-3">20% off the all order</h5>
-                    <h1 class="mb-4 font-weight-semi-bold">Winter Collection</h1>
-                    <a href="#" class="btn btn-outline-primary py-md-2 px-md-3">Shop Now</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Offer End -->
 
-
-<!-- Vendor Start -->
-<div class="container-fluid py-5">
-    <div class="row px-xl-5">
-        <div class="col">
-            <div class="owl-carousel vendor-carousel">
-                @for (int i = 1; i <= 8; i++)
-                {
-                    <div class="vendor-item border p-4">
-                        <img src="@Url.Content($"~/img/vendor-{i}.jpg")" alt="Vendor @i">
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Vendor End -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const items = document.querySelectorAll("#header-carousel .carousel-item");
