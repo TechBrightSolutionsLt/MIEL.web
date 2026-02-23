@@ -117,18 +117,25 @@
                     </form>
                 }
 
+                
                 <hr />
 
-                <h5>Total: ₹ @Model.TotalAmount</h5>
+                @* Calculate total dynamically *@
+                @{
+                    decimal totalAmount = 0;
+                    foreach (var item in Model.CartItems)
+                    {
+                        totalAmount += item.Price * item.Quantity;
+                    }
+                }
+                <h5>Total: ₹ @totalAmount</h5>
 
                 <form asp-action="ConfirmOrder" asp-controller="Home" method="post">
-
-                    <input type="hidden" name="TotalAmount" value="@Model.TotalAmount" />
+                    <input type="hidden" name="TotalAmount" value="@totalAmount" />
 
                     <button class="btn btn-warning w-100 mt-2">
                         CONFIRM ORDER
                     </button>
-
                 </form>
 
 

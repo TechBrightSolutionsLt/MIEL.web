@@ -1,6 +1,4 @@
-﻿@using MIEL.web.Models.EntityModels
-@model OrderVM
-
+﻿@model MIEL.web.Models.ViewModel.PayIDViewModel
 <div class="container mt-5 text-center">
 
     <div class="card p-5 shadow-sm">
@@ -32,3 +30,39 @@
     </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+    (function () {
+        emailjs.init("9aE_1VzIvNy3xsMf8");
+    })();
+
+     document.addEventListener("DOMContentLoaded", function () {
+
+        var orderNumber = "@Model.OrderNumber";
+        var amount = "@Model.TotalAmount";
+        var orderDate = new Date().toLocaleDateString();
+        var customerEmail = "@Model.CustomerEmail";
+        var items = "@Model.ItemsSummary";
+        var customerName = "@Model.CustomerName";
+        // ✅ 1. Existing Business Email (DO NOT TOUCH)
+        emailjs.send("service_2dg2iki", "template_v7o06jf", {
+            order_number: orderNumber,
+            amount: amount,
+            order_date: orderDate,
+            to_email: "mielcollectionss@gmail.com",
+            name: "MIEL Collections"
+        });
+
+        // ✅ 2. NEW Customer Email (Extra Added)
+        emailjs.send("service_2dg2iki", "template_icpqwij", {
+            order_number: orderNumber,
+            amount: amount,
+            order_date: orderDate,
+            items: items,
+            customer_name: customerName,
+            to_email: customerEmail
+        });
+
+    });
+</script>

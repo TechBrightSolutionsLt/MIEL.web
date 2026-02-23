@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc;
 using MIEL.web.Data;
 using MIEL.web.Models;
 using MIEL.web.Models.EntityModels;
@@ -787,19 +788,21 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             if (sales == null)
                 return RedirectToAction("Cart", "Cart");
 
+            // Mark payment type as Cash On Delivery
             sales.PaymentType = "Cash";
-            sales.paysts = 0;
-
+            sales.paysts = 0; // pending
             _context.SaveChanges();
 
-            HttpContext.Session.Remove("SalesId");
+            // Generate order number
+            var orderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
+            // Create Order Entity
             var order = new OrderVM
             {
                 CustomerId = sales.CustomerId,
                 SalesId = sales.SalesId,
                 TotalAmount = sales.TotalAmount,
-                OrderNumber = "ORD" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                OrderNumber = orderNumber,
                 PaymentStatus = "NotPaid",
                 VerifyId = 0
             };
@@ -807,17 +810,35 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // ✅ UPDATE INVENTORY
+            // ✅ Update Inventory
             var cartItems = _context.Cart
                 .Where(c => c.CustomerId == sales.CustomerId)
                 .ToList();
 
+            var itemDetails = new List<string>(); // for email
+
             foreach (var item in cartItems)
             {
+                var product = _context.ProductMasters
+                    .FirstOrDefault(p => p.ProductId == item.ProductId);
+
+                if (product != null)
+                {
+                    itemDetails.Add($"{product.ProductName} - Qty: {item.Quantity}");
+                }
+
                 int variantId = item.VariantId;
                 int cartQty = item.Quantity;
 
-                // Update InventoryBatch
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == variantId);
+
+                if (variant == null || variant.QuantityOnHand < cartQty)
+                {
+                    return RedirectToAction("Cart", "Cart");
+                }
+
+                // Update Batch
                 var batch = _context.InventoryBatch
                     .Where(b => b.varientid == variantId)
                     .OrderByDescending(b => b.InventoryBatchId)
@@ -828,24 +849,39 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                     batch.QuantityOut += cartQty;
                 }
 
-                // Update QuantityOnHand
-                var variant = _context.ProColorSizeVariants
-                    .FirstOrDefault(v => v.varientid == variantId);
-
-                if (variant != null)
-                {
-                    variant.QuantityOnHand -= cartQty;
-                }
+                // Reduce Stock
+                variant.QuantityOnHand -= cartQty;
             }
 
             _context.SaveChanges();
 
-            // ✅ Clear Cart
+            // Clear Cart
             ClearCustomerCart(sales.CustomerId);
 
-            return RedirectToAction("OrderSuccess", new { salesId = salesId });
-        }
+            // Get Customer Info
+            var user = _context.users_TB
+                .FirstOrDefault(u => u.CustomerId == sales.CustomerId);
 
+            // Prepare ViewModel for email / view
+            var vm = new PayIDViewModel
+            {
+                SalesId = sales.SalesId,
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
+                TotalAmount = sales.TotalAmount,
+                PayId = "", // COD does not need PayID
+                BusinessEmail = "mielcollectionss@gmail.com",
+                CustomerEmail = user?.Email,
+                CustomerName = user?.FirstName,
+                ItemsSummary = string.Join(", ", itemDetails)
+            };
+
+            // ✅ Send Email (reuse same email logic as PayID)
+
+
+            // Redirect to Order Success Page
+            return View("OrderSuccess", vm);
+        }
 
 
         private void ClearCustomerCart(int customerId)
@@ -905,7 +941,21 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             var cartItems = _context.Cart
                 .Where(c => c.CustomerId == sales.CustomerId)
                 .ToList();
+            // ✅ EXTRA: Collect items for customer email
+            var itemDetails = new List<string>();
 
+            foreach (var item in cartItems)
+            {
+                var product = _context.ProductMasters
+                    .FirstOrDefault(p => p.ProductId == item.ProductId);
+
+                if (product != null)
+                {
+                    itemDetails.Add($"{product.ProductName} - Qty: {item.Quantity}");
+                }
+            }
+
+            string itemsSummary = string.Join(", ", itemDetails);
             foreach (var item in cartItems)
             {
                 int variantId = item.VariantId;
@@ -942,7 +992,8 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
 
             int? customerId = HttpContext.Session.GetInt32("CustomerId");
 
-        
+            var user = _context.users_TB
+        .FirstOrDefault(u => u.CustomerId == sales.CustomerId);
             // Prepare ViewModel
             var vm = new PayIDViewModel
             {
@@ -951,7 +1002,10 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 OrderNumber = order.OrderNumber,
                 TotalAmount = sales.TotalAmount,
                 PayId = "0430823457",
-                Email = "mielcollectionss@gmail.com"
+                BusinessEmail = "mielcollectionss@gmail.com",
+                CustomerEmail = user?.Email,
+                CustomerName = user?.FirstName,
+                ItemsSummary = itemsSummary
             };
 
             return View("PayIDPage", vm);

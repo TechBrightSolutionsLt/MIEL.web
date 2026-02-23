@@ -38,7 +38,7 @@
                         <div>
                             <div class="label-text">PayID (Email)</div>
                             <div class="highlight-value text-dark">
-                                @Model.Email
+                                @Model.BusinessEmail
                             </div>
                         </div>
 
@@ -101,28 +101,31 @@
         emailjs.init("9aE_1VzIvNy3xsMf8");
     })();
 
-        document.addEventListener("DOMContentLoaded", function () {
+     document.addEventListener("DOMContentLoaded", function () {
 
         var orderNumber = "@Model.OrderNumber";
         var amount = "@Model.TotalAmount";
         var orderDate = new Date().toLocaleDateString();
-        var customerEmail = "@Model.Email";
-
-        console.log("Sending to:", customerEmail);
-
+        var customerEmail = "@Model.CustomerEmail";
+        var items = "@Model.ItemsSummary";
+        var customerName = "@Model.CustomerName";
+        // ✅ 1. Existing Business Email (DO NOT TOUCH)
         emailjs.send("service_2dg2iki", "template_v7o06jf", {
             order_number: orderNumber,
             amount: amount,
             order_date: orderDate,
-            to_email: customerEmail,
-            name: "MIEL Collections",
-            email: "mielcollectionss@gmail.com"
-        })
-        .then(function (response) {
-            console.log("SUCCESS!", response);
-        })
-        .catch(function (error) {
-            console.log("FAILED...", error);
+            to_email: "mielcollectionss@gmail.com",
+            name: "MIEL Collections"
+        });
+
+        // ✅ 2. NEW Customer Email (Extra Added)
+        emailjs.send("service_2dg2iki", "template_icpqwij", {
+            order_number: orderNumber,
+            amount: amount,
+            order_date: orderDate,
+            items: items,
+            customer_name: customerName,
+            to_email: customerEmail
         });
 
     });
