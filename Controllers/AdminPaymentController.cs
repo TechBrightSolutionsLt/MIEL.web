@@ -43,23 +43,35 @@ public class AdminPaymentController : Controller
 
 
 
-    // 2️⃣ Show Verify Page
     [HttpGet]
     public async Task<IActionResult> Verify(int id)
     {
         var model = await _context.Orders
             .Where(o => o.Id == id)
+
+            // 🔹 Join SalesMaster
             .Join(_context.SalesMasters,
                   o => o.SalesId,
                   s => s.SalesId,
-                  (o, s) => new VerifyPaymentVM
+                  (o, s) => new { o, s })
+
+            // 🔹 Join userModel (Customer)
+            .Join(_context.users_TB,   // <-- your DbSet<userModel>
+                  os => os.o.CustomerId,
+                  u => u.CustomerId,
+                  (os, u) => new VerifyPaymentVM
                   {
-                      Id = o.Id,
-                      OrderNumber = o.OrderNumber,
-                      TotalAmount = o.TotalAmount,
-                      PaymentType = s.PaymentType,
-                      BankReference = o.BankReference
+                      Id = os.o.Id,
+                      OrderNumber = os.o.OrderNumber,
+                      TotalAmount = os.o.TotalAmount,
+                      PaymentType = os.s.PaymentType,
+                      BankReference = os.o.BankReference,
+
+                      // ✅ FROM userModel
+                      Email = u.Email,
+                      FirstName = u.FirstName
                   })
+
             .FirstOrDefaultAsync();
 
         if (model == null)
@@ -67,7 +79,6 @@ public class AdminPaymentController : Controller
 
         return View(model);
     }
-
 
 
 

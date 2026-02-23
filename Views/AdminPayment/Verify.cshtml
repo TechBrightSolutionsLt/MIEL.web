@@ -5,7 +5,7 @@
 }
 <h2>Verify  Payment</h2>
 
-<form asp-action="Verify" method="post">
+<form asp-action="Verify" method="post" id="verifyForm">
     <input type="hidden" asp-for="Id" />
 
 
@@ -32,6 +32,47 @@
     <br />
 
     <button type="submit" class="btn btn-success">
+       
         Confirm Payment
     </button>
 </form>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+    (function () {
+        emailjs.init("9aE_1VzIvNy3xsMf8");
+    })();
+
+    document.getElementById("verifyForm").addEventListener("submit", function (e) {
+
+        // Let form submit normally first (do NOT preventDefault)
+
+        var orderNumber = "@Model.OrderNumber";
+        var amount = "@Model.TotalAmount";
+        var paymentType = "@Model.PaymentType";
+        var bankReference = document.querySelector("[name='BankReference']").value;
+        var customerEmail = "@Model.Email";
+        var orderDate = new Date().toLocaleDateString();
+        var time = new Date().toLocaleString();
+        var name = "@Model.FirstName";
+
+        emailjs.send("service_2dg2iki", "template_ppsnis8", {
+            title: "MIEL Collections",
+            name: name,
+            order_number: orderNumber,
+            order_date: orderDate,
+            amount: amount,
+            payment_type: paymentType,
+            bank_reference: bankReference,
+            time: time,
+            to_email: customerEmail
+        })
+        .then(function (response) {
+            console.log("Email Sent!", response);
+        })
+        .catch(function (error) {
+            console.log("Email Failed...", error);
+        });
+
+    });
+</script>

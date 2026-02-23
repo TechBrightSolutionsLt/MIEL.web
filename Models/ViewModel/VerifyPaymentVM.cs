@@ -6,8 +6,9 @@ namespace MIEL.web.Models.ViewModel
     {
         public int Id { get; set; }
 
+        public string? Email { get; set; }
         public string? OrderNumber { get; set; }
-
+        public string ?FirstName { get; set; }
         public decimal TotalAmount { get; set; }
 
         public string? PaymentType { get; set; }
