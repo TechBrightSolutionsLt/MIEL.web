@@ -43,9 +43,11 @@
         emailjs.init("9aE_1VzIvNy3xsMf8");
     })();
 
-    document.getElementById("verifyForm").addEventListener("submit", function (e) {
+    document.getElementById("verifyForm").addEventListener("submit", function (e) {debugger;
 
-        // Let form submit normally first (do NOT preventDefault)
+        e.preventDefault(); // 🔥 STOP normal submit
+
+        var form = this;
 
         var orderNumber = "@Model.OrderNumber";
         var amount = "@Model.TotalAmount";
@@ -69,9 +71,15 @@
         })
         .then(function (response) {
             console.log("Email Sent!", response);
+
+            // ✅ After email sent, submit form manually
+            form.submit();
         })
         .catch(function (error) {
             console.log("Email Failed...", error);
+
+            // Optional: still submit form even if email fails
+            form.submit();
         });
 
     });
