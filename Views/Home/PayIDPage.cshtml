@@ -94,3 +94,36 @@
     }
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+    (function () {
+        emailjs.init("9aE_1VzIvNy3xsMf8");
+    })();
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+        var orderNumber = "@Model.OrderNumber";
+        var amount = "@Model.TotalAmount";
+        var orderDate = new Date().toLocaleDateString();
+        var customerEmail = "@Model.Email";
+
+        console.log("Sending to:", customerEmail);
+
+        emailjs.send("service_2dg2iki", "template_v7o06jf", {
+            order_number: orderNumber,
+            amount: amount,
+            order_date: orderDate,
+            to_email: customerEmail,
+            name: "MIEL Collections",
+            email: "mielcollectionss@gmail.com"
+        })
+        .then(function (response) {
+            console.log("SUCCESS!", response);
+        })
+        .catch(function (error) {
+            console.log("FAILED...", error);
+        });
+
+    });
+</script>

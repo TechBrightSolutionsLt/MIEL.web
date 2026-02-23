@@ -940,11 +940,9 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             // ✅ Clear Cart
             ClearCustomerCart(sales.CustomerId);
 
-            SendOrderEmail(
-    "binoyjoseph@y7mail.com",
-    order.OrderNumber,
-    sales.TotalAmount
-);
+            int? customerId = HttpContext.Session.GetInt32("CustomerId");
+
+        
             // Prepare ViewModel
             var vm = new PayIDViewModel
             {
@@ -952,8 +950,8 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 OrderId = order.Id,
                 OrderNumber = order.OrderNumber,
                 TotalAmount = sales.TotalAmount,
-                PayId = 0430823457,
-                Email = "binoyjoseph@y7mail.com"
+                PayId = "0430823457",
+                Email = "mielcollectionss@gmail.com"
             };
 
             return View("PayIDPage", vm);
@@ -961,33 +959,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
 
 
 
-        private void SendOrderEmail(string toEmail, string orderNumber, decimal amount)
-        {
-            var fromEmail = "yourgmail@gmail.com";
-            var password = "abcd efgh ijkl mnop"; // App password
-
-            MailMessage message = new MailMessage();
-
-            message.From = new MailAddress(fromEmail);
-            message.To.Add(toEmail);
-
-            message.Subject = "New Order Placed - " + orderNumber;
-
-            message.Body =
-                "Hello,<br><br>" +
-                "New order received.<br><br>" +
-                "Order Number: " + orderNumber + "<br>" +
-                "Amount: ₹" + amount + "<br><br>" +
-                "Thank you.";
-
-            message.IsBodyHtml = true;
-
-            SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
-            smtp.Credentials = new NetworkCredential(fromEmail, password);
-            smtp.EnableSsl = true;
-
-            smtp.Send(message);
-        }
+  
 
 
         public IActionResult Privacy()
