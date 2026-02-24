@@ -145,7 +145,7 @@
         }
 
     </div>
-
+    </div>
 <!-- Categories End -->
 
 
@@ -164,23 +164,30 @@
 
         /* ===== COMPACT CATEGORY STYLE ===== */
 
+
+
         .cat-item {
             text-align: center;
             transition: 0.3s ease;
         }
 
-        .cat-img {
-            display: block;
-            overflow: hidden;
-            border-radius: 4px;
-        }
 
-            .cat-img img {
-                width: 100%;
-                height: 80px; /* 🔥 Smaller than before */
-                object-fit: cover;
-                transition: transform 0.3s ease;
-            }
+
+
+    .cat-img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3; /* ✅ 4:3 ratio */
+        overflow: hidden;
+        border-radius: 6px;
+    }
+
+        .cat-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
 
         /* Hover effect */
         .cat-item:hover img {
