@@ -21,7 +21,18 @@ namespace MIEL.web.Controllers
             _logger = logger;
             _context = context;
         }
+        public JsonResult GetMainCategories()
+        {
+            var categories = _context.MainCategories
+                .Select(x => new
+                {
+                    mainCategoryId = x.MainCategoryId,
+                    mainCategoryName = x.MainCategoryName
+                })
+                .ToList();
 
+            return Json(categories);
+        }
         public IActionResult Index()
         {
             ViewBag.BannerImages = _context.ImageItems

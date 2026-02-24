@@ -15,47 +15,6 @@
     var mainCategories = ViewBag.MainCategories;
 }
 
-<!-- MAIN CATEGORY MENU -->
-<div class="container-fluid bg-light border-bottom">
-    <div class="row px-xl-5">
-        <div class="col-12">
-            <ul class="nav justify-content-center py-2" id="mainCategories">
-                @if (mainCategories != null)
-                {
-                    foreach (var item in mainCategories)
-                    {
-                        <li class="nav-item mx-3 position-relative">
-                            <a href="javascript:void(0)"
-                               class="nav-link text-dark fw-bold main-cat"
-                               data-id="@item.MainCategoryId">
-                                @item.MainCategoryName
-                            </a>
-
-                            <!-- subcategory placeholder -->
-                            <ul class="nav flex-column subcat-container position-absolute bg-white border shadow-sm d-none" style="top:100%; left:0;">
-                                <!-- loaded dynamically -->
-                            </ul>
-                        </li>
-                    }
-                }
-            </ul>
-
-
-        </div>
-    </div>
-</div>
-
-<!-- SUBCATEGORY BAR -->
-<div class="container-fluid bg-white border-bottom">
-    <div class="row px-xl-5">
-        <div class="col-12">
-            <ul class="nav justify-content-center py-2" id="subCategories">
-                <!-- subcategories load here -->
-            </ul>
-        </div>
-    </div>
-</div>
-
 <div id="header-carousel" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner">
 
@@ -155,7 +114,7 @@
         {
             foreach (var item in categories)
             {
-                <div class="col-lg-4 col-md-6 pb-4">
+                <div class="col-lg-3 col-md-4 col-sm-6 col-6 pb-4">
                     <div class="cat-item">
                         <a href="@Url.Action("CategoryProducts", "Home",
                                                            new { categoryId = item.CategoryId })"
@@ -195,6 +154,38 @@
     });
 </script>
     <style>
+        /* ===== CATEGORY TILE SMALL STYLE ===== */
+
+        .cat-item {
+            text-align: center;
+            transition: 0.3s ease;
+        }
+
+        .cat-img {
+            display: block;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+            .cat-img img {
+                width: 100%;
+                height: 220px; /* 🔥 Smaller height */
+                object-fit: cover;
+                transition: transform 0.4s ease;
+            }
+
+        /* Hover zoom effect */
+        .cat-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .cat-item h3 {
+            font-size: 16px; /* Smaller title */
+            margin-top: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
         #header-carousel .carousel-item {
             height: 500px;
         }
@@ -248,68 +239,42 @@
                     color: #8b6f47;
                     border-bottom: 2px solid #8b6f47;
                 }
-                .subcat-container {
-    min-width: 150px;
-    z-index: 1000;
-}
+        /* ========================= */
+        /* HORIZONTAL SUBCATEGORY   */
+        /* ========================= */
 
-.subcat-container .nav-link {
-    white-space: nowrap;
-    color: #5a534a;
-}
+        .subcat-container {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 12px 25px;
+            display: flex;
+            gap: 30px;
+            white-space: nowrap;
+            border-top: 1px solid #eee;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
 
-.subcat-container .nav-link:hover {
-    color: #8b6f47;
-    background-color: #f8f5f0;
-}
+            .subcat-container li {
+                list-style: none;
+            }
+
+            .subcat-container a {
+                text-decoration: none;
+                font-size: 13px;
+                letter-spacing: 0.5px;
+                color: #444;
+                transition: 0.3s;
+            }
+
+                .subcat-container a:hover {
+                    color: #b68d40;
+                }
 
 
     </style>
-    <script>
 
-                  document.addEventListener("DOMContentLoaded", function () {
-
-            document.querySelectorAll(".main-cat").forEach(cat => {
-
-                cat.addEventListener("mouseenter", function () {
-                    const categoryId = this.getAttribute("data-id");
-
-                    // find the subcategory container inside this li
-                    const subContainer = this.closest("li").querySelector(".subcat-container");
-
-                    fetch('/Home/GetSubCategories?categoryId=' + categoryId)
-                        .then(res => res.json())
-                        .then(data => {
-                            subContainer.innerHTML = "";
-
-                            if (data.length === 0) {
-                                subContainer.innerHTML =
-                                    '<li class="nav-item text-muted px-2">No subcategories</li>';
-                            } else {
-                                data.forEach(sub => {
-                                    subContainer.innerHTML += `
-                                        <li class="nav-item px-2">
-                                            <a href="/Home/CategoryProducts?categoryId=${sub.subCategoryId}"
-                                               class="nav-link p-1">
-                                                ${sub.subCategoryName}
-                                            </a>
-                                        </li>`;
-                                });
-                            }
-
-                            // show the container
-                            subContainer.classList.remove("d-none");
-                        });
-                });
-
-                // hide when leaving the category
-                cat.closest("li").addEventListener("mouseleave", function () {
-                    const subContainer = this.querySelector(".subcat-container");
-                    if (subContainer) subContainer.classList.add("d-none");
-                });
-            });
-        });
-
-    </script>
 
 

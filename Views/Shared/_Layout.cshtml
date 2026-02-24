@@ -37,11 +37,26 @@
         <div class="row bg-secondary py-2 px-xl-5">
             <div class="col-lg-6 d-none d-lg-block">
                 <div class="d-inline-flex align-items-center">
-                    <a class="text-dark" href="#">FAQs</a>
-                    <span class="text-muted px-2">|</span>
-                    <a class="text-dark" href="#">Help</a>
-                    <span class="text-muted px-2">|</span>
-                    <a class="text-dark" href="#">Support</a>
+                    <a asp-controller="Home" asp-action="Index" class="nav-item nav-link active">Home</a>
+                    @if (!string.IsNullOrEmpty(userName))
+                    {
+                        <span class="mx-3 text-muted">|</span>
+
+                        <div class="dropdown d-inline">
+                            <a href="#" class="text-dark dropdown-toggle"
+                               data-toggle="dropdown">
+                                <i class="fa fa-user-circle mr-1"></i> @userName
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a asp-controller="Account" asp-action="Profile"
+                                   class="dropdown-item">My Profile</a>
+
+                                <a asp-controller="Account" asp-action="Logout"
+                                   class="dropdown-item text-danger">Logout</a>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
             <div class="col-lg-6 text-center text-lg-right">
@@ -54,138 +69,65 @@
                 </div>
             </div>
         </div>
-
         <div class="row align-items-center py-3 px-xl-5">
-            @* <div class="col-lg-3 d-none d-lg-block">
-                <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
-                    <h1 class="m-0 display-5 font-weight-semi-bold">
-                        <span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper
-                    </h1>
-                </a>
-            </div> *@
-            <div class="col-lg-3 d-none d-lg-block">
-              @*   <a asp-controller="Home" asp-action="Index" class="text-decoration-none d-flex align-items-center">
+
+            <!-- LEFT : MAIN CATEGORIES -->
+            <div class="col-lg-4 d-none d-lg-flex">
+                <ul id="layoutMainCategories" class="header-main-categories"></ul>
+            </div>
+
+            <!-- CENTER : LOGO -->
+            <div class="col-lg-4 col-6 text-center">
+                <a asp-controller="Home" asp-action="Index">
                     <img src="~/img/logo.jpg"
                          alt="MIEL Collections"
-                         style="height: 50px; width: auto;"
-                         class="mr-2" />
-
-                    <h1 class="m-0 font-weight-semi-bold text-dark" style="color: #D19C97 !important;">
-                        MIEL Collections
-                    </h1>
-                </a> *@
+                         style="height:70px; width:auto;" />
+                </a>
             </div>
 
-            <div class="col-lg-6 col-6 text-left">
-                <form>
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for products">
-                        <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
-                        </div>
+            <!-- RIGHT : SEARCH + ICONS -->
+            <div class="col-lg-4 col-6 text-right">
+                <div class="d-flex justify-content-end align-items-center header-icons">
+
+                    <div class="search-box mr-4 d-none d-lg-block">
+                        <input type="text" placeholder="Search">
+                        <i class="fa fa-search"></i>
                     </div>
-                </form>
+
+                    <a href="#" class="icon-btn">
+                        <i class="far fa-heart"></i>
+                        <span>0</span>
+                    </a>
+                    <a href="Account/Login"
+                       class="icon-btn profile-icon"
+                      >
+                       
+                        <i class="far fa-user"></i>
+                    </a>
+                    <a href="/Home/Cart" class="icon-btn">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span id="cartCount">0</span>
+                    </a>
+
+                </div>
             </div>
 
-            <div class="col-lg-3 col-6 text-right">
-                <a href="#" class="btn border">
-                    <i class="fas fa-heart text-primary"></i>
-                    <span class="badge">0</span>
-                </a>
-                <a href="/Home/Cart" class="btn border">
-                    <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge" id="cartCount">0</span>
-                </a>
-
-            </div>
         </div>
     </div>
     <!-- Topbar End -->
     <!-- Navbar Start -->
-    <div class="container-fluid mb-5">
-        <div class="row border-top px-xl-5">
-            <div class="col-lg-12 px-0">
-                <nav class="navbar navbar-expand-lg bg-light navbar-light py-3 py-lg-0 px-0">
-                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none d-flex align-items-center">
-                        <img src="~/img/logo.jpg"
-                             alt="MIEL Collections"
-                             style="height: 50px; width: auto;"
-                             class="mr-2" />
-
-                        <h1 class="m-0 font-weight-semi-bold text-dark" style="color: #D19C97 !important;">
-                            MIEL Collections
-                        </h1>
-                    </a>
-
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-
-                    <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                        <div class="navbar-nav mr-auto py-0">
-                            <a asp-controller="Home" asp-action="Index" class="nav-item nav-link active">Home</a>
-                            <a asp-controller="Home" asp-action="ShopProducts" class="nav-item nav-link">Shop</a>
-                            @* <a class="nav-item nav-link" href="#">Shop Detail</a> *@
-                            @* <a class="nav-item nav-link" href="#">Contact</a> *@
-                            <a asp-controller="Home" asp-action="About" class="nav-item nav-link">About</a>
-                           
-                            
-                        </div>
-                        @* <div class="navbar-nav ml-auto py-0">
-                            <a asp-controller="Home" asp-action="Admin" class="nav-item nav-link">Admin</a>
-                            <a asp-controller="Account" asp-action="Login" class="nav-item nav-link">Login</a>
-                            <a asp-controller="Users" asp-action="Register" class="nav-item nav-link">Register</a>
-                        </div> *@
-                        <div class="navbar-nav ml-auto py-0">
-
-                            @*  USER LOGGED IN *@
-                            @if (!string.IsNullOrEmpty(userName))
-                            {
-                                <div class="nav-item dropdown">
-                                    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center"
-                                       data-toggle="dropdown">
-                                        <i class="fa fa-user-circle mr-2"></i>
-                                        <span>@userName</span>
-                                    </a>
-
-                                    <div class="dropdown-menu dropdown-menu-right">
-
-                                        @* Admin only *@
-                                        @if (roleId == "1")
-                                        {
-                                            <a asp-controller="Home" asp-action="Admin" class="dropdown-item">
-                                                Admin Dashboard
-                                            </a>
-                                        }
-
-                                        <a asp-controller="Account" asp-action="Profile" class="dropdown-item">
-                                            My Profile
-                                        </a>
-
-                                        <div class="dropdown-divider"></div>
-
-                                        <a asp-controller="Account" asp-action="Logout" class="dropdown-item text-danger">
-                                            Logout
-                                        </a>
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                @* USER LOGGED OUT *@
-                                <a asp-controller="Account" asp-action="Login" class="nav-item nav-link">Login</a>
-                                <a asp-controller="Users" asp-action="Register" class="nav-item nav-link">Register</a>
-                            }
-
-                        </div>
-                    </div>
-                </nav>
-            </div>
+  
+    <!-- Navbar End -->
+    <!-- SUBCATEGORY BAR ONLY -->
+   
+        <div class="container-fluid border-bottom bg-white" id="selectedCategoryBar" style="display:none;"> 
+            <div class="px-xl-5 py-3"> 
+            <h2 id="selectedCategoryTitle" class="m-0"></h2> </div> </div>
+    <div class="container-fluid bg-white border-bottom d-none" id="subCategoryBar">
+        <div class="px-xl-5">
+            <ul id="horizontalSubCategories" class="horizontal-subcats"></ul>
         </div>
     </div>
-    <!-- Navbar End -->
     <!-- MAIN CONTENT -->
     <div class="container-fluid">
         @RenderBody()
@@ -221,22 +163,10 @@
                         <h5 class="font-weight-bold text-dark mb-4">Quick Links</h5>
                         <div class="d-flex flex-column justify-content-start">
                             <a asp-controller="Home" asp-action="Index" class="nav-item nav-link">Home</a>
-                            <a asp-controller="Home" asp-action="ShopProducts" class="nav-item nav-link">Shop</a>
-                            <a class="text-dark mb-2" href="cart.html"><i class="fa fa-angle-right mr-2"></i>Shopping Cart</a>
-                            <a class="text-dark mb-2" href="checkout.html"><i class="fa fa-angle-right mr-2"></i>Checkout</a>
-                            <a asp-controller="Home" asp-action="About" class="nav-item nav-link">About</a>
+                           
                         </div>
                     </div>
-                    <div class="col-md-4 mb-5">
-                        <h5 class="font-weight-bold text-dark mb-4">Quick Links</h5>
-                        <div class="d-flex flex-column justify-content-start">
-                            <a asp-controller="Home" asp-action="Index" class="nav-item nav-link">Home</a>
-                            <a asp-controller="Home" asp-action="ShopProducts" class="nav-item nav-link">Shop</a>
-                            <a class="text-dark mb-2" href="cart.html"><i class="fa fa-angle-right mr-2"></i>Shopping Cart</a>
-                            <a class="text-dark mb-2" href="checkout.html"><i class="fa fa-angle-right mr-2"></i>Checkout</a>
-                            <a asp-controller="Home" asp-action="About" class="nav-item nav-link">About</a>
-                        </div>
-                    </div>
+ 
                     <div class="col-md-4 mb-5">
                         <h5 class="font-weight-bold text-dark mb-4">Newsletter</h5>
                         <form action="">
@@ -302,6 +232,251 @@
         }
 
         }
+
+        #subCategoryBar {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* ============================= */
+/* KALKI STYLE CATEGORY NAVBAR  */
+/* ============================= */
+        /* ============================= */
+        /* PREMIUM CATEGORY TITLE STYLE */
+        /* ============================= */
+
+        #selectedCategoryBar {
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+
+        #selectedCategoryTitle {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #111;
+            text-transform: uppercase;
+            margin-left: 0;
+        }
+
+        /* Subcategory horizontal bar */
+
+
+        .horizontal-subcats {
+            list-style: none;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 40px;
+            padding: 14px 0;
+            margin: 0;
+        }
+
+            .horizontal-subcats li a {
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 600;
+                letter-spacing: 1px;
+                color: #555;
+                transition: 0.3s ease;
+                position: relative;
+            }
+
+                /* Hover effect */
+                .horizontal-subcats li a:hover {
+                    color: #b68d40;
+                }
+
+                /* Active underline animation */
+                .horizontal-subcats li a::after {
+                    content: "";
+                    position: absolute;
+                    width: 0%;
+                    height: 2px;
+                    bottom: -6px;
+                    left: 0;
+                    background-color: #b68d40;
+                    transition: width 0.3s ease;
+                }
+
+                .horizontal-subcats li a:hover::after {
+                    width: 100%;
+                }
+.navbar {
+    background: #ffffff !important;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.main-category-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-category-menu li {
+    margin: 0 22px;
+    position: relative;
+}
+
+.main-category-menu li a {
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    color: #000;
+    padding: 18px 0;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+        /* Selected Category Title */
+        #selectedCategoryTitle {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+      
+        /* Active main category */
+        #layoutMainCategories a.main-link.active {
+            color: #b68d40;
+            border-bottom: 2px solid #b68d40;
+        }
+
+        /* Profile Icon Special Style */
+        .profile-icon {
+            font-size: 18px;
+            margin-left: 20px;
+            transition: 0.3s ease;
+        }
+
+            .profile-icon:hover {
+                color: #b68d40;
+                transform: scale(1.1);
+            }
+/* Hover underline animation */
+        #layoutMainCategories {
+            list-style: none;
+            display: flex;
+            justify-content: flex-start; /* LEFT ALIGN */
+            gap: 40px;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+            #layoutMainCategories li {
+                position: relative;
+            }
+
+            #layoutMainCategories a.main-link {
+                text-decoration: none;
+                font-size: 26px;
+                font-weight: 600;
+                letter-spacing: -1px;
+                color: #000;
+                transition: 0.3s;
+            }
+
+                #layoutMainCategories a.main-link:hover {
+                    color: #b68d40;
+                }
+        /* ============================= */
+        /* PROFESSIONAL HEADER STYLE */
+        /* ============================= */
+
+        .header-main-categories {
+            list-style: none;
+            display: flex;
+            gap: 35px;
+            margin: 0;
+            padding: 0;
+        }
+
+            .header-main-categories li a {
+                text-decoration: none;
+                font-size: 16px; /* Increased size */
+                font-weight: 700; /* Bold */
+                letter-spacing: 1.5px;
+                color: #111;
+                transition: 0.3s ease;
+                position: relative;
+            }
+
+                /* Hover */
+                .header-main-categories li a:hover {
+                    color: #b68d40;
+                }
+
+                /* Active Highlight */
+                .header-main-categories li a.active {
+                    color: #b68d40;
+                }
+
+                /* Underline Animation */
+                .header-main-categories li a::after {
+                    content: "";
+                    position: absolute;
+                    width: 0%;
+                    height: 2px;
+                    bottom: -8px;
+                    left: 0;
+                    background-color: #b68d40;
+                    transition: width 0.3s ease;
+                }
+
+                .header-main-categories li a:hover::after,
+                .header-main-categories li a.active::after {
+                    width: 100%;
+                }
+
+        /* Search */
+        .search-box {
+            position: relative;
+        }
+
+            .search-box input {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                outline: none;
+                font-size: 13px;
+                padding-right: 25px;
+            }
+
+            .search-box i {
+                position: absolute;
+                right: 0;
+                top: 3px;
+                font-size: 13px;
+                color: #888;
+            }
+
+        .bg-secondary {
+            background-color: #f3f4f8 !important;
+        }
+        /* Icons */
+        .icon-btn {
+            position: relative;
+            margin-left: 20px;
+            color: #111;
+            font-size: 18px;
+            text-decoration: none;
+        }
+
+            .icon-btn span {
+                position: absolute;
+                top: -8px;
+                right: -10px;
+                font-size: 11px;
+                background: #b68d40;
+                color: white;
+                border-radius: 50%;
+                padding: 2px 6px;
+            }
     </style>
     @RenderSection("Scripts", required: false)
     <script>
@@ -314,6 +489,96 @@
                         cartCount.textContent = data.count;
                     }
                 });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const container = document.getElementById("layoutMainCategories");
+            if (!container) return;
+
+            // Load Main Categories
+            fetch('/Home/GetMainCategories')
+                .then(res => res.json())
+                .then(data => {
+
+                    container.innerHTML = "";
+
+                    data.forEach(cat => {
+                        container.innerHTML += `
+                            <li class="position-relative main-li">
+                                <a href="javascript:void(0)"
+                                   class="main-link"
+                                   data-id="${cat.mainCategoryId}">
+                                   ${cat.mainCategoryName.toUpperCase()}
+                                </a>
+                             
+                            </li>
+                        `;
+                    });
+
+                });
+
+            // CLICK EVENT (instead of hover)
+            container.addEventListener("click", function (e) {
+
+            if (e.target.classList.contains("main-link")) {
+
+                const mainLink = e.target;
+                const categoryId = mainLink.dataset.id;
+                const categoryName = mainLink.textContent;
+
+                const titleBar = document.getElementById("selectedCategoryBar");
+                const title = document.getElementById("selectedCategoryTitle");
+                const subBar = document.getElementById("subCategoryBar");
+                const subList = document.getElementById("horizontalSubCategories");
+
+                // Remove active class from all
+                document.querySelectorAll(".main-link")
+                    .forEach(link => link.classList.remove("active"));
+
+                // Add active class to selected
+                mainLink.classList.add("active");
+
+                // Show category title
+                title.textContent = categoryName;
+                titleBar.style.display = "block";
+
+                // Load subcategories
+                fetch('/Home/GetSubCategories?categoryId=' + categoryId)
+                    .then(res => res.json())
+                    .then(data => {
+
+                        subList.innerHTML = "";
+
+                        if (data.length === 0) {
+                            subBar.classList.add("d-none");
+                            return;
+                        }
+
+                        data.forEach(sub => {
+                            subList.innerHTML += `
+                                <li>
+                                    <a href="/Home/CategoryProducts?categoryId=${sub.subCategoryId}">
+                                        ${sub.subCategoryName}
+                                    </a>
+                                </li>
+                            `;
+                        });
+
+                        subBar.classList.remove("d-none");
+                    });
+            }
+        });
+
+            // Optional: click outside to close
+            document.addEventListener("click", function (e) {
+                if (!container.contains(e.target)) {
+                    document.querySelectorAll(".subcat-container")
+                        .forEach(el => el.classList.add("d-none"));
+                }
+            });
+
         });
     </script>
 
