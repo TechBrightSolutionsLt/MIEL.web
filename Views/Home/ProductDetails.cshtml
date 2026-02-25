@@ -25,6 +25,11 @@
         <!-- ================= MAIN IMAGE ================= -->
         <div class="col-lg-4 col-md-5 position-relative">
             <div class="main-image" id="mainImageContainer">
+                <button id="wishlistBtn"
+                        data-id="@Model.ProductId"
+                        class="wishlist-btn">
+                    <i class="far fa-heart"></i>
+                </button>
                 <img id="mainProductImage"
                      src="@Model.ImagePath"
                      alt="@Model.ProductName" />
@@ -61,7 +66,7 @@
                     </div>
                 </div>
             }
-
+        
             <!-- ================= SIZE ================= -->
             <div class="variant-box">
                 <h6>Size</h6>
@@ -242,6 +247,47 @@
         cursor: pointer;
     }
 
+    <style >
+    .main-image {
+        position: relative;
+    }
+
+    .wishlist-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: none;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s ease;
+        z-index: 10;
+    }
+
+        .wishlist-btn i {
+            font-size: 18px;
+            color: #333;
+            transition: 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            background: #000;
+        }
+
+            .wishlist-btn:hover i {
+                color: #fff;
+            }
+
+        /* Active state */
+        .wishlist-btn.active i {
+            color: red;
+        }
+</style>
 </style>
 
 <!-- ================= VARIANT DATA ================= -->
@@ -479,5 +525,50 @@ function closeSizeChart() {
 
 
     });
+
 </script>
 
+<script>
+    document.getElementById("wishlistBtn").addEventListener("click", function () {
+
+        let productId = this.getAttribute("data-id");
+
+        fetch('/Home/AddToWishlist?productId=' + productId, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+
+                // Update header count
+                document.getElementById("wishlist-count").innerText = data.count;
+
+                alert("Added to Wishlist ❤️");
+            }
+        });
+
+    });
+</script>
+<script>
+    document.getElementById("wishlistBtn").addEventListener("click", function () {
+
+        let btn = this;
+        let productId = btn.getAttribute("data-id");
+
+        fetch('/Home/AddToWishlist?productId=' + productId, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+
+                // Update count in header
+                document.getElementById("wishlist-count").innerText = data.count;
+
+                // Toggle red heart
+                btn.classList.add("active");
+                btn.innerHTML = '<i class="fas fa-heart"></i>';
+            }
+        });
+    });
+</script>

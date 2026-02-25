@@ -44,7 +44,7 @@ namespace MIEL.web.Data
         public DbSet<SalesMaster> SalesMasters { get; set; }
         public DbSet<Cart> Cart { get; set; }
         public DbSet<OrderVM> Orders { get; set;}
-
+        public DbSet<Wishlist> Wishlist { get; set; }
 
 
 

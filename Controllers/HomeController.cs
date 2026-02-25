@@ -35,6 +35,7 @@ namespace MIEL.web.Controllers
         }
         public IActionResult Index()
         {
+            LoadWishlistCount();
             ViewBag.BannerImages = _context.ImageItems
                                           .OrderByDescending(x => x.Id)
                                           .ToList();
@@ -90,6 +91,7 @@ namespace MIEL.web.Controllers
 
         public IActionResult CategoryProducts(int categoryId)
         {
+            LoadWishlistCount();
             var products = (from p in _context.ProductMasters
                             where p.CategoryId == categoryId
                             select new ProductListVM
@@ -121,6 +123,7 @@ namespace MIEL.web.Controllers
 
         public IActionResult ProductDetails(int id)
         {
+            LoadWishlistCount();
             var product = _context.ProductMasters
                 .Where(p => p.ProductId == id)
                 .Select(p => new ProductListVM
@@ -427,7 +430,7 @@ namespace MIEL.web.Controllers
 
                 Response.Cookies.Append("GuestId", guestId, new CookieOptions
                 {
-                    Expires = DateTime.Now.AddDays(30), // persists 30 days
+                    Expires = DateTime.Now.AddDays(30),
                     HttpOnly = true,
                     IsEssential = true
                 });
@@ -439,6 +442,7 @@ namespace MIEL.web.Controllers
 
         public IActionResult Cart()
         {
+            LoadWishlistCount();
             string customerId = HttpContext.Session.GetString("CustomerId");
             string guestId = GetGuestId();
 
@@ -1024,9 +1028,147 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
 
 
 
-  
+        [HttpPost]
+        public IActionResult AddToWishlist(int productId)
+        {
+            string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
+
+            // GET PRODUCT NAME
+            var productName = _context.ProductMasters
+                .Where(p => p.ProductId == productId)
+                .Select(p => p.ProductName)
+                .FirstOrDefault();
+
+            if (productName == null)
+                return Json(new { success = false });
+
+            var variantId = _context.ProColorSizeVariants
+    .Where(v => v.ProductId == productId)
+    .Select(v => v.varientid)
+    .FirstOrDefault();
+
+            var rate = _context.PurchaseItems
+                .Where(pi => pi.varientid == variantId)
+                .OrderByDescending(pi => pi.PurchaseItemId)
+                .Select(pi => pi.Rate)
+                .FirstOrDefault();
+
+            // GET IMAGE
+            var image = _context.ProductImages
+                .Where(i => i.ProductId == productId && i.Flag == 1)
+                .Select(i => i.ImgPath)
+                .FirstOrDefault();
+
+            Wishlist existingItem = null;
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                int cid = Convert.ToInt32(customerId);
+
+                existingItem = _context.Wishlist
+                    .FirstOrDefault(x =>
+                        x.ProductId == productId &&
+                        x.CustomerId == cid);
+            }
+            else
+            {
+                existingItem = _context.Wishlist
+                    .FirstOrDefault(x =>
+                        x.ProductId == productId &&
+                        x.GuestId == guestId &&
+                        x.CustomerId == null);   // IMPORTANT
+            }
+
+            // INSERT ONLY (Wishlist does not increase quantity)
+            if (existingItem == null)
+            {
+                Wishlist newItem = new Wishlist
+                {
+                    CustomerId = string.IsNullOrEmpty(customerId) ? (int?)null : Convert.ToInt32(customerId),
+                    GuestId = string.IsNullOrEmpty(customerId) ? guestId : null,
+                    ProductId = productId,
+                    ProductName = productName,
+                    Price = rate,
+                    Image = image,
+                    CreatedDate = DateTime.Now
+                };
+
+                _context.Wishlist.Add(newItem);
+                _context.SaveChanges();
+            }
+
+            // RETURN WISHLIST COUNT (LIKE CART COUNT)
+            int count = !string.IsNullOrEmpty(customerId)
+                ? _context.Wishlist.Count(x => x.CustomerId == Convert.ToInt32(customerId))
+                : _context.Wishlist.Count(x => x.GuestId == guestId);
+
+            return Json(new { success = true, count });
+        }
+
+        public IActionResult Wishlist()
+        {
+            string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
+
+            List<Wishlist> wishlistItems;
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                int cid = Convert.ToInt32(customerId);
+
+                wishlistItems = _context.Wishlist
+                    .Where(c => c.CustomerId == cid)
+                    .ToList();
+
+                ViewBag.WishlistCount = _context.Wishlist
+                    .Count(c => c.CustomerId == cid);
+            }
+            else
+            {
+                wishlistItems = _context.Wishlist
+                    .Where(c => c.GuestId == guestId)
+                    .ToList();
+
+                ViewBag.WishlistCount = _context.Wishlist
+                    .Count(c => c.GuestId == guestId);
+            }
+
+            return View(wishlistItems);
+        }
+
+        public IActionResult RemoveFromWishlist(int id)
+        {
+            var item = _context.Wishlist.FirstOrDefault(x => x.Id == id);
+
+            if (item != null)
+            {
+                _context.Wishlist.Remove(item);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Wishlist");
+        }
 
 
+        private void LoadWishlistCount()
+        {
+            string customerId = HttpContext.Session.GetString("CustomerId");
+            string guestId = GetGuestId();
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                int cid = Convert.ToInt32(customerId);
+
+                ViewBag.WishlistCount = _context.Wishlist
+                    .Count(x => x.CustomerId == cid);
+            }
+            else
+            {
+                ViewBag.WishlistCount = _context.Wishlist
+                    .Count(x => x.GuestId == guestId);
+            }
+        }
         public IActionResult Privacy()
         {
             return View();

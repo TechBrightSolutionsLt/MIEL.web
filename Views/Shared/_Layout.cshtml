@@ -93,10 +93,16 @@
                         <input type="text" placeholder="Search">
                         <i class="fa fa-search"></i>
                     </div>
-
-                    <a href="#" class="icon-btn">
+                    <a href="https://wa.me/61430823457"
+                       target="_blank"
+                       class="icon-btn whatsapp-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="/Home/Wishlist" class="icon-btn">
                         <i class="far fa-heart"></i>
-                        <span>0</span>
+                        <span id="wishlist-count">
+                            @(ViewBag.WishlistCount ?? 0)
+                        </span>
                     </a>
                     <a href="Account/Login"
                        class="icon-btn profile-icon"
@@ -405,6 +411,17 @@
                 position: relative;
             }
 
+        
+        .whatsapp-icon i {
+            color: #25D366;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .whatsapp-icon:hover i {
+            transform: scale(1.2);
+        }
+    
                 /* Hover */
                 .header-main-categories li a:hover {
                     color: #b68d40;

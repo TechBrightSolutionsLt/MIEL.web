@@ -1,0 +1,94 @@
+﻿@model List<MIEL.web.Models.EntityModels.Wishlist>
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">My Wishlist</h3>
+        <span class="text-muted">@Model.Count item(s)</span>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <h5>Your wishlist is empty ❤️</h5>
+            <a href="/Home/Index" class="btn btn-dark mt-3 px-4">
+                Continue Shopping
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card wishlist-card border-0 shadow-sm h-100">
+
+                        <!-- REMOVE ICON -->
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <a href="/Home/RemoveFromWishlist/@item.Id"
+                               class="text-danger fs-5">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+
+                        <!-- IMAGE -->
+                        <a href="/Home/ProductDetails/@item.ProductId">
+                            <img src="@item.Image"
+                                 class="card-img-top wishlist-img"
+                                 alt="@item.ProductName">
+                        </a>
+
+                        <!-- BODY -->
+                        <div class="card-body text-center d-flex flex-column">
+
+                            <h6 class="fw-semibold mb-2">
+                                @item.ProductName
+                            </h6>
+
+                            <p class="text-dark fw-bold mb-3">
+                                $ @item.Price.ToString("N2")
+                            </p>
+
+                            <div class="mt-auto">
+                                <a href="/Home/RemoveFromWishlist/@item.Id"
+                                   class="btn btn-dark btn-sm w-100 mb-2">
+                                    Move to Cart
+                                </a>
+
+                                <a href="/Home/ProductDetails/@item.ProductId"
+                                   class="btn btn-outline-dark btn-sm w-100">
+                                    View Product
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    <style>
+        .wishlist-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: 0.3s ease;
+            position: relative;
+        }
+
+            .wishlist-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            }
+
+        .wishlist-img {
+            height: 260px;
+            object-fit: cover;
+            transition: 0.3s ease;
+        }
+
+        .wishlist-card:hover .wishlist-img {
+            transform: scale(1.05);
+        }
+    </style>
+</div>
