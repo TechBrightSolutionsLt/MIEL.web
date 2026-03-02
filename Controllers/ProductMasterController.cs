@@ -309,18 +309,41 @@ namespace MIEL.web.Controllers
                 _db.SaveChanges();
 
                 // ---------- OTHER IMAGES ----------
+                //var oldImageIds = Request.Form["OldImageIds"];
+
+                //for (int i = 0; i < oldImageIds.Count; i++)
+                //{
+                //    var file = Request.Form.Files["Image" + (i + 2)];
+                //    if (file == null || file.Length == 0)
+                //        continue;
+
+                //    int imgId = Convert.ToInt32(oldImageIds[i]);
+
+                //    var oldImg = _db.ProductImages
+                //        .First(x => x.ImgId == imgId);
+
+                //    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                //    var path = Path.Combine(uploadDir, fileName);
+
+                //    using (var stream = new FileStream(path, FileMode.Create))
+                //    {
+                //        file.CopyTo(stream);
+                //    }
+
+                //    oldImg.ImgPath = "/proimg/" + fileName;
+                //}
                 var oldImageIds = Request.Form["OldImageIds"];
 
-                for (int i = 0; i < oldImageIds.Count; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     var file = Request.Form.Files["Image" + (i + 2)];
                     if (file == null || file.Length == 0)
                         continue;
 
-                    int imgId = Convert.ToInt32(oldImageIds[i]);
+                    int? imgId = null;
 
-                    var oldImg = _db.ProductImages
-                        .First(x => x.ImgId == imgId);
+                    if (i < oldImageIds.Count)
+                        imgId = Convert.ToInt32(oldImageIds[i]);
 
                     var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
                     var path = Path.Combine(uploadDir, fileName);
@@ -330,9 +353,23 @@ namespace MIEL.web.Controllers
                         file.CopyTo(stream);
                     }
 
-                    oldImg.ImgPath = "/proimg/" + fileName;
+                    if (imgId != null)
+                    {
+                        // UPDATE existing image
+                        var oldImg = _db.ProductImages.First(x => x.ImgId == imgId);
+                        oldImg.ImgPath = "/proimg/" + fileName;
+                    }
+                    else
+                    {
+                        // INSERT new image
+                        _db.ProductImages.Add(new ProductImages
+                        {
+                            ProductId = productId,
+                            ImgPath = "/proimg/" + fileName,
+                            Flag = 0
+                        });
+                    }
                 }
-
                 _db.SaveChanges();
 
 

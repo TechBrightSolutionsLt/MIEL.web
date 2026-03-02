@@ -11,6 +11,7 @@
 {
     <div class="alert alert-success">@TempData["msg"]</div>
 }
+
 <form method="post" action="/ProductMaster/Update" enctype="multipart/form-data">
 
 <input type="hidden" name="ProductId" value="@Model.Product.ProductId" />
@@ -19,10 +20,6 @@
 <input type="text" name="ProductCode"
            value="@Model.Product.ProductCode"
        class="form-control" />
-
-
-
-
 
 <label>Product Name</label>
 <input type="text" name="ProductName"
@@ -97,7 +94,7 @@
         </div>
 
         <!-- OTHER IMAGES -->
-        <div class="row">
+        @* <div class="row">
             @for (int i = 0; i < otherImgs.Count; i++)
             {
                 <div class="col-md-3 text-center mb-3">
@@ -119,8 +116,41 @@
                 </div>
             }
         </div>
-    </div>
+    </div> *@
+        <div class="row">
+            @for (int i = 0; i < 3; i++)
+            {
+                var img = otherImgs.Count > i ? otherImgs[i] : null;
 
+                <div class="col-md-3 text-center mb-3">
+                    <label class="fw-bold">Image @(i + 2)</label>
+
+                    @if (img != null)
+                    {
+                        <img id="preview@(i)"
+                             src="@img.ImgPath"
+                             class="img-thumbnail d-block mx-auto mt-2"
+                             style="height:120px;width:120px;object-fit:cover;" />
+
+                        <input type="hidden"
+                               name="OldImageIds"
+                               value="@img.ImgId" />
+                    }
+                    else
+                    {
+                        <img id="preview@(i)"
+                             class="img-thumbnail d-none mt-2"
+                             style="height:120px;width:120px;object-fit:cover;" />
+                    }
+
+                    <input type="file"
+                           name="Image@(i + 2)"
+                           class="form-control mt-2"
+                           onchange="previewImage(this, 'preview@(i)')" />
+                </div>
+            }
+        </div>
+        </div>
     <!-- ================= SIZE CHART ================= -->
     @* <div class="card p-3 mb-4">
         <h4>Size Chart</h4>
@@ -211,12 +241,20 @@
 
 
 <script>
-    function previewImage(input, imgId) {
+       function previewImage(input, imgId) {
         if (input.files && input.files[0]) {
+
             const reader = new FileReader();
+
             reader.onload = function (e) {
-                document.getElementById(imgId).src = e.target.result;
+                const img = document.getElementById(imgId);
+
+                img.src = e.target.result;
+
+                // 🔥 REMOVE d-none if exists
+                img.classList.remove("d-none");
             };
+
             reader.readAsDataURL(input.files[0]);
         }
     }
