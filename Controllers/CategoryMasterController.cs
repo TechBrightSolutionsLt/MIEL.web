@@ -106,8 +106,7 @@ namespace MIEL.web.Controllers
                         Text = m.MainCategoryName,
                         Value = m.MainCategoryId.ToString()
                     })
-                    .ToList();
-
+                    .ToList();          
                 return View("~/Views/Admin/CategoryMaster.cshtml", vm);
             }
 
@@ -134,6 +133,7 @@ namespace MIEL.web.Controllers
             }
 
             _context.SaveChanges();
+            TempData["SuccessMessage"] = "Created successfully!";
             return RedirectToAction(nameof(CategoryMaster));
         }
         // POST : Delete
@@ -149,6 +149,7 @@ namespace MIEL.web.Controllers
 
             _context.Categories.Remove(category);
             _context.SaveChanges();
+            TempData["SuccessMessage"] = "Deleted successfully!";
 
             return RedirectToAction(nameof(CategoryMaster));
         }
