@@ -99,12 +99,14 @@
 
             <div class="col-md-1">
                 <label>Disc %</label>
-                <input id="DiscPercent" type="number" class="form-control" />
+               @*  <input id="DiscPercent" type="number" class="form-control" /> *@
+                <input id="DiscPercent" type="number" class="form-control" value="0" min="0" />
             </div>
 
             <div class="col-md-1">
                 <label>Disc Amt</label>
-                <input id="DiscAmount" type="number" class="form-control" />
+                @* <input id="DiscAmount" type="number" class="form-control" /> *@
+                <input id="DiscAmount" type="number" class="form-control" value="0" min="0" />
             </div>
 
             <div class="col-md-1 d-flex align-items-end">
@@ -561,8 +563,10 @@
             function resetFields() {
 
             $('#Quantity').val(1);
-            $('#DiscPercent').val('');
-            $('#DiscAmount').val('');
+            // $('#DiscPercent').val('');
+            // $('#DiscAmount').val('');
+                $('#DiscPercent').val(0);
+                $('#DiscAmount').val(0);
 
             $('#VariantId').val('').trigger('change');
             $('#BatchNo').empty().append('<option value="">-- Select Batch --</option>');
