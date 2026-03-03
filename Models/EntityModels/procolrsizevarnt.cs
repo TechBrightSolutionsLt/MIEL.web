@@ -18,5 +18,7 @@ namespace MIEL.web.Models.EntityModels
         public string varientCode { get; set; }
         public decimal AverageCost { get; set; }
 
+        public ICollection<ProdColImage> ProdColImages { get; set; }
+
     }
 }

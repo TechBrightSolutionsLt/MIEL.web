@@ -1,0 +1,57 @@
+﻿@using MIEL.web.Models.EntityModels
+@model IEnumerable<procolrsizevarnt>
+@{
+    ViewData["Title"] = "Manage Product Images";
+    Layout = "_AdminLayout";
+}
+
+
+@foreach (var variant in Model)
+{
+    <div style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+
+        <h4>Color: @variant.colour | Size: @variant.size</h4>
+
+        <!-- Upload Images -->
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="variantId" value="@variant.varientid" />
+            <input type="file" name="files" multiple />
+            <button type="submit" class="btn btn-success">Upload</button>
+        </form>
+
+        <br />
+
+        <!-- Show Images -->
+        @if (variant.ProdColImages != null)
+        {
+            foreach (var img in variant.ProdColImages)
+            {
+                <div style="display:inline-block; margin:10px;">
+                    <img src="~/productimages/@img.ImagePath"
+                         width="120" height="120" />
+
+                    <br />
+
+                    <!-- Delete -->
+                    <a asp-action="DeleteImage"
+                       asp-route-id="@img.Id"
+                       class="btn btn-danger btn-sm">
+                        Delete
+                    </a>
+
+                    <!-- Edit -->
+                    <form asp-action="EditImage"
+                          method="post"
+                          enctype="multipart/form-data">
+                        <input type="hidden" name="id" value="@img.Id" />
+                        <input type="file" name="newFile" />
+                        <button type="submit"
+                                class="btn btn-warning btn-sm">
+                            Replace
+                        </button>
+                    </form>
+                </div>
+            }
+        }
+    </div>
+}

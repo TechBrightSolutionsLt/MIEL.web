@@ -39,13 +39,13 @@ namespace MIEL.web.Data
 
        
         public DbSet<InventoryBatch> InventoryBatch { get; set; }
-
+        public DbSet<MainCategory> MainCategories { get; set; }
         public DbSet<SalesItem>SalesItems { get; set; }
         public DbSet<SalesMaster> SalesMasters { get; set; }
         public DbSet<Cart> Cart { get; set; }
         public DbSet<OrderVM> Orders { get; set;}
         public DbSet<Wishlist> Wishlist { get; set; }
-
+        public DbSet<ProdColImage> ProdColImages { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -86,6 +86,6 @@ namespace MIEL.web.Data
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<MainCategory> MainCategories { get; set; }
+       
     }
 }

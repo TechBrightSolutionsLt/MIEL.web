@@ -1,0 +1,35 @@
+﻿@using MIEL.web.Models.EntityModels
+@model IEnumerable<ProductMaster>
+@{
+    ViewData["Title"] = "Add Product Images";
+    Layout = "_AdminLayout";
+}
+
+
+<form method="get">
+    <input type="text" name="search" placeholder="Search product..." />
+    <button type="submit">Search</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.ProductName</td>
+                <td>
+                    <a asp-action="Manage" asp-route-id="@p.ProductId"
+                       class="btn btn-primary">
+                        Manage Images
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
