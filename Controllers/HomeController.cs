@@ -911,6 +911,16 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 _context.SaveChanges();
             }
         }
+        //public IActionResult OrderSuccess(int salesId)
+        //{
+        //    var order = _context.Orders
+        //        .FirstOrDefault(x => x.SalesId == salesId);
+
+        //    if (order == null)
+        //        return RedirectToAction("Cart", "Cart");
+
+        //    return View(order);
+        //}
         public IActionResult OrderSuccess(int salesId)
         {
             var order = _context.Orders
@@ -919,7 +929,15 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             if (order == null)
                 return RedirectToAction("Cart", "Cart");
 
-            return View(order);
+            // Map Order → PayIDViewModel
+            PayIDViewModel model = new PayIDViewModel
+            {
+                OrderNumber = order.OrderNumber,
+                PaymentStatus = order.PaymentStatus,
+                TotalAmount = order.TotalAmount
+            };
+
+            return View(model);
         }
 
 
