@@ -104,12 +104,20 @@
                             @(ViewBag.WishlistCount ?? 0)
                         </span>
                     </a>
-                    <a href="Account/Login"
+
+
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="icon-btn profile-icon">
+                        <i class="far fa-user"></i>
+                    </a>
+
+                  @*   <a href="Account/Login"
                        class="icon-btn profile-icon"
                       >
                        
                         <i class="far fa-user"></i>
-                    </a>
+                    </a> *@
                     <a href="/Home/Cart" class="icon-btn">
                         <i class="fas fa-shopping-bag"></i>
                         <span id="cartCount">0</span>
