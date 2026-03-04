@@ -86,7 +86,13 @@ public class ProductImageController : Controller
     // ==============================
     public async Task<IActionResult> DeleteImage(int id)
     {
-        var image = await _context.ProdColImages.FindAsync(id);
+        //var image = await _context.ProdColImages.FindAsync(id);
+
+        var image = await _context.ProdColImages
+    .Include(i => i.Variant)
+    .FirstOrDefaultAsync(i => i.Id == id);
+
+
 
         if (image != null)
         {
@@ -99,6 +105,11 @@ public class ProductImageController : Controller
             await _context.SaveChangesAsync();
         }
 
+        //return RedirectToAction("Manage", new { id = image.Variant.ProductId });
+
+        if (image?.Variant == null)
+            return RedirectToAction("Index");
+
         return RedirectToAction("Manage", new { id = image.Variant.ProductId });
     }
 
@@ -108,7 +119,11 @@ public class ProductImageController : Controller
     [HttpPost]
     public async Task<IActionResult> EditImage(int id, IFormFile newFile)
     {
-        var image = await _context.ProdColImages.FindAsync(id);
+        //var image = await _context.ProdColImages.FindAsync(id);
+
+        var image = await _context.ProdColImages
+    .Include(i => i.Variant)
+    .FirstOrDefaultAsync(i => i.Id == id);
 
         if (image != null && newFile != null)
         {
@@ -129,6 +144,11 @@ public class ProductImageController : Controller
             image.ImagePath = newFileName;
             await _context.SaveChangesAsync();
         }
+
+        //return RedirectToAction("Manage", new { id = image.Variant.ProductId });
+
+        if (image?.Variant == null)
+            return RedirectToAction("Index");
 
         return RedirectToAction("Manage", new { id = image.Variant.ProductId });
     }
