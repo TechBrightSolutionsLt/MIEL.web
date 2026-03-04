@@ -168,6 +168,7 @@ namespace MIEL.web.Controllers
                     Variants = (
     from v in _context.ProColorSizeVariants
     where v.ProductId == p.ProductId
+    orderby v.varientid
     select new ColorSizeVM
     {
         VariantId = v.varientid,
@@ -230,13 +231,24 @@ namespace MIEL.web.Controllers
                     //.FirstOrDefault()
 
 
-                    NetAmount = (from v in _context.ProColorSizeVariants
-                                 join sp in _context.VariantPrices
-                                 on v.varientid equals sp.varientid
-                                 where v.ProductId == p.ProductId && sp.IsActive
-                                 orderby sp.VariantPriceId descending   // or CreatedDate
-                                 select sp.SellingPrice)
-             .FirstOrDefault()
+                    //       NetAmount = (from v in _context.ProColorSizeVariants
+                    //                    join sp in _context.VariantPrices
+                    //                    on v.varientid equals sp.varientid
+                    //                    where v.ProductId == p.ProductId && sp.IsActive
+                    //                    orderby sp.VariantPriceId descending   // or CreatedDate
+                    //                    select sp.SellingPrice)
+                    //.FirstOrDefault()
+
+                    NetAmount = (
+    from v in _context.ProColorSizeVariants
+    where v.ProductId == p.ProductId
+    orderby v.varientid   // first variant
+    select _context.VariantPrices
+        .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+        .OrderByDescending(sp => sp.VariantPriceId)
+        .Select(sp => sp.SellingPrice)
+        .FirstOrDefault()
+).FirstOrDefault()
                 })
                 .FirstOrDefault();
 
