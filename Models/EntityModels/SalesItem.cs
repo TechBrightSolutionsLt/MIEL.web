@@ -8,30 +8,29 @@ namespace MIEL.web.Models.EntityModels
         [Key]
         public int SalesItemId { get; set; }
 
-        // 🔥 Foreign Key
         public int SalesId { get; set; }
 
         [ForeignKey("SalesId")]
         public SalesMaster SalesMaster { get; set; }
 
+        // 🔥 FOREIGN KEY TO VARIANT
         public int varientid { get; set; }
+
+        [ForeignKey("varientid")]
+        public procolrsizevarnt procolrsizevarnt { get; set; }
 
         [MaxLength(50)]
         public string BatchNo { get; set; }
 
         public int Quantity { get; set; }
 
-        // GST INCLUDED price (AUD)
         public decimal SellingPrice { get; set; }
 
-        // ================= DISCOUNT =================
         public decimal DiscPercent { get; set; }
         public decimal DiscAmount { get; set; }
 
-        // ================= TAX =================
         public decimal TaxAmount { get; set; }
 
-        // ================= TOTAL =================
         public decimal NetAmount { get; set; }
     }
 }
