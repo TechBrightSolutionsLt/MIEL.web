@@ -5,132 +5,227 @@
     Layout = "_AdminLayout";
 }
 
-<h4 class="mb-3">✏ Edit Sale</h4>
+<div class="container-fluid mt-4">
 
-<form asp-action="Edit" method="post">
-    @Html.AntiForgeryToken()
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <input type="hidden" asp-for="SalesId" />
+        <div class="d-flex align-items-center gap-3">
+            <a href="javascript:history.back()"
+               class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+                ← Back
+            </a>
 
-    <div class="row mb-3">
-        <div class="col-md-3">
-            <label>Invoice No</label>
-            <input asp-for="InvoiceNo" class="form-control" readonly />
+            <h4 class="fw-bold mb-0">✏ Edit Sale</h4>
         </div>
 
-        <div class="col-md-3">
-            <label>Date</label>
-            <input asp-for="SalesDate" type="date" class="form-control" />
-        </div>
+    </div>
 
-        <div class="col-md-3">
-            <label>Customer</label>
-            <select asp-for="CustomerId"
-                    asp-items="ViewBag.Customers"
-                    class="form-control">
-                <option value="">-- Select Customer --</option>
-            </select>
-        </div>
+    <!-- ================= CARD ================= -->
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body">
 
-        <div class="col-md-3">
-            <label>Payment</label>
-            <select asp-for="PaymentType" class="form-select">
-                <option value="Cash">Cash</option>
-                <option value="Pay_ID">Pay_ID</option>
-            </select>
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="SalesId" />
+
+                <!-- ================= TOP DETAILS ================= -->
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Invoice No</label>
+                        <input asp-for="InvoiceNo"
+                               class="form-control"
+                               readonly />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Date</label>
+                        <input asp-for="SalesDate"
+                               type="date"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Customer</label>
+                        <select asp-for="CustomerId"
+                                asp-items="ViewBag.Customers"
+                                class="form-select">
+                            <option value="">-- Select Customer --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Payment</label>
+                        <select asp-for="PaymentType"
+                                class="form-select">
+                            <option value="Cash">Cash</option>
+                            <option value="Pay_ID">Pay_ID</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <!-- ================= ITEMS TABLE ================= -->
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover">
+
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <th>Variant</th>
+                                <th>Batch</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Disc %</th>
+                                <th class="text-end">Disc Amt</th>
+                                <th class="text-end">GST</th>
+                                <th class="text-end">Net</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="itemsBody">
+                            @if (Model.Items != null)
+                            {
+                                for (int i = 0; i < Model.Items.Count; i++)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <input asp-for="Items[@i].varientid"
+                                                   class="form-control text-center"
+                                                   readonly />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].BatchNo"
+                                                   class="form-control text-center"
+                                                   readonly />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].SellingPrice"
+                                                   class="form-control text-end price" />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].Quantity"
+                                                   class="form-control text-center"
+                                                   readonly />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].DiscPercent"
+                                                   class="form-control text-end discpercent" />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].DiscAmount"
+                                                   class="form-control text-end discamount" />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].TaxAmount"
+                                                   class="form-control text-end taxamount" />
+                                        </td>
+
+                                        <td>
+                                            <input asp-for="Items[@i].NetAmount"
+                                                   class="form-control text-end netamount fw-semibold"
+                                                   readonly />
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <!-- ================= TOTAL SUMMARY ================= -->
+                <div class="row justify-content-end mt-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 shadow-sm rounded-4">
+                            <div class="card-body text-end">
+
+                                <h6 class="text-muted">
+                                    Discount :
+                                    <span class="text-danger fw-semibold">
+                                        ₹ @Model.TotalDiscount.ToString("0.00")
+                                    </span>
+                                </h6>
+
+                                <h6 class="text-muted">
+                                    GST :
+                                    <span class="text-info fw-semibold">
+                                        ₹ @Model.GstAmount.ToString("0.00")
+                                    </span>
+                                </h6>
+
+                                <hr />
+
+                                <h4 class="fw-bold">
+                                    Total :
+                                    <span class="text-success">
+                                        ₹ @Model.NetAmount.ToString("0.00")
+                                    </span>
+                                </h4>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Totals -->
+                <input type="hidden" asp-for="TotalAmount" />
+                <input type="hidden" asp-for="TotalDiscount" />
+                <input type="hidden" asp-for="GstAmount" />
+                <input type="hidden" asp-for="NetAmount" />
+
+                <!-- ================= ACTION BUTTONS ================= -->
+                <div class="text-end mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary rounded-pill px-5 shadow-sm fw-semibold">
+                        💾 Update Sale
+                    </button>
+
+                    <a asp-action="Details"
+                       class="btn btn-outline-secondary rounded-pill px-4 shadow-sm ms-2">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
         </div>
     </div>
 
-    <hr />
+</div>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Variant</th>
-                <th>Batch</th>
-                <th>Price</th>
-                <th>Qty</th>
-                <th>Disc %</th>
-                <th>Disc Amt</th>
-                <th>GST</th>
-                <th>Net</th>
-                <th></th>
-            </tr>
-        </thead>
+<style>
+    .card {
+        background: #ffffff;
+    }
 
-        <tbody id="itemsBody">
-            @if (Model.Items != null)
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+    }
 
-            {
-                for (int i = 0; i < Model.Items.Count; i++)
-                {
-                    <tr>
-                        <td>
-                            <input asp-for="Items[@i].varientid" class="form-control" readonly />
-                        </td>
+    .table tbody tr {
+        transition: all 0.2s ease-in-out;
+    }
 
-                        <td>
-                            <input asp-for="Items[@i].BatchNo" class="form-control" readonly />
-                        </td>
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.002);
+        }
 
-                        <td>
-                            <input asp-for="Items[@i].SellingPrice"
-                                   class="form-control text-end price" />
-                        </td>
-
-                        <td>
-                            <input asp-for="Items[@i].Quantity"
-                                   class="form-control" readonly />
-                        </td>
-
-                        <td>
-                            <input asp-for="Items[@i].DiscPercent"
-                                   class="form-control text-end discpercent" />
-                        </td>
-
-                        <td>
-                            <input asp-for="Items[@i].DiscAmount"
-                                   class="form-control text-end discamount" />
-                        </td>
-
-                        <td>
-                            <input asp-for="Items[@i].TaxAmount"
-                                   class="form-control text-end taxamount" />
-                        </td>
-
-                        <td>
-                            <input asp-for="Items[@i].NetAmount"
-                                   class="form-control text-end netamount" readonly />
-                        </td>
-
-                        
-                    </tr>
-                }
-            }
-        </tbody>
-
-    </table>
-
-    @* <div class="text-end">
-        <h5>Discount: <span>@Model.TotalDiscount.ToString("0.00")</span></h5>
-        <h5>GST: <span>@Model.GstAmount.ToString("0.00")</span></h5>
-        <h4>Total: <span>@Model.NetAmount.ToString("0.00")</span></h4>
-    </div> *@
-
-
-    <input type="hidden" asp-for="TotalAmount" />
-    <input type="hidden" asp-for="TotalDiscount" />
-    <input type="hidden" asp-for="GstAmount" />
-    <input type="hidden" asp-for="NetAmount" />
-
-    <div class="text-end mt-3">
-        <button type="submit" class="btn btn-primary">
-            💾 Update Sale
-        </button>
-
-        <a asp-action="Details" asp-route-id="@Model.SalesId" class="btn btn-secondary">
-            Cancel
-        </a>
-    </div>
-
-</form>
+    .btn {
+        font-weight: 500;
+    }
+</style>
