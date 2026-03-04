@@ -105,13 +105,20 @@ namespace MIEL.web.Controllers
                                     .Select(i => i.ImgPath)
                                     .FirstOrDefault(),
 
+                                //NetAmount = (from v in _context.ProColorSizeVariants
+                                //         join pi in _context.PurchaseItems
+                                //         on v.varientid equals pi.varientid
+                                //         where v.ProductId == p.ProductId
+                                //         orderby pi.PurchaseItemId descending
+                                //         select pi.Rate)
+                                //         .FirstOrDefault()
                                 NetAmount = (from v in _context.ProColorSizeVariants
-                                         join pi in _context.PurchaseItems
-                                         on v.varientid equals pi.varientid
-                                         where v.ProductId == p.ProductId
-                                         orderby pi.PurchaseItemId descending
-                                         select pi.Rate)
-                                         .FirstOrDefault()
+                                             join sp in _context.VariantPrices
+                                             on v.varientid equals sp.varientid
+                                             where v.ProductId == p.ProductId && sp.IsActive
+                                             orderby sp.SellingPrice descending
+                                             select sp.SellingPrice)
+             .FirstOrDefault()
                             }).ToList();
 
             return View(products);
@@ -197,15 +204,44 @@ namespace MIEL.web.Controllers
                     //).ToList(),
 
                     // Default price (first variant)
-                    NetAmount = _context.ProColorSizeVariants
-                        .Where(v => v.ProductId == p.ProductId)
-                        .Select(v => _context.PurchaseItems
-                            .Where(pi => pi.varientid == v.varientid)
-                            .OrderByDescending(pi => pi.PurchaseItemId)
-                            .Select(pi => pi.Rate)
-                            .FirstOrDefault()
-                        )
-                        .FirstOrDefault()
+                    //NetAmount = _context.ProColorSizeVariants
+                    //    .Where(v => v.ProductId == p.ProductId)
+                    //    .Select(v => _context.PurchaseItems
+                    //        .Where(pi => pi.varientid == v.varientid)
+                    //        .OrderByDescending(pi => pi.PurchaseItemId)
+                    //        .Select(pi => pi.Rate)
+                    //        .FirstOrDefault()
+                    //    )
+                    //    .FirstOrDefault()
+
+                    //                NetAmount = _context.ProColorSizeVariants
+                    //.Where(v => v.ProductId == p.ProductId)
+                    //.Select(v => _context.VariantPrices
+                    //    .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+                    //    .Select(sp => sp.SellingPrice)
+                    //    .FirstOrDefault()
+                    //)
+                    //.FirstOrDefault()
+
+
+                    //       NetAmount = (from v in _context.ProColorSizeVariants
+                    //                    join sp in _context.VariantPrices
+                    //                    on v.varientid equals sp.varientid
+                    //                    where v.ProductId == p.ProductId && sp.IsActive
+                    //                    orderby sp.VariantPriceId descending   // or CreatedDate
+                    //                    select sp.SellingPrice)
+                    //.FirstOrDefault()
+
+                    NetAmount = (
+    from v in _context.ProColorSizeVariants
+    where v.ProductId == p.ProductId
+    orderby v.varientid   // first variant
+    select _context.VariantPrices
+        .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+        .OrderByDescending(sp => sp.VariantPriceId)
+        .Select(sp => sp.SellingPrice)
+        .FirstOrDefault()
+).FirstOrDefault()
                 })
                 .FirstOrDefault();
 
@@ -247,11 +283,17 @@ namespace MIEL.web.Controllers
                 });
             }
             // GET RATE separately
-            var rate = _context.PurchaseItems
-                .Where(pi => pi.varientid == variant.varientid)
-                .OrderByDescending(pi => pi.PurchaseItemId)
-                .Select(pi => pi.Rate)
-                .FirstOrDefault();
+            //var rate = _context.PurchaseItems
+            //    .Where(pi => pi.varientid == variant.varientid)
+            //    .OrderByDescending(pi => pi.PurchaseItemId)
+            //    .Select(pi => pi.Rate)
+            //    .FirstOrDefault();
+
+            var rate = _context.VariantPrices
+     .Where(sp => sp.varientid == variant.varientid && sp.IsActive)
+     .OrderByDescending(sp => sp.VariantPriceId)   // IMPORTANT
+     .Select(sp => sp.SellingPrice)
+     .FirstOrDefault();
 
             // GET IMAGE AND NAME
             var image = _context.ProductImages
@@ -339,12 +381,17 @@ namespace MIEL.web.Controllers
                 });
             }
             // get latest rate
-            var rate = _context.PurchaseItems
-                .Where(pi => pi.varientid == variant.varientid)
-                .OrderByDescending(pi => pi.PurchaseItemId)
-                .Select(pi => pi.Rate)
-                .FirstOrDefault();
+            //var rate = _context.PurchaseItems
+            //    .Where(pi => pi.varientid == variant.varientid)
+            //    .OrderByDescending(pi => pi.PurchaseItemId)
+            //    .Select(pi => pi.Rate)
+            //    .FirstOrDefault();
 
+            var rate = _context.VariantPrices
+    .Where(sp => sp.varientid == variant.varientid && sp.IsActive)
+    .OrderByDescending(sp => sp.VariantPriceId)   // ADD THIS
+    .Select(sp => sp.SellingPrice)
+    .FirstOrDefault();
             // image & name
             var image = _context.ProductImages
                 .Where(i => i.ProductId == productId && i.Flag == 1)
@@ -1085,15 +1132,26 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             if (productName == null)
                 return Json(new { success = false });
 
+            //        var variantId = _context.ProColorSizeVariants
+            //.Where(v => v.ProductId == productId)
+            //.Select(v => v.varientid)
+            //.FirstOrDefault();
+
+            //        var rate = _context.PurchaseItems
+            //            .Where(pi => pi.varientid == variantId)
+            //            .OrderByDescending(pi => pi.PurchaseItemId)
+            //            .Select(pi => pi.Rate)
+            //            .FirstOrDefault();
+
+
             var variantId = _context.ProColorSizeVariants
     .Where(v => v.ProductId == productId)
     .Select(v => v.varientid)
     .FirstOrDefault();
 
-            var rate = _context.PurchaseItems
-                .Where(pi => pi.varientid == variantId)
-                .OrderByDescending(pi => pi.PurchaseItemId)
-                .Select(pi => pi.Rate)
+            var rate = _context.VariantPrices
+                .Where(sp => sp.varientid == variantId && sp.IsActive)
+                .Select(sp => sp.SellingPrice)
                 .FirstOrDefault();
 
             // GET IMAGE

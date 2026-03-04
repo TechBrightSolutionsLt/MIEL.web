@@ -17,14 +17,24 @@
     }
  *@
 
-    <h4 class="mb-3">Create Sales</h4>
-    <a asp-action="Details"
-       class="btn btn-info w-10">
-        View
-    </a>
-    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h4 class="fw-bold text-dark mb-0">
+            🧾 Create Sales
+        </h4>
+
+        <a asp-action="Details"
+           class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
+            📄 View Sales
+        </a>
+
+    </div>
 
     @* <form asp-action="Create" method="post"> *@
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body">
+
+            <!-- YOUR FORM STARTS HERE -->
     <form id="salesForm" asp-action="Create" method="post">
 
         @Html.AntiForgeryToken()
@@ -109,15 +119,22 @@
                 <input id="DiscAmount" type="number" class="form-control" value="0" min="0" />
             </div>
 
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="button" id="btnAdd" class="btn btn-primary w-100">Add</button>
-            </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button"
+                                id="btnAdd"
+                                class="btn w-100 rounded-pill shadow-sm fw-semibold add-btn">
+                            <span class="me-1">➕</span> Add Item
+                        </button>
+                    </div>
+
         </div>
 
         <div id="hiddenItems"></div>
 
-        <table class="table table-bordered">
-            <thead>
+                <div class="table-responsive mt-4">
+                    <table class="table align-middle table-hover">
+                        <thead class="bg-dark text-white">
+
                 <tr>
                     <th>Product</th>
                     <th>Variant</th>
@@ -135,15 +152,48 @@
             <tbody id="itemsBody"></tbody>
         </table>
 
-        <div class="text-end">
-            <h5>Discount: <span id="lblDiscount">0.00</span></h5>
-            <h5>GST: <span id="lblGst">0.00</span></h5>
-            <h4>Total: <span id="lblNet">0.00</span></h4>
-        </div>
+                    <div class="row justify-content-end mt-4">
+                        <div class="col-md-4">
 
-        <div class="text-end mt-3">
-            <button type="submit" class="btn btn-success">Save</button>
-        </div>
+                            <div class="card bg-light border-0 shadow-sm rounded-4">
+                                <div class="card-body text-end">
+
+                                    <h6 class="text-muted">
+                                        Discount :
+                                        <span class="fw-semibold text-danger">
+                                            ₹ <span id="lblDiscount">0.00</span>
+                                        </span>
+                                    </h6>
+
+                                    <h6 class="text-muted">
+                                        GST :
+                                        <span class="fw-semibold text-info">
+                                            ₹ <span id="lblGst">0.00</span>
+                                        </span>
+                                    </h6>
+
+                                    <hr />
+
+                                    <h4 class="fw-bold">
+                                        Total :
+                                        <span class="text-success">
+                                            ₹ <span id="lblNet">0.00</span>
+                                        </span>
+                                    </h4>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <button type="submit"
+                            class="btn btn-success rounded-pill px-5 shadow-sm">
+                        💾 Save
+                    </button>
+
+
 
         <input type="hidden" name="TotalAmount" id="hdTotalAmount" />
         <input type="hidden" name="TotalDiscount" id="hdTotalDiscount" />
@@ -151,10 +201,54 @@
         <input type="hidden" name="NetAmount" id="hdNetAmount" />
 
     </form>
-
+        </div>
+    </div>
 </div>
 
 <!-- ================= script ================= -->
+<style>
+    .card {
+        background: #ffffff;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+    }
+
+    .table thead th {
+        font-size: 14px;
+        letter-spacing: .5px;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.002);
+        }
+
+    .btn {
+        font-weight: 500;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+    .select2-selection__rendered {
+        line-height: 28px !important;
+    }
+
+    .select2-selection__arrow {
+        height: 36px !important;
+    }
+</style>
+
 <script>
             // =============================================
         // AJAX FORM SUBMIT

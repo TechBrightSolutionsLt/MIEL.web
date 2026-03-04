@@ -217,7 +217,7 @@ namespace MIEL.web.Controllers
 
         // SEARCH CUSTOMER
         public async Task<IActionResult> SearchCustomers(string term)
-        {
+       {
             var data = await _context.users_TB
                 .Where(x => x.FirstName.Contains(term))
                 .Select(x => new
@@ -276,38 +276,46 @@ namespace MIEL.web.Controllers
             return Json(batch);
         }
 
-        public async Task<IActionResult> Details()
+        public async Task<IActionResult> Details(string invoiceNo)
         {
-            var result = await _context.SalesMasters
-        .Select(s => new SalesVM
-        {
-            SalesId = s.SalesId,   // 🔥 VERY IMPORTANT
+            var query = _context.SalesMasters
+                .Include(s => s.SalesItems)
+                    .ThenInclude(i => i.procolrsizevarnt)
+                .AsQueryable();
 
-            //var result = await _context.SalesMasters
-            //    .Select(s => new SalesVM
-            //    {
-            //         SalesId = s.SalesId,   // 👈 ADD THIS (VERY IMPORTANT)
+            if (!string.IsNullOrEmpty(invoiceNo))
+            {
+                query = query.Where(s => s.InvoiceNo.Contains(invoiceNo));
+            }
+
+            var result = await query
+                .Select(s => new SalesVM
+                {
+                    SalesId = s.SalesId,
                     InvoiceNo = s.InvoiceNo,
                     SalesDate = s.SalesDate,
                     PaymentType = s.PaymentType,
                     NetAmount = s.NetAmount,
-                    Items = _context.SalesItems
-                                .Where(i => i.SalesId == s.SalesId)
-                                .Select(i => new SalesItemVM
-                                {
-                                    varientid = i.varientid,
-                                    BatchNo = i.BatchNo,
-                                    Quantity = i.Quantity,
-                                    SellingPrice = i.SellingPrice,
-                                    DiscAmount = i.DiscAmount,
-                                    TaxAmount = i.TaxAmount,
-                                    NetAmount = i.NetAmount
-                                }).ToList()
+
+                    Items = s.SalesItems.Select(i => new SalesItemVM
+                    {
+                        varientid = i.varientid,
+
+                        // 🔥 NOW THIS WORKS
+                        VariantName = i.procolrsizevarnt.colour + " - " +
+                                      i.procolrsizevarnt.size,
+
+                        BatchNo = i.BatchNo,
+                        Quantity = i.Quantity,
+                        SellingPrice = i.SellingPrice,
+                        DiscAmount = i.DiscAmount,
+                        TaxAmount = i.TaxAmount,
+                        NetAmount = i.NetAmount
+                    }).ToList()
                 }).ToListAsync();
 
             return View(result);
         }
-
         // ==========================================
         // EDIT GET
         // ==========================================

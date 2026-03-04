@@ -1,82 +1,186 @@
 ﻿@model List<MIEL.web.Models.ViewModel.SalesVM>
 @{
-    // ViewData["Title"] = "Create Sales";
     Layout = "_AdminLayout";
 }
-<h4 class="mb-3">All Sales Details</h4>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Invoice No</th>
-            <th>Date</th>
-            <th>Payment</th>
-            <th>Total</th>
-            <th>Variant</th>
-            <th>Batch</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Discount</th>
-            <th>GST</th>
-            <th>Net</th>
-            <th width="150">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var sale in Model)
-        {
-            if (sale.Items != null && sale.Items.Any())
-            {
-                foreach (var item in sale.Items)
-                {
-                    <tr>
+<div class="container-fluid mt-4">
 
-                        <td>@sale.InvoiceNo</td>
-                        <td>@sale.SalesDate.ToString("dd-MM-yyyy")</td>
-                        <td>@sale.PaymentType</td>
-                        <td>@sale.NetAmount.ToString("0.00")</td>
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-                        <td>@item.varientid</td>
-                        <td>@item.BatchNo</td>
-                        <td>@item.Quantity</td>
-                        <td>@item.SellingPrice.ToString("0.00")</td>
-                        <td>@item.DiscAmount.ToString("0.00")</td>
-                        <td>@item.TaxAmount.ToString("0.00")</td>
-                        <td>@item.NetAmount.ToString("0.00")</td>
+        <div class="d-flex align-items-center gap-3">
 
-                        <td>
+            <a href="javascript:history.back()"
+               class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+                ← Back
+            </a>
 
-                            <a asp-action="Print"
-                               asp-route-id="@sale.SalesId"
-                               target="_blank"
-                               class="btn btn-info btn-sm">
-                                🖨 Print
-                            </a>
+            <h4 class="fw-bold text-dark mb-0">
+                📊 All Sales Details
+            </h4>
 
-                            <a asp-action="Edit"
-                               asp-route-id="@sale.SalesId"
-                               class="btn btn-warning btn-sm">
-                                ✏ Edit
-                            </a>
+        </div>
 
-                            <a asp-action="Delete"
-                               asp-route-id="@sale.SalesId"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Are you sure you want to delete this sale?');">
-                                🗑 Delete
-                            </a>
-
-                        </td>
+    </div>
 
 
+    <!-- Card Wrapper -->
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body">
+
+            <!-- Search Section -->
+            <form method="get" asp-action="Details" class="mb-4">
+                <div class="input-group shadow-sm">
+
+                    <span class="input-group-text bg-white border-end-0">
+                        🔍
+                    </span>
+
+                    <input type="text"
+                           name="invoiceNo"
+                           value="@Context.Request.Query["invoiceNo"]"
+                           class="form-control border-start-0"
+                           placeholder="Search Invoice No..." />
+
+                    <button type="submit" class="btn btn-primary px-4">
+                        Search
+                    </button>
+
+                    <a asp-action="Details" class="btn btn-outline-secondary">
+                        Clear
+                    </a>
+
+                </div>
+            </form>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table align-middle table-hover">
+
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Date</th>
+                            <th>Payment</th>
+                            <th>Total</th>
+                            <th>Variant</th>
+                            <th>Batch</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Discount</th>
+                            <th>GST</th>
+                            <th>Net</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var sale in Model)
+                        {
+                            if (sale.Items != null && sale.Items.Any())
+                            {
+                                foreach (var item in sale.Items)
+                                {
+                                    <tr>
+
+                                        <td class="fw-semibold text-primary">
+                                            @sale.InvoiceNo
+                                        </td>
+
+                                        <td>
+                                            @sale.SalesDate.ToString("dd-MM-yyyy")
+                                        </td>
+
+                                        <td>
+                                            @if (sale.PaymentType == "Cash")
+                                            {
+                                                <span class="badge bg-success">Cash</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info text-dark">
+                                                    @sale.PaymentType
+                                                </span>
+                                            }
+                                        </td>
+
+                                        <td class="fw-semibold">
+                                            
+                                            @sale.NetAmount.ToString("0.00")
+                                        </td>
+
+                                        <td>@item.VariantName</td>
+                                        <td>@item.BatchNo</td>
+                                        <td>@item.Quantity</td>
+                                        <td> @item.SellingPrice.ToString("0.00")</td>
+                                        <td> @item.DiscAmount.ToString("0.00")</td>
+                                        <td> @item.TaxAmount.ToString("0.00")</td>
+                                        <td class="fw-semibold text-dark">
+                                             @item.NetAmount.ToString("0.00")
+                                        </td>
+
+                                        <td class="text-center">
+
+                                            <a asp-action="Print"
+                                               asp-route-id="@sale.SalesId"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1">
+                                                Print
+                                            </a>
+
+                                            <a asp-action="Edit"
+                                               asp-route-id="@sale.SalesId"
+                                               class="btn btn-sm btn-outline-warning rounded-pill px-3 me-1">
+                                                Edit
+                                            </a>
+
+                                            <a asp-action="Delete"
+                                               asp-route-id="@sale.SalesId"
+                                               class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                               onclick="return confirm('Are you sure you want to delete this sale?');">
+                                                Delete
+                                            </a>
 
 
+                                        </td>
 
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
 
-                    </tr>
-                }
-            }
-        }
-    </tbody>
+                </table>
+            </div>
 
-</table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table thead th {
+        font-size: 14px;
+        letter-spacing: .5px;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.002);
+    }
+
+    .card {
+        background: #ffffff;
+    }
+
+    .input-group input {
+        height: 45px;
+    }
+
+    .btn {
+        font-weight: 500;
+    }
+</style>
