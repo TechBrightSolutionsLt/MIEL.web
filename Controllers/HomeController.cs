@@ -159,26 +159,26 @@ namespace MIEL.web.Controllers
 
 
                     Variants = (
-    from v in _context.ProColorSizeVariants
-    where v.ProductId == p.ProductId
-    select new ColorSizeVM
-    {
-        VariantId = v.varientid,
-        Color = v.colour,
-        Size = v.size,
+                        from v in _context.ProColorSizeVariants
+                        where v.ProductId == p.ProductId
+                        select new ColorSizeVM
+                        {
+                            VariantId = v.varientid,
+                            Color = v.colour,
+                            Size = v.size,
 
-        Rate = _context.PurchaseItems
-            .Where(pi => pi.varientid == v.varientid)
-            .OrderByDescending(pi => pi.PurchaseItemId)
-            .Select(pi => pi.Rate)
-            .FirstOrDefault(),
+                            Rate = _context.PurchaseItems
+                                .Where(pi => pi.varientid == v.varientid)
+                                .OrderByDescending(pi => pi.PurchaseItemId)
+                                .Select(pi => pi.Rate)
+                                .FirstOrDefault(),
 
-        ColorImages = _context.ProdColImages
-            .Where(ci => ci.VariantId == v.varientid)
-            .Select(ci => ci.ImagePath)
-            .ToList()
-    }
-).ToList(),
+                            ColorImages = _context.ProdColImages
+                                .Where(ci => ci.VariantId == v.varientid)
+                                .Select(ci => ci.ImagePath)
+                                .ToList()
+                        }
+                    ).ToList(),
 
                     //Variants = (
                     //    from v in _context.ProColorSizeVariants
