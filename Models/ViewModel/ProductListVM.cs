@@ -9,6 +9,8 @@
         public int QuantityOnHand { get; set; }
         public int DefaultQty { get; set; } = 1;
 
+        public List<string> ColorImages { get; set; }
+
     }
     public class SpecificationVM
     {
