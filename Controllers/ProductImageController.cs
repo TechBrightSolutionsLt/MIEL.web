@@ -54,6 +54,23 @@ public class ProductImageController : Controller
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 
+        // Count existing images for this variant
+        int existingImageCount = _context.ProdColImages
+            .Count(i => i.VariantId == variantId);
+
+        // Total images after upload
+        int totalImages = existingImageCount + (files?.Count ?? 0);
+
+        if (totalImages > 4)
+        {
+            TempData["Error"] = "Maximum 4 images allowed per variant.";
+
+            var variantData = _context.ProColorSizeVariants
+                .FirstOrDefault(v => v.varientid == variantId);
+
+            return RedirectToAction("Manage", new { id = variantData.ProductId });
+        }
+
         foreach (var file in files)
         {
             string fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
@@ -86,7 +103,13 @@ public class ProductImageController : Controller
     // ==============================
     public async Task<IActionResult> DeleteImage(int id)
     {
-        var image = await _context.ProdColImages.FindAsync(id);
+        //var image = await _context.ProdColImages.FindAsync(id);
+
+        var image = await _context.ProdColImages
+    .Include(i => i.Variant)
+    .FirstOrDefaultAsync(i => i.Id == id);
+
+
 
         if (image != null)
         {
@@ -99,6 +122,11 @@ public class ProductImageController : Controller
             await _context.SaveChangesAsync();
         }
 
+        //return RedirectToAction("Manage", new { id = image.Variant.ProductId });
+
+        if (image?.Variant == null)
+            return RedirectToAction("Index");
+
         return RedirectToAction("Manage", new { id = image.Variant.ProductId });
     }
 
@@ -108,7 +136,11 @@ public class ProductImageController : Controller
     [HttpPost]
     public async Task<IActionResult> EditImage(int id, IFormFile newFile)
     {
-        var image = await _context.ProdColImages.FindAsync(id);
+        //var image = await _context.ProdColImages.FindAsync(id);
+
+        var image = await _context.ProdColImages
+    .Include(i => i.Variant)
+    .FirstOrDefaultAsync(i => i.Id == id);
 
         if (image != null && newFile != null)
         {
@@ -129,6 +161,11 @@ public class ProductImageController : Controller
             image.ImagePath = newFileName;
             await _context.SaveChangesAsync();
         }
+
+        //return RedirectToAction("Manage", new { id = image.Variant.ProductId });
+
+        if (image?.Variant == null)
+            return RedirectToAction("Index");
 
         return RedirectToAction("Manage", new { id = image.Variant.ProductId });
     }

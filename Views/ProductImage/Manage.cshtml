@@ -6,20 +6,42 @@
 }
 
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 @foreach (var variant in Model)
 {
     <div style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
 
         <h4>Color: @variant.colour | Size: @variant.size</h4>
 
-        <!-- Upload Images -->
+        @* <!-- Upload Images -->
         <form asp-action="Upload" method="post" enctype="multipart/form-data">
             <input type="hidden" name="variantId" value="@variant.varientid" />
             <input type="file" name="files" multiple />
             <button type="submit" class="btn btn-success">Upload</button>
         </form>
 
-        <br />
+        <br /> *@
+
+        @if (variant.ProdColImages.Count < 4)
+        {
+            <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="variantId" value="@variant.varientid" />
+                <input type="file" name="files" multiple />
+                <button type="submit" class="btn btn-success">Upload</button>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                Maximum 4 images uploaded for this variant.
+            </div>
+        }
 
         <!-- Show Images -->
         @if (variant.ProdColImages != null)
