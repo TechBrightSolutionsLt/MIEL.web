@@ -289,6 +289,8 @@ namespace MIEL.web.Controllers
             }
 
             var result = await query
+                 .OrderByDescending(s => s.SalesDate)   // 🔥 Sort by latest date
+        .ThenByDescending(s => s.SalesId)      // Optional: latest invoice if same date
                 .Select(s => new SalesVM
                 {
                     SalesId = s.SalesId,
