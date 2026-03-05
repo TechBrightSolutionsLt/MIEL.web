@@ -112,6 +112,8 @@ namespace MIEL.web.Controllers
                                 //         orderby pi.PurchaseItemId descending
                                 //         select pi.Rate)
                                 //         .FirstOrDefault()
+                                
+                                
                                 NetAmount = (from v in _context.ProColorSizeVariants
                                              join sp in _context.VariantPrices
                                              on v.varientid equals sp.varientid
@@ -172,11 +174,21 @@ namespace MIEL.web.Controllers
                             Color = v.colour,
                             Size = v.size,
 
-                            Rate = _context.PurchaseItems
-                                .Where(pi => pi.varientid == v.varientid)
-                                .OrderByDescending(pi => pi.PurchaseItemId)
-                                .Select(pi => pi.Rate)
-                                .FirstOrDefault()
+                            //    Rate = _context.PurchaseItems
+                            //        .Where(pi => pi.varientid == v.varientid)
+                            //        .OrderByDescending(pi => pi.PurchaseItemId)
+                            //        .Select(pi => pi.Rate)
+                            //        .FirstOrDefault()
+                            //}).ToList(),
+
+
+
+
+                            Rate = _context.VariantPrices
+            .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+            .OrderByDescending(sp => sp.VariantPriceId)
+            .Select(sp => sp.SellingPrice)
+            .FirstOrDefault()
                         }).ToList(),
 
                     // Default price (first active variant price)
