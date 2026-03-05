@@ -69,21 +69,40 @@
                 </div>
             </div>
         </div>
-        <div class="row align-items-center py-3 px-xl-5">
+        @* <div class="row align-items-center py-3 px-xl-5"> *@
 
             <!-- LEFT : MAIN CATEGORIES -->
-            <div class="col-lg-4 col-12 d-flex justify-content-center justify-content-lg-start mb-2 mb-lg-0">
+           @*  <div class="col-lg-4 col-12 d-flex justify-content-center justify-content-lg-start mb-2 mb-lg-0">
                 <ul id="layoutMainCategories" class="header-main-categories"></ul>
-            </div>
+            </div> *@
 
             <!-- CENTER : LOGO -->
-            <div class="col-lg-4 col-6 text-center">
+            @* <div class="col-lg-4 col-6 text-center">
                 <a asp-controller="Home" asp-action="Index">
                     <img src="~/img/miel logo new.png"
                          alt="MIEL Collections"
                          style="height:120px; width:auto;" />
                 </a>
+            </div> *@
+
+        <div class="row align-items-center py-3 px-xl-5">
+
+            <!-- LEFT : LOGO -->
+            <div class="col-lg-3 col-6">
+                <a asp-controller="Home" asp-action="Index">
+                    <img src="~/img/miel logo new.png"
+                         alt="MIEL Collections"
+                         style="height:90px; width:auto;" />
+                </a>
             </div>
+
+            <!-- CENTER : MAIN CATEGORIES -->
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+                <ul id="layoutMainCategories" class="header-main-categories"></ul>
+            </div>
+
+
+
 
             <!-- RIGHT : SEARCH + ICONS -->
             <div class="col-lg-4 col-6 text-right">
