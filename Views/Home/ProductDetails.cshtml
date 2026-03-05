@@ -441,16 +441,13 @@
             colorPills[0].click();
         }
 
+               function updateImagesByColor(color) {
 
-            function updateImagesByColor(color) {
-
-        // Get all variants of selected color
         const variantsByColor = productVariants
-            .filter(v => v.Color === color);
+            .filter(v => v.Color?.toLowerCase() === color.toLowerCase());
 
         let images = [];
 
-        // Find first variant that has images
         for (let v of variantsByColor) {
             if (v.ColorImages && v.ColorImages.length > 0) {
                 images = v.ColorImages;
@@ -458,28 +455,31 @@
             }
         }
 
-        // 🔥 If no color images → DO NOTHING
-        if (images.length === 0) return;
+        if (!images || images.length === 0) {
+            console.log("No color images found");
+            return;
+        }
 
         const mainImg = document.getElementById("mainProductImage");
         const thumbContainer = document.querySelector(".thumbnail-column");
 
-        // Clear old thumbnails
         thumbContainer.innerHTML = "";
 
         images.forEach((imgPath, index) => {
 
             const img = document.createElement("img");
-            img.src = imgPath;
+
+            img.src = imgPath;   // ✅ Already contains /productimages/
+
             img.className = "thumb-img";
 
             if (index === 0) {
                 img.classList.add("active");
-                mainImg.src = imgPath;
+                mainImg.src = img.src;
             }
 
-            img.onmouseover = function () {
-                changeImage(this);
+            img.onclick = function () {
+                mainImg.src = this.src;
             };
 
             thumbContainer.appendChild(img);

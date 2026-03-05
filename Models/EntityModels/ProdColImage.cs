@@ -11,6 +11,7 @@ namespace MIEL.web.Models.EntityModels
         [ForeignKey("procolrsizevarnt")]
         public int VariantId { get; set; }
 
+        public string col { get; set; } = string.Empty;
         public string ? ImagePath { get; set; }
 
         public procolrsizevarnt ? Variant { get; set; }
