@@ -441,17 +441,17 @@
             colorPills[0].click();
         }
 
-            function updateImagesByColor(color) {debugger;
+               function updateImagesByColor(color) {
 
         const variantsByColor = productVariants
-            .filter(v => v.color?.toLowerCase() === color.toLowerCase());
+            .filter(v => v.Color?.toLowerCase() === color.toLowerCase());
 
         let images = [];
 
         for (let v of variantsByColor) {
-            if (v.colorImages && v.colorImages.length > 0) {
-                images = v.colorImages;
-                break; 
+            if (v.ColorImages && v.ColorImages.length > 0) {
+                images = v.ColorImages;
+                break;
             }
         }
 
@@ -469,9 +469,7 @@
 
             const img = document.createElement("img");
 
-            img.src = imgPath.startsWith("/")
-                ? imgPath
-                : "/uploads/" + imgPath;
+            img.src = imgPath;   // ✅ Already contains /productimages/
 
             img.className = "thumb-img";
 
@@ -480,7 +478,7 @@
                 mainImg.src = img.src;
             }
 
-            img.onmouseover = function () {
+            img.onclick = function () {
                 mainImg.src = this.src;
             };
 

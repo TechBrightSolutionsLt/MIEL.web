@@ -125,12 +125,13 @@ namespace MIEL.web.Controllers
         }
 
 
-
-
-
         public IActionResult ProductDetails(int id)
         {
             LoadWishlistCount();
+
+            // =========================
+            // 1️⃣ LOAD PRODUCT + VARIANTS (NO IMAGES HERE)
+            // =========================
             var product = _context.ProductMasters
                 .Where(p => p.ProductId == id)
                 .Select(p => new ProductListVM
@@ -140,6 +141,7 @@ namespace MIEL.web.Controllers
                     Brand = p.Brand,
                     ProductDescription = p.ProductDescription,
                     sizechartPath = p.sizechartPath,
+
                     ImagePath = _context.ProductImages
                         .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
                         .Select(i => i.ImgPath)
@@ -162,13 +164,9 @@ namespace MIEL.web.Controllers
                             SpecValue = ps.specificationvalue
                         }).ToList(),
 
-                    // ? Correct Variants with Latest Rate
-
-
-                    Variants = (
-                        from v in _context.ProColorSizeVariants
-                        where v.ProductId == p.ProductId
-                        select new ColorSizeVM
+                    Variants = _context.ProColorSizeVariants
+                        .Where(v => v.ProductId == p.ProductId)
+                        .Select(v => new ColorSizeVM
                         {
                             VariantId = v.varientid,
                             Color = v.colour,
@@ -178,78 +176,202 @@ namespace MIEL.web.Controllers
                                 .Where(pi => pi.varientid == v.varientid)
                                 .OrderByDescending(pi => pi.PurchaseItemId)
                                 .Select(pi => pi.Rate)
-                                .FirstOrDefault(),
+                                .FirstOrDefault()
+                        }).ToList(),
 
-                            ColorImages = _context.ProdColImages
-                                .Where(ci => ci.VariantId == v.varientid)
-                                .Select(ci => ci.ImagePath)
-                                .ToList()
-                        }
-                    ).ToList(),
-
-                    //Variants = (
-                    //    from v in _context.ProColorSizeVariants
-                    //    where v.ProductId == p.ProductId
-                    //    select new ColorSizeVM
-                    //    {
-                    //        VariantId = v.varientid,
-                    //        Color = v.colour,
-                    //        Size = v.size,
-                    //        Rate = _context.PurchaseItems
-                    //            .Where(pi => pi.varientid == v.varientid)
-                    //            .OrderByDescending(pi => pi.PurchaseItemId)
-                    //            .Select(pi => pi.Rate)
-                    //            .FirstOrDefault()
-                    //    }
-                    //).ToList(),
-
-                    // Default price (first variant)
-                    //NetAmount = _context.ProColorSizeVariants
-                    //    .Where(v => v.ProductId == p.ProductId)
-                    //    .Select(v => _context.PurchaseItems
-                    //        .Where(pi => pi.varientid == v.varientid)
-                    //        .OrderByDescending(pi => pi.PurchaseItemId)
-                    //        .Select(pi => pi.Rate)
-                    //        .FirstOrDefault()
-                    //    )
-                    //    .FirstOrDefault()
-
-                    //                NetAmount = _context.ProColorSizeVariants
-                    //.Where(v => v.ProductId == p.ProductId)
-                    //.Select(v => _context.VariantPrices
-                    //    .Where(sp => sp.varientid == v.varientid && sp.IsActive)
-                    //    .Select(sp => sp.SellingPrice)
-                    //    .FirstOrDefault()
-                    //)
-                    //.FirstOrDefault()
-
-
-                    //       NetAmount = (from v in _context.ProColorSizeVariants
-                    //                    join sp in _context.VariantPrices
-                    //                    on v.varientid equals sp.varientid
-                    //                    where v.ProductId == p.ProductId && sp.IsActive
-                    //                    orderby sp.VariantPriceId descending   // or CreatedDate
-                    //                    select sp.SellingPrice)
-                    //.FirstOrDefault()
-
+                    // Default price (first active variant price)
                     NetAmount = (
-    from v in _context.ProColorSizeVariants
-    where v.ProductId == p.ProductId
-    orderby v.varientid   // first variant
-    select _context.VariantPrices
-        .Where(sp => sp.varientid == v.varientid && sp.IsActive)
-        .OrderByDescending(sp => sp.VariantPriceId)
-        .Select(sp => sp.SellingPrice)
-        .FirstOrDefault()
-).FirstOrDefault()
+                        from v in _context.ProColorSizeVariants
+                        where v.ProductId == p.ProductId
+                        orderby v.varientid
+                        select _context.VariantPrices
+                            .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+                            .OrderByDescending(sp => sp.VariantPriceId)
+                            .Select(sp => sp.SellingPrice)
+                            .FirstOrDefault()
+                    ).FirstOrDefault()
                 })
                 .FirstOrDefault();
 
             if (product == null)
                 return NotFound();
 
+
+            // =========================
+            // 2️⃣ LOAD ALL VARIANT IMAGES SEPARATELY (NO EF ERROR)
+            // =========================
+
+            var variantIds = product.Variants
+                .Select(v => v.VariantId)
+                .ToList();
+
+            var allImages = _context.ProdColImages
+                .Where(i => variantIds.Contains(i.VariantId))
+                .ToList();
+
+            // =========================
+            // 3️⃣ ATTACH IMAGES TO EACH VARIANT
+            // =========================
+
+            foreach (var variant in product.Variants)
+            {
+                variant.ColorImages = allImages
+                    .Where(i => i.VariantId == variant.VariantId)
+                    .Select(i => "/productimages/" + i.ImagePath)
+                    .ToList();
+            }
+
             return View(product);
         }
+
+
+        //        public IActionResult ProductDetails(int id)
+        //        {
+        //            LoadWishlistCount();
+        //            var product = _context.ProductMasters
+        //                .Where(p => p.ProductId == id)
+        //                .Select(p => new ProductListVM
+        //                {
+        //                    ProductId = p.ProductId,
+        //                    ProductName = p.ProductName,
+        //                    Brand = p.Brand,
+        //                    ProductDescription = p.ProductDescription,
+        //                    sizechartPath = p.sizechartPath,
+        //                    ImagePath = _context.ProductImages
+        //                        .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
+        //                        .Select(i => i.ImgPath)
+        //                        .FirstOrDefault(),
+
+        //                    Images = _context.ProductImages
+        //                        .Where(i => i.ProductId == p.ProductId && i.Flag == 0)
+        //                        .OrderBy(i => i.ImgId)
+        //                        .Select(i => i.ImgPath)
+        //                        .ToList(),
+
+        //                    Specificationsnew = (
+        //                        from ps in _context.productspecifications
+        //                        join s in _context.Specifications
+        //                            on ps.Id equals s.Id
+        //                        where ps.ProductId == p.ProductId
+        //                        select new SpecificationVM
+        //                        {
+        //                            SpecName = s.SpecName,
+        //                            SpecValue = ps.specificationvalue
+        //                        }).ToList(),
+
+        //                    // ? Correct Variants with Latest Rate
+
+        //                    Variants = (
+        //    from v in _context.ProColorSizeVariants
+        //    where v.ProductId == p.ProductId
+        //    select new ColorSizeVM
+        //    {
+        //        VariantId = v.varientid,
+        //        Color = v.colour,
+        //        Size = v.size,
+
+        //        Rate = _context.PurchaseItems
+        //            .Where(pi => pi.varientid == v.varientid)
+        //            .OrderByDescending(pi => pi.PurchaseItemId)
+        //            .Select(pi => pi.Rate)
+        //            .FirstOrDefault(),
+
+        //        // 🔥 Get images by COLOR (not just variant)
+        //        ColorImages = (
+        //            from img in _context.ProdColImages
+        //            join vv in _context.ProColorSizeVariants
+        //                on img.VariantId equals vv.varientid
+        //            where vv.ProductId == p.ProductId
+        //                  && vv.colour == v.colour
+        //            select "/productimages/" + img.ImagePath
+        //        ).Distinct().ToList()
+        //    }
+        //).ToList(),
+        //                    //                Variants = (
+        //                    //                    from v in _context.ProColorSizeVariants
+        //                    //                    where v.ProductId == p.ProductId
+        //                    //                    select new ColorSizeVM
+        //                    //                    {
+        //                    //                        VariantId = v.varientid,
+        //                    //                        Color = v.colour,
+        //                    //                        Size = v.size,
+
+        //                    //                        Rate = _context.PurchaseItems
+        //                    //                            .Where(pi => pi.varientid == v.varientid)
+        //                    //                            .OrderByDescending(pi => pi.PurchaseItemId)
+        //                    //                            .Select(pi => pi.Rate)
+        //                    //                            .FirstOrDefault(),
+
+        //                    //                        ColorImages = _context.ProdColImages
+        //                    //.Where(ci => ci.VariantId == v.varientid)
+        //                    //.Select(ci => "/productimages/" + ci.ImagePath)
+        //                    //.ToList()
+        //                    //                    }
+        //                    //                ).ToList(),
+
+        //                    //Variants = (
+        //                    //    from v in _context.ProColorSizeVariants
+        //                    //    where v.ProductId == p.ProductId
+        //                    //    select new ColorSizeVM
+        //                    //    {
+        //                    //        VariantId = v.varientid,
+        //                    //        Color = v.colour,
+        //                    //        Size = v.size,
+        //                    //        Rate = _context.PurchaseItems
+        //                    //            .Where(pi => pi.varientid == v.varientid)
+        //                    //            .OrderByDescending(pi => pi.PurchaseItemId)
+        //                    //            .Select(pi => pi.Rate)
+        //                    //            .FirstOrDefault()
+        //                    //    }
+        //                    //).ToList(),
+
+        //                    // Default price (first variant)
+        //                    //NetAmount = _context.ProColorSizeVariants
+        //                    //    .Where(v => v.ProductId == p.ProductId)
+        //                    //    .Select(v => _context.PurchaseItems
+        //                    //        .Where(pi => pi.varientid == v.varientid)
+        //                    //        .OrderByDescending(pi => pi.PurchaseItemId)
+        //                    //        .Select(pi => pi.Rate)
+        //                    //        .FirstOrDefault()
+        //                    //    )
+        //                    //    .FirstOrDefault()
+
+        //                    //                NetAmount = _context.ProColorSizeVariants
+        //                    //.Where(v => v.ProductId == p.ProductId)
+        //                    //.Select(v => _context.VariantPrices
+        //                    //    .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+        //                    //    .Select(sp => sp.SellingPrice)
+        //                    //    .FirstOrDefault()
+        //                    //)
+        //                    //.FirstOrDefault()
+
+
+        //                    //       NetAmount = (from v in _context.ProColorSizeVariants
+        //                    //                    join sp in _context.VariantPrices
+        //                    //                    on v.varientid equals sp.varientid
+        //                    //                    where v.ProductId == p.ProductId && sp.IsActive
+        //                    //                    orderby sp.VariantPriceId descending   // or CreatedDate
+        //                    //                    select sp.SellingPrice)
+        //                    //.FirstOrDefault()
+
+        //                    NetAmount = (
+        //    from v in _context.ProColorSizeVariants
+        //    where v.ProductId == p.ProductId
+        //    orderby v.varientid   // first variant
+        //    select _context.VariantPrices
+        //        .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+        //        .OrderByDescending(sp => sp.VariantPriceId)
+        //        .Select(sp => sp.SellingPrice)
+        //        .FirstOrDefault()
+        //).FirstOrDefault()
+        //                })
+        //                .FirstOrDefault();
+
+        //            if (product == null)
+        //                return NotFound();
+
+        //            return View(product);
+        //        }
 
 
 
