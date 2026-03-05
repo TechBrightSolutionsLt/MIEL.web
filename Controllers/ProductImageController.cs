@@ -54,21 +54,21 @@ public class ProductImageController : Controller
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 
-        // Count existing images for this variant
+        var variant = await _context.ProColorSizeVariants
+            .FirstOrDefaultAsync(v => v.varientid == variantId);
+
+        if (variant == null)
+            return RedirectToAction("Index");
+
         int existingImageCount = _context.ProdColImages
             .Count(i => i.VariantId == variantId);
 
-        // Total images after upload
         int totalImages = existingImageCount + (files?.Count ?? 0);
 
         if (totalImages > 4)
         {
             TempData["Error"] = "Maximum 4 images allowed per variant.";
-
-            var variantData = _context.ProColorSizeVariants
-                .FirstOrDefault(v => v.varientid == variantId);
-
-            return RedirectToAction("Manage", new { id = variantData.ProductId });
+            return RedirectToAction("Manage", new { id = variant.ProductId });
         }
 
         foreach (var file in files)
@@ -84,6 +84,7 @@ public class ProductImageController : Controller
             ProdColImage image = new ProdColImage
             {
                 VariantId = variantId,
+                col = (variant.colour ?? "UNKNOWN").ToUpper(),  // ✅ setter will convert to UPPERCASE
                 ImagePath = fileName
             };
 
@@ -91,9 +92,6 @@ public class ProductImageController : Controller
         }
 
         await _context.SaveChangesAsync();
-
-        var variant = _context.ProColorSizeVariants
-            .FirstOrDefault(v => v.varientid == variantId);
 
         return RedirectToAction("Manage", new { id = variant.ProductId });
     }
