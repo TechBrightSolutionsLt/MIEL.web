@@ -118,7 +118,8 @@ namespace MIEL.web.Controllers
                                              join sp in _context.VariantPrices
                                              on v.varientid equals sp.varientid
                                              where v.ProductId == p.ProductId && sp.IsActive
-                                             orderby sp.SellingPrice descending
+                                             //orderby sp.SellingPrice descending
+                                             orderby sp.VariantPriceId descending
                                              select sp.SellingPrice)
              .FirstOrDefault()
                             }).ToList();
@@ -184,24 +185,39 @@ namespace MIEL.web.Controllers
 
 
 
+                            //                Rate = _context.VariantPrices
+                            //.Where(sp => sp.varientid == v.varientid && sp.IsActive)
+                            //.OrderByDescending(sp => sp.VariantPriceId)
+                            //.Select(sp => sp.SellingPrice)
+                            //.FirstOrDefault()
                             Rate = _context.VariantPrices
-            .Where(sp => sp.varientid == v.varientid && sp.IsActive)
-            .OrderByDescending(sp => sp.VariantPriceId)
-            .Select(sp => sp.SellingPrice)
-            .FirstOrDefault()
+    .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+    .OrderByDescending(sp => sp.VariantPriceId)
+    .Select(sp => sp.SellingPrice)
+    .FirstOrDefault()
                         }).ToList(),
 
                     // Default price (first active variant price)
+                    //NetAmount = (
+                    //    from v in _context.ProColorSizeVariants
+                    //    where v.ProductId == p.ProductId
+                    //    orderby v.varientid
+                    //    select _context.VariantPrices
+                    //        .Where(sp => sp.varientid == v.varientid && sp.IsActive)
+                    //        .OrderByDescending(sp => sp.VariantPriceId)
+                    //        .Select(sp => sp.SellingPrice)
+                    //        .FirstOrDefault()
+                    //).FirstOrDefault()
+
                     NetAmount = (
-                        from v in _context.ProColorSizeVariants
-                        where v.ProductId == p.ProductId
-                        orderby v.varientid
-                        select _context.VariantPrices
-                            .Where(sp => sp.varientid == v.varientid && sp.IsActive)
-                            .OrderByDescending(sp => sp.VariantPriceId)
-                            .Select(sp => sp.SellingPrice)
-                            .FirstOrDefault()
-                    ).FirstOrDefault()
+    from v in _context.ProColorSizeVariants
+    where v.ProductId == p.ProductId
+    join sp in _context.VariantPrices
+        on v.varientid equals sp.varientid
+    where sp.IsActive
+    orderby sp.VariantPriceId descending
+    select sp.SellingPrice
+).FirstOrDefault()
                 })
                 .FirstOrDefault();
 
