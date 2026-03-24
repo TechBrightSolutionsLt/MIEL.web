@@ -1310,6 +1310,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 .Select(i => i.ImgPath)
                 .FirstOrDefault();
 
+
             Wishlist existingItem = null;
 
             if (!string.IsNullOrEmpty(customerId))
