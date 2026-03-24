@@ -85,7 +85,7 @@ namespace MIEL.web.Controllers
                 };
 
                 _db.ProductMasters.Add(product);
-                _db.SaveChanges(); // 🔑 ProductId generated
+                _db.SaveChanges(); // ?? ProductId generated
                 TempData["SuccessMessage"] = "Product Created successfully!";
 
 
@@ -190,7 +190,7 @@ namespace MIEL.web.Controllers
                     _db.productspecifications.Add(new productspecification
                     {
                         ProductId = product.ProductId,
-                        Id = specId,                    // FK → Specifications.Id
+                        Id = specId,                    // FK ? Specifications.Id
                         specificationvalue = spec.Value
                     });
                 }
@@ -205,7 +205,7 @@ namespace MIEL.web.Controllers
                 // TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
                 TempData["ErrorMessage"] = "ProductCode already Exists";
                 return RedirectToAction("Index");
-            } 
+            }
         }
 
         // ================= LIST =================
@@ -244,7 +244,7 @@ namespace MIEL.web.Controllers
                     .Include(s => s.CategorySpecification)
                     .ToList(),
 
-              
+
                 Variants = _db.ProColorSizeVariants
                                     .Where(v => v.ProductId == id)
                                     .ToList(),
@@ -278,7 +278,7 @@ namespace MIEL.web.Controllers
 
 
                 // =====================================================
-                // 🔥 IMAGE UPDATE CODE GOES HERE (YOUR CODE)
+                // ?? IMAGE UPDATE CODE GOES HERE (YOUR CODE)
                 // =====================================================
 
                 var uploadDir = Path.Combine(
@@ -462,60 +462,12 @@ namespace MIEL.web.Controllers
             }
             catch (Exception ex)
             {
-              // TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
-               TempData["ErrorMessage"] = "Product Code already exists!";
+                // TempData["msg"] = ex.InnerException?.Message ?? ex.Message;
+                TempData["ErrorMessage"] = "Product Code already exists!";
                 return RedirectToAction("Index");
             }
         }
 
-
-        [HttpPost]
-        public IActionResult DeleteImage(int imgId)
-        {
-            var img = _db.ProductImages.FirstOrDefault(x => x.ImgId == imgId);
-
-            if (img == null)
-                return Json(false);
-
-            var fullPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                img.ImgPath.TrimStart('/')
-            );
-
-            if (System.IO.File.Exists(fullPath))
-                System.IO.File.Delete(fullPath);
-
-            _db.ProductImages.Remove(img);
-            _db.SaveChanges();
-
-            return Json(true);
-        }
-
-        //[HttpPost]
-        //public IActionResult DeleteImage(int imgId)
-        //{
-        //    var img = _db.ProductImages.FirstOrDefault(x => x.ImgId == imgId);
-
-        //    if (img == null)
-        //        return Json(false);
-
-        //    // 🔥 Delete physical file
-        //    var fullPath = Path.Combine(
-        //        Directory.GetCurrentDirectory(),
-        //        "wwwroot",
-        //        img.ImgPath.TrimStart('/')
-        //    );
-
-        //    if (System.IO.File.Exists(fullPath))
-        //        System.IO.File.Delete(fullPath);
-
-        //    // 🔥 Remove from DB
-        //    _db.ProductImages.Remove(img);
-        //    _db.SaveChanges();
-
-        //    return Json(true);
-        //}
 
         // ================= DELETE =================
         public IActionResult Delete(int id)
