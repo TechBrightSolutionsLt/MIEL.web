@@ -74,6 +74,17 @@
             <div class="col-md-4">
                 <label class="fw-bold">Main Image</label>
 
+                @* @if (mainImg != null)
+                {
+                    <img id="mainPreview"
+                         src="@mainImg.ImgPath"
+                         class="img-thumbnail d-block mt-2"
+                         style="height:150px;width:150px;object-fit:cover;" />
+
+                    <input type="hidden"
+                           name="OldMainImageId"
+                           value="@mainImg.ImgId" />
+                } *@
                 @if (mainImg != null)
                 {
                     <img id="mainPreview"
@@ -84,6 +95,13 @@
                     <input type="hidden"
                            name="OldMainImageId"
                            value="@mainImg.ImgId" />
+
+                    <!-- 🔥 ADD THIS DELETE BUTTON -->
+                    <button type="button"
+                            class="btn btn-danger btn-sm mt-2"
+                            onclick="deleteImage(@mainImg.ImgId)">
+                        Delete
+                    </button>
                 }
 
                 <input type="file"
@@ -94,6 +112,45 @@
         </div>
 
         <!-- OTHER IMAGES -->
+
+
+        <div class="row">
+            @for (int i = 0; i < 3; i++)
+            {
+                var img = otherImgs.Count > i ? otherImgs[i] : null;
+
+                <div class="col-md-3 text-center mb-3">
+                    <label class="fw-bold">Image @(i + 2)</label>
+
+                    <!-- IMAGE PREVIEW -->
+                    <img id="preview@(i)"
+                         src="@(img != null ? img.ImgPath : "")"
+                         class="img-thumbnail @(img == null ? "d-none" : "") mt-2"
+                         style="height:120px;width:120px;object-fit:cover;" />
+
+                    <!-- OLD IMAGE ID -->
+                    @if (img != null)
+                    {
+                        <input type="hidden"
+                               name="OldImageIds"
+                               value="@img.ImgId" />
+
+                        <!-- ✅ DELETE BUTTON -->
+                        <button type="button"
+                                class="btn btn-danger btn-sm mt-2 d-block mx-auto"
+                                onclick="deleteImage(@img.ImgId)">
+                            Delete
+                        </button>
+                    }
+
+                    <!-- FILE INPUT -->
+                    <input type="file"
+                           name="Image@(i + 2)"
+                           class="form-control mt-2"
+                           onchange="previewImage(this, 'preview@(i)')" />
+                </div>
+            }
+        </div>
         @* <div class="row">
             @for (int i = 0; i < otherImgs.Count; i++)
             {
@@ -117,15 +174,9 @@
             }
         </div>
     </div> *@
-        <div class="row">
-            @for (int i = 0; i < 3; i++)
-            {
-                var img = otherImgs.Count > i ? otherImgs[i] : null;
+        
 
-                <div class="col-md-3 text-center mb-3">
-                    <label class="fw-bold">Image @(i + 2)</label>
-
-                    @if (img != null)
+                    @* @if (img != null)
                     {
                         <img id="preview@(i)"
                              src="@img.ImgPath"
@@ -142,15 +193,15 @@
                              class="img-thumbnail d-none mt-2"
                              style="height:120px;width:120px;object-fit:cover;" />
                     }
-
-                    <input type="file"
+ *@
+                   @*  <input type="file"
                            name="Image@(i + 2)"
                            class="form-control mt-2"
                            onchange="previewImage(this, 'preview@(i)')" />
                 </div>
             }
         </div>
-        </div>
+        </div> *@
     <!-- ================= SIZE CHART ================= -->
     @* <div class="card p-3 mb-4">
         <h4>Size Chart</h4>
@@ -259,4 +310,45 @@
         }
     }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function deleteImage(imgId) {
 
+        // 🔥 SweetAlert confirmation
+        Swal.fire({
+            title: 'Delete this image?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                // Call server
+                $.post('/ProductMaster/DeleteImage', { imgId: imgId }, function (res) {
+
+                    if (res === true) {
+
+                        // 🔥 SAME POPUP LIKE YOUR SCREENSHOT
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Image deleted successfully!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+
+                    } else {
+                        Swal.fire('Error', 'Image not found', 'error');
+                    }
+
+                }).fail(function () {
+                    Swal.fire('Error', 'Server error', 'error');
+                });
+
+            }
+        });
+    }
+</script>

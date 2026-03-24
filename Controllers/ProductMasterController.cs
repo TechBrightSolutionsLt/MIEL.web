@@ -469,6 +469,54 @@ namespace MIEL.web.Controllers
         }
 
 
+        [HttpPost]
+        public IActionResult DeleteImage(int imgId)
+        {
+            var img = _db.ProductImages.FirstOrDefault(x => x.ImgId == imgId);
+
+            if (img == null)
+                return Json(false);
+
+            var fullPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                img.ImgPath.TrimStart('/')
+            );
+
+            if (System.IO.File.Exists(fullPath))
+                System.IO.File.Delete(fullPath);
+
+            _db.ProductImages.Remove(img);
+            _db.SaveChanges();
+
+            return Json(true);
+        }
+
+        //[HttpPost]
+        //public IActionResult DeleteImage(int imgId)
+        //{
+        //    var img = _db.ProductImages.FirstOrDefault(x => x.ImgId == imgId);
+
+        //    if (img == null)
+        //        return Json(false);
+
+        //    // 🔥 Delete physical file
+        //    var fullPath = Path.Combine(
+        //        Directory.GetCurrentDirectory(),
+        //        "wwwroot",
+        //        img.ImgPath.TrimStart('/')
+        //    );
+
+        //    if (System.IO.File.Exists(fullPath))
+        //        System.IO.File.Delete(fullPath);
+
+        //    // 🔥 Remove from DB
+        //    _db.ProductImages.Remove(img);
+        //    _db.SaveChanges();
+
+        //    return Json(true);
+        //}
+
         // ================= DELETE =================
         public IActionResult Delete(int id)
         {
