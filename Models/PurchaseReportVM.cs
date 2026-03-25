@@ -1,4 +1,4 @@
-﻿namespace MIEL.web.Models
+namespace MIEL.web.Models
 {
     public class PurchaseReportVM
     {
@@ -13,6 +13,11 @@
         public decimal Rate { get; set; }
         public decimal DiscAmount { get; set; }
         public decimal NetAmount { get; set; }
+
+        public string BatchNo { get; set; }
+        public decimal GstAmount { get; set; }
+        public string UnitName { get; set; }
+        public string SupInvNo { get; set; }
 
         public decimal TotalTaxable { get; set; }
         public decimal TotalTax { get; set; }
