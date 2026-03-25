@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Purchase Summary Report";
+    Layout = "_AdminLayout";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0 fw-bold">Purchase Summary Report</h4>
+    </div>
+
+    <div class="card-body">
+        <form method="get" asp-controller="PurchaseSummary" asp-action="PurchaseSummaryView">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="fw-bold">From Date</label>
+                    <input type="date" name="FromDate" value="@ViewBag.FromDate" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="fw-bold">To Date</label>
+                    <input type="date" name="ToDate" value="@ViewBag.ToDate" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="fw-bold">Invoice No</label>
+                    <input type="text" name="InvoiceNo" value="@ViewBag.InvoiceNo" class="form-control" />
+                </div>
+            </div>
+
+            <br />
+
+            <button type="submit" class="btn btn-primary">
+                Search
+            </button>
+        </form>
+    </div>
+</div>
