@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MIEL.web.Data;
@@ -34,7 +34,7 @@ namespace MIEL.web.Controllers
 
         // ================== POST (Search) ==================
         [HttpPost]
-        public IActionResult Index(DateTime? fromDate, DateTime? toDate, int? supplierId)
+        public IActionResult Index(DateTime? fromDate, DateTime? toDate, int? supplierId, string invoiceNo, string productName)
         {
             LoadSuppliers();
 
@@ -42,19 +42,10 @@ namespace MIEL.web.Controllers
             ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
             ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
             ViewBag.SupplierId = supplierId?.ToString();
+            ViewBag.InvoiceNo = invoiceNo;
+            ViewBag.ProductName = productName;
 
-            var query = GetBaseQuery();
-
-            if (fromDate.HasValue)
-                query = query.Where(x => x.InvoiceDate >= fromDate.Value);
-
-            if (toDate.HasValue)
-                query = query.Where(x => x.InvoiceDate <= toDate.Value);
-
-            if (supplierId.HasValue)
-                query = query.Where(x => x.SupplierId == supplierId.Value);
-
-            var result = query.ToList();
+            var result = FilterQuery(fromDate, toDate, supplierId, invoiceNo, productName).ToList();
 
             if (result.Count == 0)
                 ViewBag.Msg = "No records found for this search";
@@ -63,20 +54,9 @@ namespace MIEL.web.Controllers
         }
 
         // ================== EXPORT FILTERED DATA TO EXCEL ==================
-        public IActionResult ExportToExcel(DateTime? fromDate, DateTime? toDate, int? supplierId)
+        public IActionResult ExportToExcel(DateTime? fromDate, DateTime? toDate, int? supplierId, string invoiceNo, string productName)
         {
-            var query = GetBaseQuery();
-
-            if (fromDate.HasValue)
-                query = query.Where(x => x.InvoiceDate >= fromDate.Value);
-
-            if (toDate.HasValue)
-                query = query.Where(x => x.InvoiceDate <= toDate.Value);
-
-            if (supplierId.HasValue)
-                query = query.Where(x => x.SupplierId == supplierId.Value);
-
-            var data = query.ToList();
+            var data = FilterQuery(fromDate, toDate, supplierId, invoiceNo, productName).ToList();
 
             var sb = new StringBuilder();
 
@@ -90,6 +70,29 @@ namespace MIEL.web.Controllers
             byte[] buffer = Encoding.UTF8.GetBytes(sb.ToString());
 
             return File(buffer, "text/csv", "PurchaseReport.csv");
+        }
+
+        // ================== HELPER FILTER METHOD ==================
+        private IQueryable<PurchaseReportVM> FilterQuery(DateTime? fromDate, DateTime? toDate, int? supplierId, string invoiceNo, string productName)
+        {
+            var query = GetBaseQuery();
+
+            if (fromDate.HasValue)
+                query = query.Where(x => x.InvoiceDate >= fromDate.Value);
+
+            if (toDate.HasValue)
+                query = query.Where(x => x.InvoiceDate <= toDate.Value);
+
+            if (supplierId.HasValue)
+                query = query.Where(x => x.SupplierId == supplierId.Value);
+
+            if (!string.IsNullOrEmpty(invoiceNo))
+                query = query.Where(x => x.InvoiceNo.Contains(invoiceNo));
+
+            if (!string.IsNullOrEmpty(productName))
+                query = query.Where(x => x.ProductName.Contains(productName));
+
+            return query;
         }
 
         // ================== COMMON QUERY METHOD ==================
@@ -115,6 +118,10 @@ namespace MIEL.web.Controllers
                        Rate = pi.Rate,
                        DiscAmount = pi.DiscAmount,
                        NetAmount = pi.NetAmount,
+                       BatchNo = pi.BatchNo,
+                       GstAmount = pi.GstAmount,
+                       UnitName = pcs.size,
+                       SupInvNo = "", 
                        TotalTaxable = pm.TotalTaxable,
                        TotalTax = pm.TotalTax,
                        SupplierId = s.SupplierId
