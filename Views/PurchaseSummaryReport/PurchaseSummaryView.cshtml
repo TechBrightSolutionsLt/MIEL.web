@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<MIEL.web.Models.ViewModel.PurchaseSummaryVM>
+@{
     ViewData["Title"] = "Purchase Summary Report";
     Layout = "_AdminLayout";
 }
@@ -32,6 +33,47 @@
             <button type="submit" class="btn btn-primary">
                 Search
             </button>
+
+            @if (Model != null)
+            {
+                <div class="text-center mt-4">
+                    <h2 style="letter-spacing:2px; font-weight:bold;">
+                        PURCHASE SUMMARY REPORT
+                    </h2>
+                    <p>Generated on @DateTime.Now.ToString("dd MMMM yyyy")</p>
+                    <hr style="width:150px; margin:auto; border:2px solid #c49a6c;" />
+                </div>
+
+                <div class="card mt-3">
+                    
+
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Invoice No</th>
+                                    <th>Purchase Date</th>
+                                    <th>GST</th>
+                                    <th>Net Amount</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.InvoiceNo</td>
+                                        <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.GstAmount</td>
+                                        <td>@item.NetAmount</td>
+                                        <td>@item.TotalAmount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
         </form>
     </div>
 </div>
