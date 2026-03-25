@@ -60,19 +60,63 @@ namespace MIEL.web.Controllers
             if (!string.IsNullOrEmpty(paymentType))
                 query = query.Where(x => x.s.PaymentType == paymentType);
 
+            //var data = await query
+            //    .Select(x => new SalesReportResultVM
+            //    {
+            //        SalesId = x.s.SalesId,
+            //        InvoiceNo = x.s.InvoiceNo,
+            //        SalesDate = x.s.SalesDate,
+            //        CustomerName = x.u.FirstName + " " + x.u.LastName,
+            //        ProductName = x.n != null ? x.n.ProductName : "No Product",
+            //        BatchNumber = x.si.BatchNo,
+            //        NetAmount = x.s.NetAmount
+            //    })
+            //    .OrderByDescending(x => x.SalesDate)
+            //    .ToListAsync();
+
             var data = await query
-                .Select(x => new SalesReportResultVM
-                {
-                    SalesId = x.s.SalesId,
-                    InvoiceNo = x.s.InvoiceNo,
-                    SalesDate = x.s.SalesDate,
-                    CustomerName = x.u.FirstName + " " + x.u.LastName,
-                    ProductName = x.n != null ? x.n.ProductName : "No Product",
-                    BatchNumber = x.si.BatchNo,
-                    NetAmount = x.s.NetAmount
-                })
-                .OrderByDescending(x => x.SalesDate)
-                .ToListAsync();
+    .Select(x => new
+    {
+        x.s.SalesId,
+        x.s.InvoiceNo,
+        x.s.SalesDate,
+        CustomerName = x.u.FirstName + " " + x.u.LastName,
+        x.s.NetAmount,
+        ProductName = x.n != null ? x.n.ProductName : "",
+        BatchNumber = x.si.BatchNo ?? ""
+    })
+    .ToListAsync();
+
+
+            var grouped = data
+    .GroupBy(x => new
+    {
+        x.SalesId,
+        x.InvoiceNo,
+        x.SalesDate,
+        x.CustomerName,
+        x.NetAmount
+    })
+    .Select(g => new SalesReportGroupVM
+    {
+        SalesId = g.Key.SalesId,
+        InvoiceNo = g.Key.InvoiceNo,
+        SalesDate = g.Key.SalesDate,
+        CustomerName = g.Key.CustomerName,
+        NetAmount = g.Key.NetAmount,
+
+        Items = g.Select(i => new SalesReportItemVM
+        {
+            ProductName = i.ProductName,
+            BatchNumber = i.BatchNumber
+        }).ToList()
+    })
+    .OrderByDescending(x => x.SalesDate)
+    .ToList();
+
+
+
+
 
             var vm = new SalesReportVM
             {
@@ -81,7 +125,7 @@ namespace MIEL.web.Controllers
                 CustomerId = customerId,
                 SalesMode = salesMode,
                 PaymentType = paymentType,
-                Results = data,
+                Results = grouped,
                 Customers = await _context.users_TB.ToListAsync()
             };
 
