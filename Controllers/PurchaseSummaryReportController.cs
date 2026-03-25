@@ -18,6 +18,13 @@ namespace MIEL.web.Controllers
             ViewBag.ToDate = ToDate?.ToString("yyyy-MM-dd");
             ViewBag.InvoiceNo = InvoiceNo;
 
+
+            // If no search parameters → return empty view
+            if (!FromDate.HasValue && !ToDate.HasValue && string.IsNullOrEmpty(InvoiceNo))
+            {
+                return View(null);
+            }
+
             var query = from pm in _context.PurchaseMasters
                         select new PurchaseSummaryVM
                         {
