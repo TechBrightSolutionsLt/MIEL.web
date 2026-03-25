@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Purchase Report";
+    ViewData["Title"] = "Purchase Detail Report";
     Layout = "_AdminLayout";
 }
 @model List<PurchaseReportVM>
@@ -155,7 +155,9 @@
                     <label class="form-check-label fw-bold" for="chkAll">Select All Filters</label>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-primary px-4 shadow-sm" type="submit">🔍 Show Report</button>
+                    <button id="btnShowReport" class="btn btn-primary px-4 shadow-sm" type="submit">
+                        @(Model != null && Model.Count > 0 ? "🔍 Hide Report" : "🔍 Show Report")
+                    </button>
                     <a class="btn btn-outline-secondary px-4 shadow-sm" href="@Url.Action("Index","PurchaseReport")">Reset</a>
                 </div>
             </div>
@@ -234,24 +236,28 @@
                                     <th>Batch No</th>
                                     <th class="text-end">Qty</th>
                                     <th class="text-end">Rate</th>
-                                    <th class="text-end">Disc Amt</th>
-                                    <th class="text-end">GST</th>
                                     <th class="text-end">Net Amt</th>
+                                    <th class="text-end">Discount</th>
+                                    <th class="text-end">Tax</th>
+                                    <th class="text-end">Taxable</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var item in group)
                                 {
-                                    var itemTotal = item.NetAmount + item.GstAmount;
+                                    var grossAmt = item.Quantity * item.Rate;
+                                    var taxableAmt = grossAmt - item.DiscAmount;
+                                    var itemTotal = taxableAmt + item.GstAmount;
                                     <tr>
                                         <td class="fw-semibold">@item.ProductName</td>
                                         <td>@item.BatchNo</td>
                                         <td class="text-end">@item.Quantity.ToString("F2")</td>
                                         <td class="text-end">@item.Rate.ToString("F2")</td>
+                                        <td class="text-end">@grossAmt.ToString("F2")</td>
                                         <td class="text-end text-danger">-@item.DiscAmount.ToString("F2")</td>
                                         <td class="text-end">@item.GstAmount.ToString("F2")</td>
-                                        <td class="text-end">@item.NetAmount.ToString("F2")</td>
+                                        <td class="text-end">@taxableAmt.ToString("F2")</td>
                                         <td class="text-end fw-bold">@itemTotal.ToString("F2")</td>
                                     </tr>
                                 }
@@ -259,15 +265,21 @@
                                 <!-- Totals for this Invoice -->
                                 @{
                                     var invQty = group.Sum(x => x.Quantity);
+                                    var invGross = group.Sum(x => x.Quantity * x.Rate);
+                                    var invDisc = group.Sum(x => x.DiscAmount);
                                     var invGst = group.Sum(x => x.GstAmount);
-                                    var invGrandTotal = group.Sum(x => x.NetAmount + x.GstAmount);
+                                    var invTaxable = invGross - invDisc;
+                                    var invGrandTotal = invTaxable + invGst;
                                 }
                                 <tr class="total-row">
-                                    <td colspan="3" class="text-end">TOTALS</td>
-                                    <td class="text-end">@invQty.ToString("F2")</td>
-                                    <td colspan="3"></td>
-                                    <td class="text-end">@invGst.ToString("F2")</td>
-                                    <td class="text-end h6 mb-0 py-3" style="color: #c9ab82;">@invGrandTotal.ToString("F2")</td>
+                                    <td colspan="2" class="text-end fw-bold">TOTALS</td>
+                                    <td class="text-end fw-bold">@invQty.ToString("F2")</td>
+                                    <td></td>
+                                    <td class="text-end fw-bold">@invGross.ToString("F2")</td>
+                                    <td class="text-end fw-bold text-danger">@invDisc.ToString("F2")</td>
+                                    <td class="text-end fw-bold">@invGst.ToString("F2")</td>
+                                    <td class="text-end fw-bold">@invTaxable.ToString("F2")</td>
+                                    <td class="text-end fw-bold h6 mb-0 py-3" style="color: #c9ab82;">@invGrandTotal.ToString("F2")</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -277,12 +289,12 @@
                     <div class="mt-3 p-3 bg-light rounded" style="border-top: 1px dashed #ddd;">
                         <div class="row text-end">
                             <div class="col-md-8">
-                                <span class="text-muted fw-bold">Total Taxable:</span>
-                                <span class="ms-2 fs-6">@firstItem.TotalTaxable.ToString("F2")</span>
+                                <span class="text-muted fw-bold">Invoice Taxable:</span>
+                                <span class="ms-2 fs-6">@invTaxable.ToString("F2")</span>
                             </div>
                             <div class="col-md-4">
-                                <span class="text-muted fw-bold">Total Tax:</span>
-                                <span class="ms-2 fs-6">@firstItem.TotalTax.ToString("F2")</span>
+                                <span class="text-muted fw-bold">Invoice Tax:</span>
+                                <span class="ms-2 fs-6">@invGst.ToString("F2")</span>
                             </div>
                         </div>
                     </div>
@@ -290,14 +302,15 @@
             }
         </div>
     }
-    else if (ViewBag.Msg != null)
+    else if (ViewBag.IsInitialLoad == true)
     {
-        <div class="alert alert-warning text-center">@ViewBag.Msg</div>
+        <!-- Do nothing on initial load as requested -->
     }
     else
     {
-        <div class="alert alert-info text-center">
-            No records found.
+        <div class="alert alert-info text-center p-4 shadow-sm" style="border-radius: 12px; border: none;">
+             <i class="fs-4 d-block mb-2">🔍</i>
+             @(ViewBag.Msg ?? "No records found for the selected criteria.")
         </div>
     }
 </div>
@@ -315,6 +328,27 @@
         const invoiceNo = document.getElementById("invoiceNo");
         const productName = document.getElementById("productName");
         const supplierId = document.getElementById("supplierId");
+        
+        const btnShowReport = document.getElementById("btnShowReport");
+        const printArea = document.getElementById("printArea");
+
+        // Toggle functionality for the Report Button
+        if (btnShowReport && printArea) {
+            btnShowReport.addEventListener("click", function (e) {
+                // If it currently says "Hide", just hide and prevent postback
+                if (btnShowReport.innerText.includes("Hide Report")) {
+                    printArea.style.display = "none";
+                    btnShowReport.innerHTML = "🔍 Show Report";
+                    e.preventDefault();
+                } else if (printArea.style.display === "none") {
+                    // If it was hidden manually, show it again without postback
+                    printArea.style.display = "block";
+                    btnShowReport.innerHTML = "🔍 Hide Report";
+                    e.preventDefault();
+                }
+                // Otherwise (first load or manually cleared), let it submit to get fresh data
+            });
+        }
 
         function toggleInput(chk, input) {
             input.disabled = !chk.checked;

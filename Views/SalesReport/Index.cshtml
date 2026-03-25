@@ -1,4 +1,4 @@
-﻿@* @model MIEL.web.Models.ViewModel.SalesReportVM
+@* @model MIEL.web.Models.ViewModel.SalesReportVM
 @{
     Layout = "_AdminLayout";
 }
@@ -178,7 +178,7 @@
 </div>
 
 
-                            @section Scripts{
+                             @section Scripts{
     <script>
         function printReport() {
             var printContents = document.querySelector(".table-responsive").innerHTML;
@@ -293,7 +293,9 @@
                     </div>
 
                     <div class="col-md-1 d-grid">
-                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button id="btnShowReport" type="submit" class="btn btn-primary">
+                            @(Model.Results != null && Model.Results.Any() ? "Hide Report" : "Search")
+                        </button>
                     </div>
 
                     <div class="col-md-1 d-grid">
@@ -329,22 +331,17 @@
 
             <!-- REPORT AREA -->
             <div id="printArea">
-
-
-                <!-- TITLE -->
-                            <div class="text-center mb-2">
-                                <h5 class="fw-bold">Sales Detail Report</h5>
-                                <hr />
-                            </div>
-
                 @if (Model.Results != null && Model.Results.Any())
                 {
+                    <!-- TITLE -->
+                    <div class="text-center mb-2">
+                        <h5 class="fw-bold">Sales Detail Report</h5>
+                        <hr />
+                    </div>
+
                     foreach (var invoice in Model.Results)
                     {
                         <div class="invoice-box mb-4 p-3">
-
-                            
-
                             <!-- HEADER -->
                             <div class="row mb-2">
                                 <div class="col-md-6">
@@ -380,15 +377,17 @@
                                     @invoice.NetAmount.ToString("N2")
                                 </div>
                             </div>
-
                         </div>
                     }
+                }
+                else if (ViewBag.IsInitialLoad == true)
+                {
+                    <!-- Clean state on load -->
                 }
                 else
                 {
                     <div class="text-center text-muted">No records found</div>
                 }
-
             </div>
 
         </div>
@@ -401,5 +400,27 @@
     function printReport() {
         window.print();
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnShowReport = document.getElementById("btnShowReport");
+        const printArea = document.getElementById("printArea");
+
+        if (btnShowReport && printArea) {
+            btnShowReport.addEventListener("click", function (e) {
+                // Determine if results are currently visible in the DOM
+                const hasResults = printArea.querySelector(".invoice-box") !== null;
+                
+                if (hasResults && btnShowReport.innerText.includes("Hide Report")) {
+                    printArea.style.display = "none";
+                    btnShowReport.innerText = "Show Report";
+                    e.preventDefault();
+                } else if (printArea.style.display === "none") {
+                    printArea.style.display = "block";
+                    btnShowReport.innerText = "Hide Report";
+                    e.preventDefault();
+                }
+            });
+        }
+    });
 </script>
 }
