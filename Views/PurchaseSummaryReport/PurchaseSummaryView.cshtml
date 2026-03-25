@@ -14,12 +14,16 @@
             <div class="row">
                 <div class="col-md-3">
                     <label class="fw-bold">From Date</label>
-                    <input type="date" name="FromDate" value="@ViewBag.FromDate" class="form-control" />
+                    <input type="date" name="FromDate"
+                           value="@(ViewBag.FromDate ?? DateTime.Now.ToString("yyyy-MM-dd"))"
+                           class="form-control" />
                 </div>
 
                 <div class="col-md-3">
                     <label class="fw-bold">To Date</label>
-                    <input type="date" name="ToDate" value="@ViewBag.ToDate" class="form-control" />
+                    <input type="date" name="ToDate"
+                           value="@(ViewBag.ToDate ?? DateTime.Now.ToString("yyyy-MM-dd"))"
+                           class="form-control" />
                 </div>
 
                 <div class="col-md-3">
