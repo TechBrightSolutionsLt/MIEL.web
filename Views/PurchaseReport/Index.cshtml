@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Purchase Report";
     Layout = "_AdminLayout";
 }
@@ -7,176 +7,335 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-@@media print {
-
-    body * {
-        visibility: hidden;
+    .purchase-report-card {
+        border: 1px solid #e0e4e8;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 40px;
+        background: #fff;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        position: relative;
+        transition: all 0.3s ease;
     }
 
-    #printArea, #printArea * ,
-    #printHeader {
-        visibility: visible;
+    .purchase-report-card:hover {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border-color: #c9ab82;
     }
 
-    #printHeader {
-        display: block !important;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        text-align: center;
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 20px;
+    .invoice-card-header {
+        background-color: #fcfcfc;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 5px solid #c9ab82;
+        border-bottom: 1px solid #f0f0f0;
     }
 
-    #printArea {
-        position: absolute;
-        left: 0;
-        top: 50px;   /* pushes table below heading */
-        width: 100%;
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
     }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
+    .info-value {
+        font-weight: 700;
+        color: #222;
+        font-size: 1rem;
     }
 
-    th, td {
-        border: 1px solid black;
-        padding: 6px;
+    .report-table thead th {
+        background-color: #fafbfc;
+        border-top: 1px solid #eee !important;
+        border-bottom: 2px solid #eee !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.8px;
+        padding: 15px 10px;
+        color: #444;
     }
-}
+    
+    .report-table tbody td {
+        padding: 12px 10px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.95rem;
+    }
+
+    .total-row {
+        background-color: #fdfdfd;
+        font-weight: 700;
+        border-top: 2px solid #eee;
+    }
+
+    .total-row td {
+        color: #000;
+    }
+
+    @@media print {
+        #printArea { padding: 0 !important; }
+        .purchase-report-card {
+            border: 1px solid #dee2e6;
+            box-shadow: none;
+            margin-bottom: 30px;
+            padding: 20px;
+            break-inside: avoid;
+        }
+
+        .invoice-card-header {
+            background-color: #f8f9fa !important;
+            -webkit-print-color-adjust: exact;
+            border-left: 5px solid #c9ab82 !important;
+        }
+        
+        table { width: 100% !important; }
+        th, td { border: 1px solid #eee !important; padding: 8px !important; }
+        .text-end { text-align: right !important; }
+    }
 </style>
 
 
 <div class="container mt-4">
 
-    <div class="card shadow p-4 mb-4">
-        <h3 class="mb-3">📊 Purchase Report</h3>
+    <div class="card shadow p-4 mb-4" style="border-radius: 12px; border: none; background: linear-gradient(to right, #ffffff, #fdfdfd);">
+        <h3 class="mb-3" style="color: #333; font-weight: 700;">📊 Purchase Detail Report</h3>
 
         <form asp-action="Index" asp-controller="PurchaseReport" method="post"
               class="row g-3 align-items-end">
 
             <div class="col-md-3">
-                <label class="form-label">From Date</label>
-                <input type="date" class="form-control" name="fromDate"
-                       value="@ViewBag.FromDate" />
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="chkDateWise" name="chkDateWise" checked>
+                    <label class="form-check-label fw-bold" for="chkDateWise">Entry Date</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="date" class="form-control" name="fromDate" id="fromDate"
+                           value="@ViewBag.FromDate" />
+                    <input type="date" class="form-control" name="toDate" id="toDate"
+                           value="@ViewBag.ToDate" />
+                </div>
             </div>
 
             <div class="col-md-3">
-                <label class="form-label">To Date</label>
-                <input type="date" class="form-control" name="toDate"
-                       value="@ViewBag.ToDate" />
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="chkInvNo" name="chkInvNo" @(string.IsNullOrEmpty(ViewBag.InvoiceNo) ? "" : "checked")>
+                    <label class="form-check-label fw-bold" for="chkInvNo">Invoice No</label>
+                </div>
+                <input type="text" class="form-control" name="invoiceNo" id="invoiceNo" 
+                       placeholder="Enter Invoice No" value="@ViewBag.InvoiceNo" @(string.IsNullOrEmpty(ViewBag.InvoiceNo) ? "disabled" : "") />
             </div>
 
             <div class="col-md-3">
-                <label class="form-label">Supplier</label>
-                <select class="form-select" name="supplierId">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="chkItem" name="chkItem" @(string.IsNullOrEmpty(ViewBag.ProductName) ? "" : "checked")>
+                    <label class="form-check-label fw-bold" for="chkItem">Item</label>
+                </div>
+                <input type="text" class="form-control" name="productName" id="productName" 
+                       placeholder="Enter Item / Product" value="@ViewBag.ProductName" @(string.IsNullOrEmpty(ViewBag.ProductName) ? "disabled" : "") />
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="chkVendor" name="chkVendor" @(string.IsNullOrEmpty(ViewBag.SupplierId) ? "" : "checked")>
+                    <label class="form-check-label fw-bold" for="chkVendor">Vendor</label>
+                </div>
+                <select class="form-select" name="supplierId" id="supplierId" @(string.IsNullOrEmpty(ViewBag.SupplierId) ? "disabled" : "")>
                     <option value="">-- All Suppliers --</option>
-
                     @foreach (Microsoft.AspNetCore.Mvc.Rendering.SelectListItem s in ViewBag.Suppliers)
                     {
-                        <option value="@s.Value"
-                                selected="@(ViewBag.SupplierId == s.Value)">
-                            @s.Text
-                        </option>
+                        <option value="@s.Value" selected="@(ViewBag.SupplierId == s.Value)">@s.Text</option>
                     }
                 </select>
             </div>
 
-            <div class="col-md-3">
-                <button class="btn btn-primary w-100" type="submit">🔍 Search</button>
+            <div class="col-md-12 mt-3 d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="chkAll">
+                    <label class="form-check-label fw-bold" for="chkAll">Select All Filters</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary px-4 shadow-sm" type="submit">🔍 Show Report</button>
+                    <a class="btn btn-outline-secondary px-4 shadow-sm" href="@Url.Action("Index","PurchaseReport")">Reset</a>
+                </div>
             </div>
 
             <input type="hidden" name="hfFromDate" value="@ViewBag.FromDate" />
             <input type="hidden" name="hfToDate" value="@ViewBag.ToDate" />
             <input type="hidden" name="hfSupplierId" value="@ViewBag.SupplierId" />
-
-            <div class="col-md-12 text-end">
-                <a class="btn btn-outline-secondary btn-sm"
-                   href="@Url.Action("Index","PurchaseReport")">
-                    Clear Filter
-                </a>
-            </div>
         </form>
     </div>
 
-    <div class="d-flex justify-content-end mb-3 gap-2">
-
-        <a class="btn btn-success"
+    <div class="d-flex justify-content-end mb-4 gap-2 no-print">
+        <a class="btn btn-success shadow-sm d-flex align-items-center gap-2"
            href="@Url.Action("ExportToExcel","PurchaseReport",
              new {
                 fromDate = ViewBag.FromDate,
                 toDate = ViewBag.ToDate,
-                supplierId = ViewBag.SupplierId
+                supplierId = ViewBag.SupplierId,
+                invoiceNo = ViewBag.InvoiceNo,
+                productName = ViewBag.ProductName
              })">
-            📥 Export to Excel
+            <span>📥</span> Export Excel
         </a>
 
-        <!-- ✅ Correct Print Button -->
         <button type="button"
-                class="btn"
-                style="background:#c9ab82; color:#000;"
+                class="btn shadow-sm d-flex align-items-center gap-2"
+                style="background:#c9ab82; color:#fff; font-weight: 500;"
                 onclick="window.print()">
-            Print
+            <span>Print Report</span>
         </button>
-
     </div>
 
-    @if (ViewBag.Msg != null)
+    @if (Model != null && Model.Count > 0)
+    {
+        var groupedData = Model.GroupBy(x => x.InvoiceNo);
+
+        <div id="printArea">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold text-uppercase" style="letter-spacing: 2px;">Purchase Detail Report</h2>
+                <div class="text-muted">Generated on @DateTime.Now.ToString("dd MMMM yyyy")</div>
+                <hr style="width: 100px; border: 2px solid #c9ab82; margin: 15px auto; opacity: 1;"/>
+            </div>
+            
+            @foreach (var group in groupedData)
+            {
+                var firstItem = group.First();
+
+                <div class="purchase-report-card">
+                    <!-- Invoice Info -->
+                    <div class="invoice-card-header">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <span class="info-label">Invoice No:</span><br/>
+                                <span class="info-value">@group.Key</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="info-label">Purchase Date:</span><br/>
+                                <span class="info-value">@firstItem.InvoiceDate.ToString("dd-MMM-yyyy")</span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="info-label">Vendor:</span><br/>
+                                <span class="info-value">@firstItem.SupplierName</span>
+                            </div>
+                            <div class="col-md-2 text-md-end">
+                                <span class="info-label">Sup InvNo:</span><br/>
+                                <span class="info-value">@firstItem.SupInvNo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item Table -->
+                    <div class="table-responsive">
+                        <table class="table table-borderless report-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Batch No</th>
+                                    <th class="text-end">Qty</th>
+                                    <th class="text-end">Rate</th>
+                                    <th class="text-end">Disc Amt</th>
+                                    <th class="text-end">GST</th>
+                                    <th class="text-end">Net Amt</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in group)
+                                {
+                                    var itemTotal = item.NetAmount + item.GstAmount;
+                                    <tr>
+                                        <td class="fw-semibold">@item.ProductName</td>
+                                        <td>@item.BatchNo</td>
+                                        <td class="text-end">@item.Quantity.ToString("F2")</td>
+                                        <td class="text-end">@item.Rate.ToString("F2")</td>
+                                        <td class="text-end text-danger">-@item.DiscAmount.ToString("F2")</td>
+                                        <td class="text-end">@item.GstAmount.ToString("F2")</td>
+                                        <td class="text-end">@item.NetAmount.ToString("F2")</td>
+                                        <td class="text-end fw-bold">@itemTotal.ToString("F2")</td>
+                                    </tr>
+                                }
+                                
+                                <!-- Totals for this Invoice -->
+                                @{
+                                    var invQty = group.Sum(x => x.Quantity);
+                                    var invGst = group.Sum(x => x.GstAmount);
+                                    var invGrandTotal = group.Sum(x => x.NetAmount + x.GstAmount);
+                                }
+                                <tr class="total-row">
+                                    <td colspan="3" class="text-end">TOTALS</td>
+                                    <td class="text-end">@invQty.ToString("F2")</td>
+                                    <td colspan="3"></td>
+                                    <td class="text-end">@invGst.ToString("F2")</td>
+                                    <td class="text-end h6 mb-0 py-3" style="color: #c9ab82;">@invGrandTotal.ToString("F2")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Invoice Summary Footer -->
+                    <div class="mt-3 p-3 bg-light rounded" style="border-top: 1px dashed #ddd;">
+                        <div class="row text-end">
+                            <div class="col-md-8">
+                                <span class="text-muted fw-bold">Total Taxable:</span>
+                                <span class="ms-2 fs-6">@firstItem.TotalTaxable.ToString("F2")</span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="text-muted fw-bold">Total Tax:</span>
+                                <span class="ms-2 fs-6">@firstItem.TotalTax.ToString("F2")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (ViewBag.Msg != null)
     {
         <div class="alert alert-warning text-center">@ViewBag.Msg</div>
     }
-
-    @if (Model == null || Model.Count == 0)
+    else
     {
         <div class="alert alert-info text-center">
             No records found.
         </div>
     }
-    else
-    {
-        <h3 id="printHeader" class="mb-3 text-center d-none">
-    📊 Purchase Report
-</h3>
-
-        <div class="table-responsive" id="printArea">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Invoice No</th>
-                        <th>Invoice Date</th>
-                        <th>Supplier</th>
-                        <th>Variant Code</th>
-                        <th>Product Name</th>
-                        <th>Qty</th>
-                        <th>Rate</th>
-                        <th>Disc Amt</th>
-                        <th>Net Amount</th>
-                        <th>Total Taxable</th>
-                        <th>Total Tax</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.InvoiceNo</td>
-                            <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
-                            <td>@item.SupplierName</td>
-                            <td>@item.VarientCode</td>
-                            <td>@item.ProductName</td>
-                            <td>@item.Quantity</td>
-                            <td>@item.Rate</td>
-                            <td>@item.DiscAmount</td>
-                            <td>@item.NetAmount</td>
-                            <td>@item.TotalTaxable</td>
-                            <td>@item.TotalTax</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chkAll = document.getElementById("chkAll");
+        const chkDateWise = document.getElementById("chkDateWise");
+        const chkInvNo = document.getElementById("chkInvNo");
+        const chkItem = document.getElementById("chkItem");
+        const chkVendor = document.getElementById("chkVendor");
+
+        const fromDate = document.getElementById("fromDate");
+        const toDate = document.getElementById("toDate");
+        const invoiceNo = document.getElementById("invoiceNo");
+        const productName = document.getElementById("productName");
+        const supplierId = document.getElementById("supplierId");
+
+        function toggleInput(chk, input) {
+            input.disabled = !chk.checked;
+            if (!chk.checked) input.value = "";
+        }
+
+        chkDateWise.addEventListener("change", () => {
+            fromDate.disabled = !chkDateWise.checked;
+            toDate.disabled = !chkDateWise.checked;
+        });
+
+        chkInvNo.addEventListener("change", () => toggleInput(chkInvNo, invoiceNo));
+        chkItem.addEventListener("change", () => toggleInput(chkItem, productName));
+        chkVendor.addEventListener("change", () => toggleInput(chkVendor, supplierId));
+
+        chkAll.addEventListener("change", () => {
+            const isChecked = chkAll.checked;
+            [chkDateWise, chkInvNo, chkItem, chkVendor].forEach(c => {
+                c.checked = isChecked;
+                c.dispatchEvent(new Event('change'));
+            });
+        });
+    });
+</script>
