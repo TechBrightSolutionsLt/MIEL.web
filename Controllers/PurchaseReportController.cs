@@ -21,15 +21,12 @@ namespace MIEL.web.Controllers
         {
             LoadSuppliers();
 
-            ViewBag.FromDate = null;
-            ViewBag.ToDate = null;
+            ViewBag.FromDate = DateTime.Today.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = DateTime.Today.ToString("yyyy-MM-dd");
             ViewBag.SupplierId = null;
+            ViewBag.IsInitialLoad = true;
 
-            var data = GetBaseQuery()
-                        .Take(50)
-                        .ToList();
-
-            return View(data);
+            return View(new List<PurchaseReportVM>());
         }
 
         // ================== POST (Search) ==================
@@ -60,11 +57,13 @@ namespace MIEL.web.Controllers
 
             var sb = new StringBuilder();
 
-            sb.AppendLine("InvoiceNo,InvoiceDate,Supplier,VariantCode,ProductName,Qty,Rate,DiscAmt,NetAmount,TotalTaxable,TotalTax");
+            sb.AppendLine("InvoiceNo,InvoiceDate,Supplier,VariantCode,ProductName,Qty,Rate,GrossAmount,Discount,Tax,TaxableAmount");
 
             foreach (var r in data)
             {
-                sb.AppendLine($"{r.InvoiceNo},{r.InvoiceDate:yyyy-MM-dd},{r.SupplierName},{r.VarientCode},{r.ProductName},{r.Quantity},{r.Rate},{r.DiscAmount},{r.NetAmount},{r.TotalTaxable},{r.TotalTax}");
+                var gross = r.Quantity * r.Rate;
+                var taxable = gross - r.DiscAmount;
+                sb.AppendLine($"{r.InvoiceNo},{r.InvoiceDate:yyyy-MM-dd},{r.SupplierName},{r.VarientCode},{r.ProductName},{r.Quantity},{r.Rate},{gross},{r.DiscAmount},{r.GstAmount},{taxable}");
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(sb.ToString());
