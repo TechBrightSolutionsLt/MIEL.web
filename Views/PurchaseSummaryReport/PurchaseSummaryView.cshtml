@@ -76,6 +76,15 @@
                                     </tr>
                                 }
                             </tbody>
+
+                            <tfoot>
+                                <tr style="font-weight:bold; background-color:#f2f2f2;">
+                                    <td colspan="2" class="text-end">TOTAL</td>
+                                    <td>@Model.Sum(x => x.GstAmount)</td>
+                                    <td>@Model.Sum(x => x.NetAmount)</td>
+                                    <td>@Model.Sum(x => x.TotalAmount)</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
