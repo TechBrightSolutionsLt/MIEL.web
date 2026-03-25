@@ -1,0 +1,152 @@
+﻿@model MIEL.web.Models.ViewModel.VATReportVM
+@{
+    ViewData["Title"] = "GST REPORT";
+    Layout = "_AdminLayout";
+}
+
+<style>
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .card {
+        border-radius: 8px;
+        background-color: #f8f9fb;
+        border: 1px solid #e3e6ea;
+    }
+
+    .miel-card-header {
+        background: #2f6ecb;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .miel-result-header {
+        background: #343a40;
+        color: white;
+        font-weight: 600;
+    }
+
+    .miel-btn {
+        background: #1e7e4f;
+        color: white;
+        font-weight: 500;
+        border: none;
+    }
+
+        .miel-btn:hover {
+            background: #16663f;
+            color: white;
+        }
+
+    .miel-table {
+        background-color: #ffffff;
+    }
+
+        .miel-table thead {
+            background: #a9b9d3;
+            font-weight: 600;
+        }
+
+        .miel-table tbody tr:nth-child(even) {
+            background-color: #f2f4f7;
+        }
+
+    .miel-total-row {
+        background: #cfcfcf;
+        font-weight: bold;
+    }
+
+    input[type="date"] {
+        background-color: #ffffff;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- GST REPORT HEADER -->
+    <div class="card shadow">
+        <div class="card-header miel-card-header">
+            GST REPORT
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                <div class="row mb-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">Report Type</label><br />
+                        <input type="radio" name="Type" value="PURCHASE" checked /> Purchase
+                        <input type="radio" name="Type" value="SALE" class="ms-3" /> Sale
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">From Date</label>
+                        <input type="date" asp-for="FromDate" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">To Date</label>
+                        <input type="date" asp-for="ToDate" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn miel-btn w-100">
+                            Show Report
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <br />
+
+    <!-- REPORT RESULT -->
+    @if (Model.Results != null && Model.Results.Count > 0)
+    {
+        <div class="card shadow">
+            <div class="card-header miel-result-header">
+                Report Result
+            </div>
+
+            <div class="card-body">
+                <table class="table table-bordered miel-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice No</th>
+                            <th>Date</th>
+                            <th>GST Amount</th>
+                            <th>Taxable Amount</th>
+                            <th>Net Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Results)
+                        {
+                            <tr>
+                                <td>@item.InvoiceNo</td>
+                                <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
+                                <td>@item.GstAmount.ToString("N2")</td>
+                                <td>@item.TaxableAmount.ToString("N2")</td>
+                                <td>@item.NetAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr class="miel-total-row">
+                            <td colspan="2" class="text-end">Total</td>
+                            <td>@Model.Results.Sum(x => x.GstAmount).ToString("N2")</td>
+                            <td>@Model.Results.Sum(x => x.TaxableAmount).ToString("N2")</td>
+                            <td>@Model.Results.Sum(x => x.NetAmount).ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>
