@@ -76,6 +76,8 @@
                 <thead>
                     <tr>
                         <th>Invoice No</th>
+                        <th>Supplier Name</th>
+
                         <th>Purchase Date</th>
                         <th>Taxable Amount</th>
                         <th>GST</th>
@@ -88,6 +90,7 @@
                     {
                         <tr>
                             <td>@item.InvoiceNo</td>
+                            <td>@item.SupplierName</td>
                             <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
                             <td>@item.NetAmount</td>
                             <td>@item.GstAmount</td>
