@@ -39,15 +39,15 @@
                 </div>
                 &nbsp;
                 <div class="mb-3">
-                    @* <a asp-controller="PurchaseSummaryReport"
+                    <a asp-controller="PurchaseSummaryReport"
                        asp-action="ExportToExcel"
                        asp-route-FromDate="@ViewBag.FromDate"
                        asp-route-ToDate="@ViewBag.ToDate"
                        asp-route-InvoiceNo="@ViewBag.InvoiceNo"
                        class="btn btn-success">
                         Export Excel
-                    </a> *@
-
+                    </a>
+                    <button type="button" class="btn btn-info" onclick="printReport()">Print</button>
                    @*  <button onclick="printReport()" class="btn btn-primary">
                         Print
                     </button> *@
@@ -61,6 +61,8 @@
 <!-- GRID CARD -->
 @if (Model != null && Model.Count > 0)
 {
+        <div id="printArea"> <!-- Added this -->
+
     <div class="card shadow-sm">
        
         <div class="card-body">
@@ -76,9 +78,12 @@
                 <thead>
                     <tr>
                         <th>Invoice No</th>
+                        <th>Supplier Name</th>
+
                         <th>Purchase Date</th>
+                        <th>Taxable Amount</th>
                         <th>GST</th>
-                        <th>Net Amount</th>
+                        
                         <th>Total Amount</th>
                     </tr>
                 </thead>
@@ -87,9 +92,11 @@
                     {
                         <tr>
                             <td>@item.InvoiceNo</td>
+                            <td>@item.SupplierName</td>
                             <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
-                            <td>@item.GstAmount</td>
                             <td>@item.NetAmount</td>
+                            <td>@item.GstAmount</td>
+                           
                             <td>@item.TotalAmount</td>
                         </tr>
                     }
@@ -107,9 +114,18 @@
             </table>
         </div>
     </div>
+    </div>
 }
-@* <script>
-    function printReport() {
-        window.print();
-    }
-</script> *@
+<!-- PRINT SCRIPT -->
+@section Scripts {
+    <script>
+        function printReport() {
+            var printContents = document.getElementById('printArea').innerHTML;
+            var originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload(); // reload page after print
+        }
+    </script>
+}
