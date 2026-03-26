@@ -250,7 +250,7 @@ namespace MIEL.web.Controllers
 
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("Sales Report");
+                var worksheet = workbook.Worksheets.Add("Sales Detail Report");
 
                 worksheet.Cell(1, 1).Value = "Invoice No";
                 worksheet.Cell(1, 2).Value = "Date";
@@ -281,7 +281,7 @@ namespace MIEL.web.Controllers
                     workbook.SaveAs(stream);
                     return File(stream.ToArray(),
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "SalesReport.xlsx");
+                        "SalesDetailReport.xlsx");
                 }
             }
         }
