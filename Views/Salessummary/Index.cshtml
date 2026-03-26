@@ -1,0 +1,188 @@
+﻿@model List<MIEL.web.Models.ViewModel.SalesSummaryVM>
+@{
+    ViewData["Title"] = "Product Master Edit";
+    Layout = "_AdminLayout";
+}
+<div class="container mt-4">
+
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold">Sales Invoice Summary</h3>
+
+       @*  <a href="/SalesSummary/Export?fromDate=@Context.Request.Query["fromDate"]&toDate=@Context.Request.Query["toDate"]"
+           class="btn btn-success">
+            ⬇ Export
+        </a> *@
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-controller="Salessummary" asp-action="Index" class="row g-3">
+
+
+                <div class="col-md-3">
+                    <label>Invoice No</label>
+                    <input type="text" id="invoiceInput" name="invoiceNo"
+                           value="@ViewBag.InvoiceNo"
+                           class="form-control"
+                           placeholder="Search invoice..." />
+
+                    <div id="suggestions"
+                         class="list-group position-absolute w-100"
+                         style="z-index:1000; display:none;"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                   @*  <input type="date" name="fromDate"
+                           value="@Context.Request.Query["fromDate"]"
+                           class="form-control" /> *@
+                    <input type="date" name="fromDate" value="@ViewBag.FromDate" class="form-control" />
+
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+
+                  @*   <input type="date" name="toDate"
+                           value="@Context.Request.Query["toDate"]"
+                           class="form-control" /> *@
+                    <input type="date" name="toDate" value="@ViewBag.ToDate" class="form-control" />
+                </div>
+
+
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-50">
+                        🔍 Search
+                    </button>
+
+                    <button type="button" id="clearBtn" class="btn btn-secondary w-50">
+                        ❌ Clear
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    @if (Context.Request.Query.Count > 0)
+{
+    <!-- Table Card -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center text-muted py-4">
+                    No data found
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle text-center">
+
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Invoice No</th>
+                                <th>Date</th>
+                                <th>Taxable Amount</th>
+                                <th>GST</th>
+                                <th>Net Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.InvoiceNo</td>
+                                    <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
+                                    <td class="text-end">@item.TaxableAmount.ToString("N2")</td>
+                                    <td class="text-end">@item.GSTAmount.ToString("N2")</td>
+                                    <td class="text-end fw-bold text-success">
+                                        @item.NetAmount.ToString("N2")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="2">Total</th>
+                                <th class="text-end">
+                                    @Model.Sum(x => x.TaxableAmount).ToString("N2")
+                                </th>
+                                <th class="text-end">
+                                    @Model.Sum(x => x.GSTAmount).ToString("N2")
+                                </th>
+                                <th class="text-end text-success">
+                                    @Model.Sum(x => x.NetAmount).ToString("N2")
+                                </th>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+    }
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        var url = '@Url.Action("GetInvoiceSuggestions", "Salessummary")';
+
+        $("#invoiceInput").on("keyup", function () {
+
+            console.log("typing..."); // debug
+
+            let term = $(this).val();
+
+            if (term.length < 2) {
+                $("#suggestions").hide();
+                return;
+            }
+
+            $.get(url, { term: term }, function (data) {
+
+                console.log(data); // debug
+
+                let list = "";
+
+                data.forEach(function (item) {
+                    list += `<div class="list-group-item suggestion-item">${item}</div>`;
+                });
+
+                $("#suggestions").html(list).show();
+            });
+        });
+
+        $(document).on("click", ".suggestion-item", function () {
+            $("#invoiceInput").val($(this).text());
+            $("#suggestions").hide();
+        });
+
+    });
+</script>
+<script>
+    $("#clearBtn").click(function () {
+
+        // Clear inputs
+        $("#invoiceInput").val('');
+        $("input[name='fromDate']").val('');
+        $("input[name='toDate']").val('');
+
+        // Hide suggestions
+        $("#suggestions").hide();
+
+        // Reload page without filters
+        window.location.href = '@Url.Action("Index", "Salessummary")';
+    });
+</script>
