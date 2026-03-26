@@ -66,7 +66,11 @@ namespace MIEL.web.Controllers
                     CustomerName = x.Customer != null
             ? x.Customer.FirstName + " " + x.Customer.LastName
             : "",
-                    TaxableAmount = x.TotalAmount - x.TotalDiscount,
+
+                    TaxableAmount = x.TotalAmount -
+            _context.SalesItems
+                .Where(i => i.SalesId == x.SalesId)
+                .Sum(i => (decimal?)i.TaxAmount) ?? 0,
                     GSTAmount = x.GstAmount,
                     NetAmount = x.NetAmount
                 })
@@ -116,7 +120,10 @@ namespace MIEL.web.Controllers
                     x.InvoiceNo,
                     x.SalesDate,
                     CustomerName = x.Customer.FirstName + " " + x.Customer.LastName,
-                    TaxableAmount = x.TotalAmount - x.TotalDiscount,
+                    TaxableAmount = x.TotalAmount -
+            _context.SalesItems
+                .Where(i => i.SalesId == x.SalesId)
+                .Sum(i => (decimal?)i.TaxAmount) ?? 0,
                     x.GstAmount,
                     x.NetAmount
                 })
@@ -132,7 +139,7 @@ namespace MIEL.web.Controllers
                 ws.Cell(1, 3).Value = "Customer";
                 ws.Cell(1, 4).Value = "Taxable";
                 ws.Cell(1, 5).Value = "GST";
-                ws.Cell(1, 6).Value = "Net";
+                ws.Cell(1, 6).Value = "Net Amount";
 
                 int row = 2;
 
@@ -200,7 +207,10 @@ namespace MIEL.web.Controllers
                     InvoiceNo = x.InvoiceNo,
                     SalesDate = x.SalesDate,
                     CustomerName = x.Customer != null ? x.Customer.FirstName + " " + x.Customer.LastName : "",
-                    TaxableAmount = x.TotalAmount - x.TotalDiscount,
+                    TaxableAmount = x.TotalAmount -
+            _context.SalesItems
+                .Where(i => i.SalesId == x.SalesId)
+                .Sum(i => (decimal?)i.TaxAmount) ?? 0,
                     GSTAmount = x.GstAmount,
                     NetAmount = x.NetAmount
                 })

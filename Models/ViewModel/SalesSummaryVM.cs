@@ -12,7 +12,9 @@
         public decimal NetAmount { get; set; }
         public string CustomerName { get; set; }
 
-       
+        public decimal TaxAmount { get; set; }
+
+
 
 
 
