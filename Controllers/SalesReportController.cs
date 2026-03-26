@@ -66,9 +66,13 @@ namespace MIEL.web.Controllers
                     x.s.InvoiceNo,
                     x.s.SalesDate,
                     CustomerName = x.u.FirstName + " " + x.u.LastName,
-                    x.s.NetAmount,
                     ProductName = x.n != null ? x.n.ProductName : "",
-                    BatchNumber = x.si.BatchNo ?? ""
+                    BatchNumber = x.si.BatchNo ?? "",
+                    Quantity = x.si.Quantity,
+                    Rate = x.si.SellingPrice,
+                    Discount = x.si.DiscAmount,
+                    Tax = x.si.TaxAmount,
+                    ItemTotal = x.si.NetAmount
                 })
                 .ToListAsync();
 
@@ -78,21 +82,45 @@ namespace MIEL.web.Controllers
                     x.SalesId,
                     x.InvoiceNo,
                     x.SalesDate,
-                    x.CustomerName,
-                    x.NetAmount
+                    x.CustomerName
                 })
-                .Select(g => new SalesReportGroupVM
-                {
-                    SalesId = g.Key.SalesId,
-                    InvoiceNo = g.Key.InvoiceNo,
-                    SalesDate = g.Key.SalesDate,
-                    CustomerName = g.Key.CustomerName,
-                    NetAmount = g.Key.NetAmount,
-                    Items = g.Select(i => new SalesReportItemVM
+                .Select(g => {
+                    var items = g.Select(i => {
+                        var total = Math.Round(i.ItemTotal, 2); // NetAmount from DB (Inclusive)
+                        var tax = Math.Round(i.Tax, 2);         // TaxAmount from DB
+                        var taxable = Math.Round(total - tax, 2); // Pre-tax value
+                        var discount = Math.Round(i.Discount, 2); // Discount from DB
+                        var gross = Math.Round(total + discount, 2); // Value before discount
+                        var qty = (decimal)i.Quantity;
+                        var rate = qty > 0 ? Math.Round(gross / qty, 2) : 0;
+
+                        return new SalesReportItemVM
+                        {
+                            ProductName = i.ProductName,
+                            BatchNumber = i.BatchNumber,
+                            Quantity = qty,
+                            Rate = rate,
+                            NetAmt = gross,
+                            Discount = discount,
+                            Tax = tax,
+                            Taxable = taxable,
+                            Total = total
+                        };
+                    }).ToList();
+
+                    return new SalesReportGroupVM
                     {
-                        ProductName = i.ProductName,
-                        BatchNumber = i.BatchNumber
-                    }).ToList()
+                        SalesId = g.Key.SalesId,
+                        InvoiceNo = g.Key.InvoiceNo,
+                        SalesDate = g.Key.SalesDate,
+                        CustomerName = g.Key.CustomerName,
+                        TotalNetAmt = items.Sum(x => x.NetAmt),
+                        TotalDiscount = items.Sum(x => x.Discount),
+                        TotalTax = items.Sum(x => x.Tax),
+                        TotalTaxable = items.Sum(x => x.Taxable),
+                        GrandTotal = items.Sum(x => x.Total),
+                        Items = items
+                    };
                 })
                 .OrderByDescending(x => x.SalesDate)
                 .ToList();

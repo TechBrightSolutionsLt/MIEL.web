@@ -7,5 +7,7 @@
         public decimal GstAmount { get; set; }
         public decimal NetAmount { get; set; }
         public decimal TotalAmount { get; set; }
+        public string SupplierName { get; set; }
+
     }
 }
