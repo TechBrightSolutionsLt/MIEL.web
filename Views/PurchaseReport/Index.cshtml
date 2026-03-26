@@ -229,18 +229,18 @@
 
                     <!-- Item Table -->
                     <div class="table-responsive">
-                        <table class="table table-borderless report-table mb-0">
+                        <table class="table table-borderless report-table mb-0" style="table-layout: fixed; width: 100%;">
                             <thead>
                                 <tr>
-                                    <th>Item Name</th>
-                                    <th>Batch No</th>
-                                    <th class="text-end">Qty</th>
-                                    <th class="text-end">Rate</th>
-                                    <th class="text-end">Net Amt</th>
-                                    <th class="text-end">Discount</th>
-                                    <th class="text-end">Tax</th>
-                                    <th class="text-end">Taxable</th>
-                                    <th class="text-end">Total</th>
+                                    <th style="width: 15%;">ITEM NAME</th>
+                                    <th style="width: 15%;">BATCH NO</th>
+                                    <th style="width: 6%;" class="text-end">QTY</th>
+                                    <th style="width: 10%;" class="text-end">RATE</th>
+                                    <th style="width: 10%;" class="text-end">NET AMT</th>
+                                    <th style="width: 10%;" class="text-end">DISCOUNT</th>
+                                    <th style="width: 12%;" class="text-end">TAXABLE</th>
+                                    <th style="width: 10%;" class="text-end">TAX</th>
+                                    <th style="width: 12%;" class="text-end">TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -256,8 +256,8 @@
                                         <td class="text-end">@item.Rate.ToString("F2")</td>
                                         <td class="text-end">@grossAmt.ToString("F2")</td>
                                         <td class="text-end text-danger">-@item.DiscAmount.ToString("F2")</td>
-                                        <td class="text-end">@item.GstAmount.ToString("F2")</td>
                                         <td class="text-end">@taxableAmt.ToString("F2")</td>
+                                        <td class="text-end">@item.GstAmount.ToString("F2")</td>
                                         <td class="text-end fw-bold">@itemTotal.ToString("F2")</td>
                                     </tr>
                                 }
@@ -277,8 +277,8 @@
                                     <td></td>
                                     <td class="text-end fw-bold">@invGross.ToString("F2")</td>
                                     <td class="text-end fw-bold text-danger">@invDisc.ToString("F2")</td>
-                                    <td class="text-end fw-bold">@invGst.ToString("F2")</td>
                                     <td class="text-end fw-bold">@invTaxable.ToString("F2")</td>
+                                    <td class="text-end fw-bold">@invGst.ToString("F2")</td>
                                     <td class="text-end fw-bold h6 mb-0 py-3" style="color: #c9ab82;">@invGrandTotal.ToString("F2")</td>
                                 </tr>
                             </tbody>

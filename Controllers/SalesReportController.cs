@@ -85,17 +85,27 @@ namespace MIEL.web.Controllers
                     x.CustomerName
                 })
                 .Select(g => {
-                    var items = g.Select(i => new SalesReportItemVM
-                    {
-                        ProductName = i.ProductName,
-                        BatchNumber = i.BatchNumber,
-                        Quantity = (decimal)i.Quantity,
-                        Rate = i.Rate,
-                        NetAmt = (decimal)i.Quantity * i.Rate,
-                        Discount = i.Discount,
-                        Tax = i.Tax,
-                        Taxable = ((decimal)i.Quantity * i.Rate) - i.Discount,
-                        Total = i.ItemTotal
+                    var items = g.Select(i => {
+                        var total = Math.Round(i.ItemTotal, 2); // NetAmount from DB (Inclusive)
+                        var tax = Math.Round(i.Tax, 2);         // TaxAmount from DB
+                        var taxable = Math.Round(total - tax, 2); // Pre-tax value
+                        var discount = Math.Round(i.Discount, 2); // Discount from DB
+                        var gross = Math.Round(total + discount, 2); // Value before discount
+                        var qty = (decimal)i.Quantity;
+                        var rate = qty > 0 ? Math.Round(gross / qty, 2) : 0;
+
+                        return new SalesReportItemVM
+                        {
+                            ProductName = i.ProductName,
+                            BatchNumber = i.BatchNumber,
+                            Quantity = qty,
+                            Rate = rate,
+                            NetAmt = gross,
+                            Discount = discount,
+                            Tax = tax,
+                            Taxable = taxable,
+                            Total = total
+                        };
                     }).ToList();
 
                     return new SalesReportGroupVM

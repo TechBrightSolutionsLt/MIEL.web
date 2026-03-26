@@ -108,34 +108,34 @@
     <!-- Modern Filter Section -->
     <div class="card shadow-sm border-0 mb-5 no-print" style="border-radius: 15px; background: #fff;">
         <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-4">
-                <i class="fas fa-chart-bar fa-2x me-3" style="color: #0d6efd;"></i>
-                <h3 class="mb-0 fw-bold" style="color: #333;">Sales Detail Report</h3>
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-chart-bar fa-lg me-2" style="color: #0d6efd;"></i>
+                <h4 class="mb-0 fw-bold" style="color: #333; font-size: 24px;">Sales Detail Report</h4>
             </div>
 
             <form method="get">
-                <div class="row g-4">
+                <div class="row g-3">
                     <!-- Checkboxes Row -->
-                    <div class="col-12 d-flex gap-4 mb-1">
+                    <div class="col-12 d-flex gap-4 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" checked disabled>
-                            <label class="form-check-label fw-bold small">Sales Date</label>
+                            <input class="form-check-input mt-1" type="checkbox" checked disabled>
+                            <label class="form-check-label fw-bold" style="font-size: 13px;">Sales Date</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox">
-                            <label class="form-check-label fw-bold small">Invoice No</label>
+                            <input class="form-check-input mt-1" type="checkbox">
+                            <label class="form-check-label fw-bold" style="font-size: 13px;">Invoice No</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox">
-                            <label class="form-check-label fw-bold small">Customer</label>
+                            <input class="form-check-input mt-1" type="checkbox">
+                            <label class="form-check-label fw-bold" style="font-size: 13px;">Customer</label>
                         </div>
                     </div>
 
                     <!-- Inputs Row -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="d-flex gap-2">
-                           <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" style="background: #f8f9fa; border: 1px solid #dee2e6;" />
-                           <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control" style="background: #f8f9fa; border: 1px solid #dee2e6;" />
+                           <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control px-2" style="background: #f8f9fa; border: 1px solid #dee2e6; color: #666;" />
+                           <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control px-2" style="background: #f8f9fa; border: 1px solid #dee2e6; color: #666;" />
                         </div>
                     </div>
 
@@ -144,7 +144,7 @@
                     </div>
 
                     <div class="col-md-3">
-                        <select name="customerId" class="form-select" style="background: #e9ecef; border: 1px solid #dee2e6;">
+                        <select name="customerId" class="form-select" style="background: #e9ecef; border: 1px solid #dee2e6; color: #666;">
                             <option value="">-- All Customers --</option>
                             @foreach (var c in Model.Customers)
                             {
@@ -153,11 +153,11 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2 d-flex gap-2 align-items-start">
-                        <button id="btnShowReport" type="submit" class="btn btn-primary px-4 shadow-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px; font-weight: 500;">
-                            <i class="fas fa-search-dollar"></i> @(Model.Results != null && Model.Results.Any() ? "Hide Report" : "Show Report")
+                    <div class="col-md-3 d-flex gap-2 align-items-start">
+                        <button id="btnShowReport" type="submit" class="btn text-white px-4 shadow-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="background-color: #c99c92; border: none; border-radius: 8px; font-weight: 500;">
+                            <i class="fas fa-search"></i> @(Model.Results != null && Model.Results.Any() ? "Hide Report" : "Show Report")
                         </button>
-                        <a href="@Url.Action("Index", "SalesReport")" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 8px;">Reset</a>
+                        <a href="@Url.Action("Index", "SalesReport")" class="btn btn-white border px-4 py-2" style="border-radius: 8px; color: #666; background: #fff; border-color: #ced4da;">Reset</a>
                     </div>
                 </div>
             </form>
@@ -169,7 +169,7 @@
                     customerId = Model.CustomerId,
                     salesMode = Model.SalesMode,
                     paymentType = Model.PaymentType
-                })" class="btn btn-success px-4 py-2 shadow-sm d-flex align-items-center gap-2" style="background-color: #198754; border: none; border-radius: 8px;">
+                })" class="btn text-white px-4 py-2 shadow-sm d-flex align-items-center gap-2" style="background-color: #198754; border: none; border-radius: 8px;">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </a>
                 <button type="button" onclick="window.print()" class="btn px-4 py-2 shadow-sm d-flex align-items-center gap-2 text-white" style="background-color: #c9ab82; border: none; border-radius: 8px;">
@@ -213,18 +213,18 @@
 
                     <!-- Items Table -->
                     <div class="table-responsive">
-                        <table class="table table-borderless report-table mb-0">
+                        <table class="table table-borderless report-table mb-0" style="table-layout: fixed; width: 100%;">
                             <thead>
                                 <tr>
-                                    <th style="width: 25%;">Item Name</th>
-                                    <th style="width: 15%;">Batch No</th>
-                                    <th style="width: 8%;" class="text-end">Qty</th>
-                                    <th style="width: 10%;" class="text-end">Rate</th>
-                                    <th style="width: 10%;" class="text-end">Net Amt</th>
-                                    <th style="width: 8%;" class="text-end">Discount</th>
-                                    <th style="width: 8%;" class="text-end">Tax</th>
-                                    <th style="width: 8%;" class="text-end">Taxable</th>
-                                    <th style="width: 10%;" class="text-end">Total</th>
+                                    <th style="width: 15%;">ITEM NAME</th>
+                                    <th style="width: 15%;">BATCH NO</th>
+                                    <th style="width: 6%;" class="text-end">QTY</th>
+                                    <th style="width: 10%;" class="text-end">RATE</th>
+                                    <th style="width: 10%;" class="text-end">NET AMT</th>
+                                    <th style="width: 10%;" class="text-end">DISCOUNT</th>
+                                    <th style="width: 12%;" class="text-end">TAXABLE</th>
+                                    <th style="width: 10%;" class="text-end">TAX</th>
+                                    <th style="width: 12%;" class="text-end">TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -237,9 +237,9 @@
                                         <td class="text-end">@item.Rate.ToString("F2")</td>
                                         <td class="text-end">@item.NetAmt.ToString("F2")</td>
                                         <td class="text-end text-danger">-@item.Discount.ToString("F2")</td>
-                                        <td class="text-end">@item.Tax.ToString("F2")</td>
                                         <td class="text-end">@item.Taxable.ToString("F2")</td>
-                                        <td class="text-end fw-bold">@item.Total.ToString("F2")</td>
+                                        <td class="text-end">@item.Tax.ToString("F2")</td>
+                                        <td class="text-end fw-bold">@((item.Taxable + item.Tax).ToString("F2"))</td>
                                     </tr>
                                 }
                                 <tr class="totals-row">
@@ -248,8 +248,8 @@
                                     <td></td>
                                     <td class="text-end fw-bold">@sale.TotalNetAmt.ToString("F2")</td>
                                     <td class="text-end fw-bold text-danger">@sale.TotalDiscount.ToString("F2")</td>
-                                    <td class="text-end fw-bold">@sale.TotalTax.ToString("F2")</td>
                                     <td class="text-end fw-bold">@sale.TotalTaxable.ToString("F2")</td>
+                                    <td class="text-end fw-bold">@sale.TotalTax.ToString("F2")</td>
                                     <td class="text-end fw-bold">@sale.GrandTotal.ToString("F2")</td>
                                 </tr>
                             </tbody>
