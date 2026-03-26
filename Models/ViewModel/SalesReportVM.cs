@@ -1,4 +1,4 @@
-﻿
+
 using MIEL.web.Models.EntityModels;
 
 namespace MIEL.web.Models.ViewModel

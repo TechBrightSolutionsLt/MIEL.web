@@ -119,13 +119,14 @@
                 <input id="DiscAmount" type="number" class="form-control" value="0" min="0" />
             </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
+                    <div class="col-md-2 d-flex align-items-end mt-3">
                         <button type="button"
                                 id="btnAdd"
-                                class="btn w-100 rounded-pill shadow-sm fw-semibold add-btn">
-                            <span class="me-1">➕</span> Add Item
+                                class="btn w-100 rounded-pill shadow add-btn">
+                            ➕ Add Item
                         </button>
                     </div>
+
 
         </div>
 
@@ -247,6 +248,20 @@
     .select2-selection__arrow {
         height: 36px !important;
     }
+
+    .add-btn {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        color: white;
+        border: none;
+        padding: 10px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37,99,235,0.3);
+        }
 </style>
 
 <script>

@@ -111,9 +111,9 @@
                 </div>
                 <div class="d-flex gap-2">
                     <input type="date" class="form-control" name="fromDate" id="fromDate"
-                           value="@(string.IsNullOrEmpty(ViewBag.FromDate) ? DateTime.Now.ToString("yyyy-MM-dd") : ViewBag.FromDate)" />
+                           value="@ViewBag.FromDate" />
                     <input type="date" class="form-control" name="toDate" id="toDate"
-                           value="@(string.IsNullOrEmpty(ViewBag.ToDate) ? DateTime.Now.ToString("yyyy-MM-dd") : ViewBag.ToDate)" />
+                           value="@ViewBag.ToDate" />
                 </div>
             </div>
 
@@ -162,8 +162,8 @@
                 </div>
             </div>
 
-            <input type="hidden" name="hfFromDate" value="@(ViewBag.FromDate ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
-            <input type="hidden" name="hfToDate" value="@(ViewBag.ToDate ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
+            <input type="hidden" name="hfFromDate" value="@ViewBag.FromDate" />
+            <input type="hidden" name="hfToDate" value="@ViewBag.ToDate" />
             <input type="hidden" name="hfSupplierId" value="@ViewBag.SupplierId" />
         </form>
     </div>
@@ -236,9 +236,10 @@
                                     <th>Batch No</th>
                                     <th class="text-end">Qty</th>
                                     <th class="text-end">Rate</th>
-                                    <th class="text-end">Taxable</th>
+                                    <th class="text-end">Net Amt</th>
                                     <th class="text-end">Discount</th>
                                     <th class="text-end">Tax</th>
+                                    <th class="text-end">Taxable</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
@@ -256,6 +257,7 @@
                                         <td class="text-end">@grossAmt.ToString("F2")</td>
                                         <td class="text-end text-danger">-@item.DiscAmount.ToString("F2")</td>
                                         <td class="text-end">@item.GstAmount.ToString("F2")</td>
+                                        <td class="text-end">@taxableAmt.ToString("F2")</td>
                                         <td class="text-end fw-bold">@itemTotal.ToString("F2")</td>
                                     </tr>
                                 }
@@ -276,6 +278,7 @@
                                     <td class="text-end fw-bold">@invGross.ToString("F2")</td>
                                     <td class="text-end fw-bold text-danger">@invDisc.ToString("F2")</td>
                                     <td class="text-end fw-bold">@invGst.ToString("F2")</td>
+                                    <td class="text-end fw-bold">@invTaxable.ToString("F2")</td>
                                     <td class="text-end fw-bold h6 mb-0 py-3" style="color: #c9ab82;">@invGrandTotal.ToString("F2")</td>
                                 </tr>
                             </tbody>
