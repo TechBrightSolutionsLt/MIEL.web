@@ -149,8 +149,9 @@
                             <th>Invoice No</th>
                             <th>Date</th>
                                 <th>Name</th>
+                                <th>Taxable Amount</th>
                             <th>GST Amount</th>
-                            <th>Taxable Amount</th>
+                           
                             <th>Net Amount</th>
                         </tr>
                     </thead>
@@ -161,8 +162,9 @@
                                 <td>@item.InvoiceNo</td>
                                 <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
                                     <td>@item.PartyName</td>
+                                    <td>@item.TaxableAmount.ToString("N2")</td>
                                 <td>@item.GstAmount.ToString("N2")</td>
-                                <td>@item.TaxableAmount.ToString("N2")</td>
+                               
                                 <td>@item.NetAmount.ToString("N2")</td>
                             </tr>
                         }
