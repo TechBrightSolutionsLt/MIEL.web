@@ -21,12 +21,15 @@ namespace MIEL.web.Controllers
         {
             LoadSuppliers();
 
-            ViewBag.FromDate = DateTime.Today.ToString("yyyy-MM-dd");
-            ViewBag.ToDate = DateTime.Today.ToString("yyyy-MM-dd");
+            var today = DateTime.Today;
+            ViewBag.FromDate = today.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = today.ToString("yyyy-MM-dd");
             ViewBag.SupplierId = null;
-            ViewBag.IsInitialLoad = true;
+            ViewBag.IsInitialLoad = false;
 
-            return View(new List<PurchaseReportVM>());
+            var result = FilterQuery(today, today, null, null, null).ToList();
+
+            return View(result);
         }
 
         // ================== POST (Search) ==================
@@ -35,14 +38,15 @@ namespace MIEL.web.Controllers
         {
             LoadSuppliers();
 
-            // Preserve values for view + Excel
-            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
-            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            // Preserve values for view + Excel, defaulting to today if null
+            var todayStr = DateTime.Today.ToString("yyyy-MM-dd");
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd") ?? todayStr;
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd") ?? todayStr;
             ViewBag.SupplierId = supplierId?.ToString();
             ViewBag.InvoiceNo = invoiceNo;
             ViewBag.ProductName = productName;
 
-            var result = FilterQuery(fromDate, toDate, supplierId, invoiceNo, productName).ToList();
+            var result = FilterQuery(fromDate ?? DateTime.Today, toDate ?? DateTime.Today, supplierId, invoiceNo, productName).ToList();
 
             if (result.Count == 0)
                 ViewBag.Msg = "No records found for this search";
@@ -57,13 +61,12 @@ namespace MIEL.web.Controllers
 
             var sb = new StringBuilder();
 
-            sb.AppendLine("InvoiceNo,InvoiceDate,Supplier,VariantCode,ProductName,Qty,Rate,GrossAmount,Discount,Tax,TaxableAmount");
+            sb.AppendLine("InvoiceNo,InvoiceDate,Supplier,VariantCode,ProductName,Qty,Rate,Taxable,Discount,Tax");
 
             foreach (var r in data)
             {
                 var gross = r.Quantity * r.Rate;
-                var taxable = gross - r.DiscAmount;
-                sb.AppendLine($"{r.InvoiceNo},{r.InvoiceDate:yyyy-MM-dd},{r.SupplierName},{r.VarientCode},{r.ProductName},{r.Quantity},{r.Rate},{gross},{r.DiscAmount},{r.GstAmount},{taxable}");
+                sb.AppendLine($"{r.InvoiceNo},{r.InvoiceDate:yyyy-MM-dd},{r.SupplierName},{r.VarientCode},{r.ProductName},{r.Quantity},{r.Rate},{gross},{r.DiscAmount},{r.GstAmount}");
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(sb.ToString());
