@@ -39,14 +39,14 @@
                 </div>
                 &nbsp;
                 <div class="mb-3">
-                    @* <a asp-controller="PurchaseSummaryReport"
+                    <a asp-controller="PurchaseSummaryReport"
                        asp-action="ExportToExcel"
                        asp-route-FromDate="@ViewBag.FromDate"
                        asp-route-ToDate="@ViewBag.ToDate"
                        asp-route-InvoiceNo="@ViewBag.InvoiceNo"
                        class="btn btn-success">
                         Export Excel
-                    </a> *@
+                    </a>
 
                    @*  <button onclick="printReport()" class="btn btn-primary">
                         Print
@@ -77,8 +77,9 @@
                     <tr>
                         <th>Invoice No</th>
                         <th>Purchase Date</th>
+                        <th>Taxable Amount</th>
                         <th>GST</th>
-                        <th>Net Amount</th>
+                        
                         <th>Total Amount</th>
                     </tr>
                 </thead>
@@ -88,8 +89,9 @@
                         <tr>
                             <td>@item.InvoiceNo</td>
                             <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
-                            <td>@item.GstAmount</td>
                             <td>@item.NetAmount</td>
+                            <td>@item.GstAmount</td>
+                           
                             <td>@item.TotalAmount</td>
                         </tr>
                     }
