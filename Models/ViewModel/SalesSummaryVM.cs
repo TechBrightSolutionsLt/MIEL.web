@@ -10,5 +10,11 @@
         public decimal TaxableAmount { get; set; }
         public decimal GSTAmount { get; set; }
         public decimal NetAmount { get; set; }
+        public string CustomerName { get; set; }
+
+       
+
+
+
     }
 }

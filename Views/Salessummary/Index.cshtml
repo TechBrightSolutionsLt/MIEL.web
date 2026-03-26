@@ -9,10 +9,17 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="fw-bold">Sales Invoice Summary</h3>
 
-       @*  <a href="/SalesSummary/Export?fromDate=@Context.Request.Query["fromDate"]&toDate=@Context.Request.Query["toDate"]"
-           class="btn btn-success">
-            ⬇ Export
-        </a> *@
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Export","Salessummary",
+                           new { fromDate = ViewBag.FromDate, toDate = ViewBag.ToDate, invoiceNo = ViewBag.InvoiceNo })"
+               class="btn btn-success">
+                ⬇ Export
+            </a>
+
+            <a asp-action="Print" asp-route-fromDate="@ViewBag.FromDate" asp-route-toDate="@ViewBag.ToDate" asp-route-invoiceNo="@ViewBag.InvoiceNo" target="_blank" class="btn btn-primary">
+                Print
+            </a>
+        </div>
     </div>
 
     <!-- Filter Card -->
@@ -87,6 +94,7 @@
                             <tr>
                                 <th>Invoice No</th>
                                 <th>Date</th>
+                                    <th>Customer</th>
                                 <th>Taxable Amount</th>
                                 <th>GST</th>
                                 <th>Net Amount</th>
@@ -99,6 +107,7 @@
                                 <tr>
                                     <td class="fw-semibold">@item.InvoiceNo</td>
                                     <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.CustomerName</td>
                                     <td class="text-end">@item.TaxableAmount.ToString("N2")</td>
                                     <td class="text-end">@item.GSTAmount.ToString("N2")</td>
                                     <td class="text-end fw-bold text-success">
@@ -108,20 +117,20 @@
                             }
                         </tbody>
 
-                        <tfoot class="table-light">
-                            <tr>
-                                <th colspan="2">Total</th>
-                                <th class="text-end">
-                                    @Model.Sum(x => x.TaxableAmount).ToString("N2")
-                                </th>
-                                <th class="text-end">
-                                    @Model.Sum(x => x.GSTAmount).ToString("N2")
-                                </th>
-                                <th class="text-end text-success">
-                                    @Model.Sum(x => x.NetAmount).ToString("N2")
-                                </th>
-                            </tr>
-                        </tfoot>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th colspan="3" class="text-end">Total</th>
+                                    <th class="text-end">
+                                        @Model.Sum(x => x.TaxableAmount).ToString("N2")
+                                    </th>
+                                    <th class="text-end">
+                                        @Model.Sum(x => x.GSTAmount).ToString("N2")
+                                    </th>
+                                    <th class="text-end text-success">
+                                        @Model.Sum(x => x.NetAmount).ToString("N2")
+                                    </th>
+                                </tr>
+                            </tfoot>
 
                     </table>
                 </div>
@@ -170,8 +179,8 @@
         });
 
     });
-</script>
-<script>
+
+
     $("#clearBtn").click(function () {
 
         // Clear inputs
@@ -185,4 +194,9 @@
         // Reload page without filters
         window.location.href = '@Url.Action("Index", "Salessummary")';
     });
+
+
+
+     
 </script>
+

@@ -1,0 +1,129 @@
+﻿@model List<MIEL.web.Models.ViewModel.SalesSummaryVM>
+@{
+    Layout = null; // Plain layout for printing
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Sales Summary Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+            margin: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+            header h1 {
+                margin: 0;
+                font-size: 20pt;
+            }
+
+            header p {
+                margin: 2px 0;
+                font-size: 10pt;
+            }
+
+        .filters {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #333;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tfoot tr td {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+
+        .right-align {
+            text-align: right;
+        }
+
+        @@media print {
+            button
+
+        {
+            display: none;
+        }
+
+        body {
+            margin: 10mm;
+        }
+
+        }
+
+        button {
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            font-size: 12pt;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MIEL Sales Summary</h1>
+        <p>From: @ViewBag.FromDate &nbsp; To: @ViewBag.ToDate &nbsp;</p>
+    </header>
+
+    <button onclick="window.location.href='@Url.Action("Index", "Salessummary")'">Back</button>
+    <button onclick="window.print()">Print Report</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice No</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th class="right-align">Taxable</th>
+                <th class="right-align">GST</th>
+                <th class="right-align">Net</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.InvoiceNo</td>
+                    <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
+                    <td>@item.CustomerName</td>
+                    <td class="right-align">@item.TaxableAmount.ToString("N2")</td>
+                    <td class="right-align">@item.GSTAmount.ToString("N2")</td>
+                    <td class="right-align">@item.NetAmount.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="right-align">Total</td>
+                <td class="right-align">@Model.Sum(x => x.TaxableAmount).ToString("N2")</td>
+                <td class="right-align">@Model.Sum(x => x.GSTAmount).ToString("N2")</td>
+                <td class="right-align">@Model.Sum(x => x.NetAmount).ToString("N2")</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
