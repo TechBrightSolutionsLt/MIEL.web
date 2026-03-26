@@ -19,7 +19,7 @@
     <div class="carousel-inner">
 
         @* ===== CASE 1: ADMIN IMAGES EXIST ===== *@
-        @if (bannerImages != null && bannerImages.Any())
+       @*  @if (bannerImages != null && bannerImages.Any())
         {
             bool first = true;
 
@@ -42,31 +42,35 @@
 
                 first = false;
             }
-        }
-        else
+        } *@
+        @if (bannerImages != null && bannerImages.Any())
         {
-            @* ===== CASE 2: NO ADMIN IMAGES (DEFAULT FALLBACK) ===== *@
-            <div class="carousel-item active" style="height:500px;">
-                <img class="img-fluid w-100 h-100"
-                     style="object-fit:cover"
-                     src="~/img/banner.webp"
-                     alt="Default Banner">
-            </div>
+            bool first = true;
 
-            <div class="carousel-item" style="height:500px;">
-                <img class="img-fluid w-100 h-100"
-                     style="object-fit:cover"
-                     src="~/img/miel3.jpg"
-                     alt="Default Banner">
-            </div>
-            <div class="carousel-item" style="height:500px;">
-                <img class="img-fluid w-100 h-100"
-                     style="object-fit:cover"
-                     src="~/img/miel4.png"
-                     alt="Default Banner">
-            </div>
+            foreach (var item in bannerImages)
+            {
+                <div class="carousel-item @(first ? "active" : "")" style="height:500px;">
+
+                    <img class="w-100"
+                         src="@item.ImagePath"
+                         style="height:500px; object-fit:cover; object-position: top center;"
+                         alt="Banner Image">
+
+                    <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+                        <div class="p-3" style="max-width:700px;">
+                            <h3 class="display-4 text-white font-weight-semi-bold mb-4">
+                                Welcome
+                            </h3>
+                            <a href="#" class="btn btn-light py-2 px-3">Shop Now</a>
+                        </div>
+                    </div>
+
+                </div>
+
+                first = false;
+            }
         }
-
+        
     </div>
     <a class="carousel-control-prev" href="#header-carousel" data-slide="prev">
         <div class="btn btn-dark" style="width: 45px; height: 45px;">

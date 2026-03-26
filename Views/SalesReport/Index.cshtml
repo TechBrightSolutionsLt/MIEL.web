@@ -1,42 +1,68 @@
-﻿@model MIEL.web.Models.ViewModel.SalesReportVM
+@model MIEL.web.Models.ViewModel.SalesReportVM
 @{
     Layout = "_AdminLayout";
 }
+
+<style>
+    .invoice-box {
+        border: 1px solid #000;
+        background: #fff;
+    }
+
+    .invoice-box .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #printArea, #printArea * {
+            visibility: visible;
+        }
+
+        #printArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+    }
+</style>
 
 <div class="container-fluid mt-4">
 
     <div class="card shadow-sm border-0">
 
-        <!-- Card Header -->
+        <!-- Header -->
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Sales Report</h5>
+            <h5 class="mb-0">Sales Detail Report</h5>
         </div>
 
-        <!-- Card Body -->
         <div class="card-body">
 
-            <!-- FILTER SECTION -->
+            <!-- FILTER -->
             <form method="get">
                 <div class="row g-3 align-items-end">
 
                     <div class="col-md-2">
-                        <label class="form-label fw-semibold">From Date</label>
-                        <input type="date"
-                               name="fromDate"
+                        <label>From Date</label>
+                        <input type="date" name="fromDate"
                                value="@Model.FromDate?.ToString("yyyy-MM-dd")"
                                class="form-control" />
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label fw-semibold">To Date</label>
-                        <input type="date"
-                               name="toDate"
+                        <label>To Date</label>
+                        <input type="date" name="toDate"
                                value="@Model.ToDate?.ToString("yyyy-MM-dd")"
                                class="form-control" />
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold">Customer</label>
+                        <label>Customer</label>
                         <select name="customerId" class="form-select">
                             <option value="">-- Select Customer --</option>
                             @foreach (var c in Model.Customers)
@@ -50,7 +76,7 @@
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label fw-semibold">Sales Mode</label>
+                        <label>Sales Mode</label>
                         <select name="salesMode" class="form-select">
                             <option value="">-- All --</option>
                             <option value="2" selected="@(Model.SalesMode == 2)">Online</option>
@@ -59,7 +85,7 @@
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label fw-semibold">Payment Type</label>
+                        <label>Payment Type</label>
                         <select name="paymentType" class="form-select">
                             <option value="">-- All --</option>
                             <option value="Cash" selected="@(Model.PaymentType == "Cash")">Cash</option>
@@ -68,32 +94,29 @@
                     </div>
 
                     <div class="col-md-1 d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            Search
+                        <button id="btnShowReport" type="submit" class="btn btn-primary">
+                            @(Model.Results != null && Model.Results.Any() ? "Hide Report" : "Search")
                         </button>
                     </div>
+
                     <div class="col-md-1 d-grid">
-    <button type="button" onclick="printReport()" class="btn btn-success">
-        Print
-    </button>
-</div>
+                        <button type="button" onclick="printReport()" class="btn btn-success">
+                            Print
+                        </button>
+                    </div>
 
-<div class="col-md-1 d-grid">
-    <a href="@Url.Action("Export", "SalesReport", new {
-        fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
-        toDate = Model.ToDate?.ToString("yyyy-MM-dd"),
-        customerId = Model.CustomerId,
-        salesMode = Model.SalesMode,
-        paymentType = Model.PaymentType
-    })"
-   class="btn btn-warning">
-    Export
-</a>
-</div>
-
-
-
-
+                    <div class="col-md-1 d-grid">
+                        <a href="@Url.Action("Export", "SalesReport", new {
+                            fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
+                            toDate = Model.ToDate?.ToString("yyyy-MM-dd"),
+                            customerId = Model.CustomerId,
+                            salesMode = Model.SalesMode,
+                            paymentType = Model.PaymentType
+                        })"
+                           class="btn btn-warning">
+                            Export
+                        </a>
+                    </div>
 
                     <div class="col-md-1 d-grid">
                         <a href="@Url.Action("Index", "SalesReport")"
@@ -105,71 +128,67 @@
                 </div>
             </form>
 
-            <hr class="my-4" />
-            @{
-    var totalNetAmount = Model.Results != null && Model.Results.Any()
-        ? Model.Results.Sum(x => x.NetAmount)
-        : 0;
-}
+            <hr />
 
-            <!-- TABLE SECTION -->
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Invoice_No</th>
-                            <th>Date</th>
-                            <th>Customer</th>
-                          @*   <th>Sales Mode</th> *@
-                            <th>Product</th>
-                            <th>Batch Number</th>
-                            <th class="text-end">Net Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Results != null && Model.Results.Any())
-                        {
-                            foreach (var item in Model.Results)
+            <!-- REPORT AREA -->
+            <div id="printArea">
+                @if (Model.Results != null && Model.Results.Any())
+                {
+                    <!-- TITLE -->
+                    <div class="text-center mb-2">
+                        <h5 class="fw-bold">Sales Detail Report</h5>
+                        <hr />
+                    </div>
+
+                    foreach (var invoice in Model.Results)
+                    {
+                        <div class="invoice-box mb-4 p-3">
+                            <!-- HEADER -->
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <strong>Invoice No:</strong> @invoice.InvoiceNo <br />
+                                    <strong>Date:</strong> @invoice.SalesDate.ToString("dd-MM-yyyy")
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <strong>Customer:</strong> @invoice.CustomerName
+                                </div>
+                            </div>
+
+                            <!-- COLUMN HEADER -->
+                            <div class="row fw-bold border-bottom pb-1">
+                                <div class="col-md-5">Product</div>
+                                <div class="col-md-3">Batch</div>
+                                <div class="col-md-4 text-end">Amount</div>
+                            </div>
+
+                            <!-- ITEMS -->
+                            @foreach (var item in invoice.Items)
                             {
-                                <tr>
-                                    <td>@item.InvoiceNo</td>
-                                    <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
-                                    <td>@item.CustomerName</td>
-                                 
-                                    <td>@item.ProductName</td>
-
-                                    <td>@item.BatchNumber</td>
-                                    @* <td>
-                                        <span class="badge bg-info">
-                                            @item.SalesMode
-                                        </span>
-                                    </td> *@
-
-
-                                    <td class="text-end fw-semibold">
-                                        @item.NetAmount.ToString("N2")
-                                    </td>
-                                </tr>
+                                <div class="row py-1">
+                                    <div class="col-md-5">@item.ProductName</div>
+                                    <div class="col-md-3">@item.BatchNumber</div>
+                                    <div class="col-md-4 text-end"></div>
+                                </div>
                             }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    No records found
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                    <tfoot>
-    <tr class="table-secondary fw-bold">
-        <td colspan="5" class="text-end">Total</td>
-        <td class="text-end">
-            @totalNetAmount.ToString("N2")
-        </td>
-    </tr>
-</tfoot>
-                </table>
+
+                            <!-- TOTAL -->
+                            <div class="row border-top pt-2 mt-2 fw-bold">
+                                <div class="col-md-8 text-end">Total:</div>
+                                <div class="col-md-4 text-end">
+                                    @invoice.NetAmount.ToString("N2")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else if (ViewBag.IsInitialLoad == true)
+                {
+                    <!-- Clean state on load -->
+                }
+                else
+                {
+                    <div class="text-center text-muted">No records found</div>
+                }
             </div>
 
         </div>
@@ -177,17 +196,32 @@
 
 </div>
 
+@section Scripts{
+<script>
+    function printReport() {
+        window.print();
+    }
 
-                            @section Scripts{
-    <script>
-        function printReport() {
-            var printContents = document.querySelector(".table-responsive").innerHTML;
-            var originalContents = document.body.innerHTML;
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnShowReport = document.getElementById("btnShowReport");
+        const printArea = document.getElementById("printArea");
 
-            document.body.innerHTML = printContents;
-            window.print();
-            document.body.innerHTML = originalContents;
-            location.reload();
+        if (btnShowReport && printArea) {
+            btnShowReport.addEventListener("click", function (e) {
+                // Determine if results are currently visible in the DOM
+                const hasResults = printArea.querySelector(".invoice-box") !== null;
+                
+                if (hasResults && btnShowReport.innerText.includes("Hide Report")) {
+                    printArea.style.display = "none";
+                    btnShowReport.innerText = "Show Report";
+                    e.preventDefault();
+                } else if (printArea.style.display === "none") {
+                    printArea.style.display = "block";
+                    btnShowReport.innerText = "Hide Report";
+                    e.preventDefault();
+                }
+            });
         }
-    </script>
+    });
+</script>
 }

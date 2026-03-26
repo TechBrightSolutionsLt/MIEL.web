@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MIEL.web.Data;
@@ -21,20 +21,17 @@ namespace MIEL.web.Controllers
         {
             LoadSuppliers();
 
-            ViewBag.FromDate = null;
-            ViewBag.ToDate = null;
+            ViewBag.FromDate = DateTime.Today.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = DateTime.Today.ToString("yyyy-MM-dd");
             ViewBag.SupplierId = null;
+            ViewBag.IsInitialLoad = true;
 
-            var data = GetBaseQuery()
-                        .Take(50)
-                        .ToList();
-
-            return View(data);
+            return View(new List<PurchaseReportVM>());
         }
 
         // ================== POST (Search) ==================
         [HttpPost]
-        public IActionResult Index(DateTime? fromDate, DateTime? toDate, int? supplierId)
+        public IActionResult Index(DateTime? fromDate, DateTime? toDate, int? supplierId, string invoiceNo, string productName)
         {
             LoadSuppliers();
 
@@ -42,19 +39,10 @@ namespace MIEL.web.Controllers
             ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
             ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
             ViewBag.SupplierId = supplierId?.ToString();
+            ViewBag.InvoiceNo = invoiceNo;
+            ViewBag.ProductName = productName;
 
-            var query = GetBaseQuery();
-
-            if (fromDate.HasValue)
-                query = query.Where(x => x.InvoiceDate >= fromDate.Value);
-
-            if (toDate.HasValue)
-                query = query.Where(x => x.InvoiceDate <= toDate.Value);
-
-            if (supplierId.HasValue)
-                query = query.Where(x => x.SupplierId == supplierId.Value);
-
-            var result = query.ToList();
+            var result = FilterQuery(fromDate, toDate, supplierId, invoiceNo, productName).ToList();
 
             if (result.Count == 0)
                 ViewBag.Msg = "No records found for this search";
@@ -63,7 +51,28 @@ namespace MIEL.web.Controllers
         }
 
         // ================== EXPORT FILTERED DATA TO EXCEL ==================
-        public IActionResult ExportToExcel(DateTime? fromDate, DateTime? toDate, int? supplierId)
+        public IActionResult ExportToExcel(DateTime? fromDate, DateTime? toDate, int? supplierId, string invoiceNo, string productName)
+        {
+            var data = FilterQuery(fromDate, toDate, supplierId, invoiceNo, productName).ToList();
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("InvoiceNo,InvoiceDate,Supplier,VariantCode,ProductName,Qty,Rate,GrossAmount,Discount,Tax,TaxableAmount");
+
+            foreach (var r in data)
+            {
+                var gross = r.Quantity * r.Rate;
+                var taxable = gross - r.DiscAmount;
+                sb.AppendLine($"{r.InvoiceNo},{r.InvoiceDate:yyyy-MM-dd},{r.SupplierName},{r.VarientCode},{r.ProductName},{r.Quantity},{r.Rate},{gross},{r.DiscAmount},{r.GstAmount},{taxable}");
+            }
+
+            byte[] buffer = Encoding.UTF8.GetBytes(sb.ToString());
+
+            return File(buffer, "text/csv", "PurchaseReport.csv");
+        }
+
+        // ================== HELPER FILTER METHOD ==================
+        private IQueryable<PurchaseReportVM> FilterQuery(DateTime? fromDate, DateTime? toDate, int? supplierId, string invoiceNo, string productName)
         {
             var query = GetBaseQuery();
 
@@ -76,20 +85,13 @@ namespace MIEL.web.Controllers
             if (supplierId.HasValue)
                 query = query.Where(x => x.SupplierId == supplierId.Value);
 
-            var data = query.ToList();
+            if (!string.IsNullOrEmpty(invoiceNo))
+                query = query.Where(x => x.InvoiceNo.Contains(invoiceNo));
 
-            var sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(productName))
+                query = query.Where(x => x.ProductName.Contains(productName));
 
-            sb.AppendLine("InvoiceNo,InvoiceDate,Supplier,VariantCode,ProductName,Qty,Rate,DiscAmt,NetAmount,TotalTaxable,TotalTax");
-
-            foreach (var r in data)
-            {
-                sb.AppendLine($"{r.InvoiceNo},{r.InvoiceDate:yyyy-MM-dd},{r.SupplierName},{r.VarientCode},{r.ProductName},{r.Quantity},{r.Rate},{r.DiscAmount},{r.NetAmount},{r.TotalTaxable},{r.TotalTax}");
-            }
-
-            byte[] buffer = Encoding.UTF8.GetBytes(sb.ToString());
-
-            return File(buffer, "text/csv", "PurchaseReport.csv");
+            return query;
         }
 
         // ================== COMMON QUERY METHOD ==================
@@ -115,6 +117,10 @@ namespace MIEL.web.Controllers
                        Rate = pi.Rate,
                        DiscAmount = pi.DiscAmount,
                        NetAmount = pi.NetAmount,
+                       BatchNo = pi.BatchNo,
+                       GstAmount = pi.GstAmount,
+                       UnitName = pcs.size,
+                       SupInvNo = "", 
                        TotalTaxable = pm.TotalTaxable,
                        TotalTax = pm.TotalTax,
                        SupplierId = s.SupplierId
