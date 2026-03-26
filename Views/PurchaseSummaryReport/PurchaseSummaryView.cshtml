@@ -32,13 +32,19 @@
                     <input type="text" name="InvoiceNo" value="@ViewBag.InvoiceNo" class="form-control" />
                 </div>
               
-                <br />
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">Search</button>
-                    <a href="/PurchaseSummaryReport/PurchaseSummaryView" class="btn btn-secondary">Clear</a>
-                </div>
+                
                 &nbsp;
-                <div class="mb-3">
+                &nbsp;
+                <div class="col-md-12 d-flex align-items-end gap-2 flex-wrap mt-3">
+
+                    <button type="submit" class="btn btn-primary">
+                        Search
+                    </button>
+
+                    <a href="/PurchaseSummaryReport/PurchaseSummaryView" class="btn btn-secondary">
+                        Clear
+                    </a>
+
                     <a asp-controller="PurchaseSummaryReport"
                        asp-action="ExportToExcel"
                        asp-route-FromDate="@ViewBag.FromDate"
@@ -47,10 +53,11 @@
                        class="btn btn-success">
                         Export Excel
                     </a>
-                    <button type="button" class="btn btn-info" onclick="printReport()">Print</button>
-                   @*  <button onclick="printReport()" class="btn btn-primary">
+
+                    <button type="button" class="btn btn-info" onclick="printReport()">
                         Print
-                    </button> *@
+                    </button>
+
                 </div>
             </div>
         </form>
