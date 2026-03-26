@@ -3,6 +3,17 @@
     ViewData["Title"] = "GST REPORT";
     Layout = "_AdminLayout";
 }
+<script>
+    function printReport() {
+        var printContents = document.getElementById("printArea").innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        location.reload();
+    }
+</script>
 
 <style>
     body {
@@ -77,8 +88,11 @@
 
                     <div class="col-md-3">
                         <label class="form-label">Report Type</label><br />
-                        <input type="radio" name="Type" value="PURCHASE" checked /> Purchase
-                        <input type="radio" name="Type" value="SALE" class="ms-3" /> Sale
+                        @* <input type="hidden" asp-for="Type" />
+                        <input type="hidden" asp-for="FromDate" />
+                        <input type="hidden" asp-for="ToDate" /> *@
+                        <input type="radio" asp-for="Type" value="PURCHASE" /> Purchase
+                        <input type="radio" asp-for="Type" value="SALE" class="ms-3" /> Sale
                     </div>
 
                     <div class="col-md-3">
@@ -91,33 +105,50 @@
                         <input type="date" asp-for="ToDate" class="form-control" />
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn miel-btn w-100">
-                            Show Report
-                        </button>
-                    </div>
+                    <div class="col-md-3 d-flex align-items-end gap-2">
 
+                        <button type="submit" class="btn miel-btn flex-fill">
+                            Show
+                        </button>
+
+                        <button type="button" onclick="printReport()" class="btn btn-primary flex-fill">
+                            Print
+                        </button>
+
+                        <button type="submit"
+                                formaction="@Url.Action("ExportToExcel", "VATReport")"
+                                formmethod="post"
+                                class="btn btn-success flex-fill">
+                            Excel
+                        </button>
+
+                    </div>
                 </div>
+
+                
             </form>
         </div>
     </div>
 
     <br />
-
+   
     <!-- REPORT RESULT -->
     @if (Model.Results != null && Model.Results.Count > 0)
     {
+        <div id="printArea">
         <div class="card shadow">
             <div class="card-header miel-result-header">
-                Report Result
+                GST Report Result
             </div>
 
             <div class="card-body">
+                
                 <table class="table table-bordered miel-table">
                     <thead>
                         <tr>
                             <th>Invoice No</th>
                             <th>Date</th>
+                                <th>Name</th>
                             <th>GST Amount</th>
                             <th>Taxable Amount</th>
                             <th>Net Amount</th>
@@ -129,6 +160,7 @@
                             <tr>
                                 <td>@item.InvoiceNo</td>
                                 <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
+                                    <td>@item.PartyName</td>
                                 <td>@item.GstAmount.ToString("N2")</td>
                                 <td>@item.TaxableAmount.ToString("N2")</td>
                                 <td>@item.NetAmount.ToString("N2")</td>
@@ -138,14 +170,16 @@
 
                     <tfoot>
                         <tr class="miel-total-row">
-                            <td colspan="2" class="text-end">Total</td>
+                            <td colspan="3" class="text-end">Total</td>
                             <td>@Model.Results.Sum(x => x.GstAmount).ToString("N2")</td>
                             <td>@Model.Results.Sum(x => x.TaxableAmount).ToString("N2")</td>
                             <td>@Model.Results.Sum(x => x.NetAmount).ToString("N2")</td>
                         </tr>
                     </tfoot>
                 </table>
+
             </div>
+        </div>
         </div>
     }
 

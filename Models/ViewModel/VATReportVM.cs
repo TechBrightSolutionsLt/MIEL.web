@@ -17,7 +17,8 @@ namespace MIEL.web.Models.ViewModel
         {
             public string InvoiceNo { get; set; }
             public DateTime InvoiceDate { get; set; }
-            public decimal GstAmount { get; set; }
+        public string PartyName { get; set; }   // Supplier / Customer
+        public decimal GstAmount { get; set; }
             public decimal TaxableAmount { get; set; }
             public decimal NetAmount { get; set; }
         }
