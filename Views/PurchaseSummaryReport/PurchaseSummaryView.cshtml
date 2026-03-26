@@ -4,9 +4,10 @@
     Layout = "_AdminLayout";
 }
 
-<div class="card shadow-sm">
+<!-- SEARCH CARD -->
+<div class="card shadow-sm mb-3">
     <div class="card-header bg-primary text-white">
-        <h4 class="mb-0 fw-bold">Purchase Summary Report</h4>
+        <h5 class="mb-0">Search Purchase Summary</h5>
     </div>
 
     <div class="card-body">
@@ -30,65 +31,85 @@
                     <label class="fw-bold">Invoice No</label>
                     <input type="text" name="InvoiceNo" value="@ViewBag.InvoiceNo" class="form-control" />
                 </div>
+              
+                <br />
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Search</button>
+                    <a href="/PurchaseSummaryReport/PurchaseSummaryView" class="btn btn-secondary">Clear</a>
+                </div>
+                &nbsp;
+                <div class="mb-3">
+                    <a asp-controller="PurchaseSummaryReport"
+                       asp-action="ExportToExcel"
+                       asp-route-FromDate="@ViewBag.FromDate"
+                       asp-route-ToDate="@ViewBag.ToDate"
+                       asp-route-InvoiceNo="@ViewBag.InvoiceNo"
+                       class="btn btn-success">
+                        Export Excel
+                    </a>
+
+                   @*  <button onclick="printReport()" class="btn btn-primary">
+                        Print
+                    </button> *@
+                </div>
             </div>
-
-            <br />
-
-            <button type="submit" class="btn btn-primary">
-                Search
-            </button>
-            <a href="/PurchaseSummaryReport/PurchaseSummaryView" class="btn btn-secondary">
-                Clear
-            </a>
-            @if (Model != null)
-            {
-                <div class="text-center mt-4">
-                    <h2 style="letter-spacing:2px; font-weight:bold;">
-                        PURCHASE SUMMARY REPORT
-                    </h2>
-                    <p>Generated on @DateTime.Now.ToString("dd MMMM yyyy")</p>
-                    <hr style="width:150px; margin:auto; border:2px solid #c49a6c;" />
-                </div>
-
-                <div class="card mt-3">
-                    
-
-                    <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Invoice No</th>
-                                    <th>Purchase Date</th>
-                                    <th>GST</th>
-                                    <th>Net Amount</th>
-                                    <th>Total Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model)
-                                {
-                                    <tr>
-                                        <td>@item.InvoiceNo</td>
-                                        <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
-                                        <td>@item.GstAmount</td>
-                                        <td>@item.NetAmount</td>
-                                        <td>@item.TotalAmount</td>
-                                    </tr>
-                                }
-                            </tbody>
-
-                            <tfoot>
-                                <tr style="font-weight:bold; background-color:#f2f2f2;">
-                                    <td colspan="2" class="text-end">TOTAL</td>
-                                    <td>@Model.Sum(x => x.GstAmount)</td>
-                                    <td>@Model.Sum(x => x.NetAmount)</td>
-                                    <td>@Model.Sum(x => x.TotalAmount)</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            }
         </form>
     </div>
 </div>
+
+
+<!-- GRID CARD -->
+@if (Model != null && Model.Count > 0)
+{
+    <div class="card shadow-sm">
+       
+        <div class="card-body">
+
+            <div class="text-center mb-3">
+                <h4 style="letter-spacing:2px; font-weight:bold;">
+                    PURCHASE SUMMARY REPORT
+                </h4>
+                <p>Generated on @DateTime.Now.ToString("dd MMMM yyyy")</p>
+            </div>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Invoice No</th>
+                        <th>Purchase Date</th>
+                        <th>GST</th>
+                        <th>Net Amount</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.InvoiceNo</td>
+                            <td>@item.InvoiceDate.ToString("dd-MM-yyyy")</td>
+                            <td>@item.GstAmount</td>
+                            <td>@item.NetAmount</td>
+                            <td>@item.TotalAmount</td>
+                        </tr>
+                    }
+                </tbody>
+
+                <tfoot>
+                    <tr style="font-weight:bold; background-color:#f2f2f2;">
+                        <td colspan="2" class="text-end">TOTAL</td>
+                        <td>@Model.Sum(x => x.GstAmount)</td>
+                        <td>@Model.Sum(x => x.NetAmount)</td>
+                        <td>@Model.Sum(x => x.TotalAmount)</td>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+    </div>
+}
+@* <script>
+    function printReport() {
+        window.print();
+    }
+</script> *@
