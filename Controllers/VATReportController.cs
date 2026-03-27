@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using MIEL.web.Models.ViewModel;
@@ -37,7 +37,7 @@ public class VATReportController : Controller
         builder.AppendLine("GST REPORT");
         builder.AppendLine($"From {vm.FromDate:dd-MM-yyyy} To {vm.ToDate:dd-MM-yyyy}");
         builder.AppendLine("");
-        builder.AppendLine("Invoice No,Date,GST Amount,Taxable Amount,Net Amount");
+        builder.AppendLine("Invoice No,Date,Name,Taxable Amount,GST Amount,Net Amount");
 
         decimal totalGst = 0;
         decimal totalTaxable = 0;
@@ -45,13 +45,13 @@ public class VATReportController : Controller
 
         foreach (var item in data)
         {
-            builder.AppendLine($"{item.InvoiceNo},{item.InvoiceDate:dd-MM-yyyy},{item.GstAmount},{item.TaxableAmount},{item.NetAmount}");
+            builder.AppendLine($"{item.InvoiceNo},{item.InvoiceDate:dd-MM-yyyy},{item.PartyName},{item.TaxableAmount},{item.GstAmount},{item.NetAmount}");
             totalGst += item.GstAmount;
             totalTaxable += item.TaxableAmount;
             totalNet += item.NetAmount;
         }
 
-        builder.AppendLine($",Total,{totalGst},{totalTaxable},{totalNet}");
+        builder.AppendLine($",,Total,{totalTaxable},{totalGst},{totalNet}");
 
         return File(
             System.Text.Encoding.UTF8.GetBytes(builder.ToString()),
