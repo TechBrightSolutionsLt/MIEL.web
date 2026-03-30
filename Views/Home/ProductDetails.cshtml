@@ -102,22 +102,51 @@
             </div>
 
             <!-- ================= HIGHLIGHTS ================= -->
-            @if (Model.Specificationsnew != null && Model.Specificationsnew.Any())
-            {
+            <!-- ================= HIGHLIGHTS ================= -->
+@if (
+            (Model.Specificationsnew != null && Model.Specificationsnew.Any()) ||
+            !string.IsNullOrEmpty(Model.ProductDescription) @* ||
+            !string.IsNullOrEmpty(Model.sizechartPath) *@
+            )
+{
                 <div class="highlight-box mt-5">
                     <h5>Product Highlights</h5>
-                    @foreach (var spec in Model.Specificationsnew)
+
+                    <!-- ✅ DESCRIPTION -->
+                    @if (!string.IsNullOrEmpty(Model.ProductDescription))
                     {
                         <div class="highlight-row">
-                            <strong>@spec.SpecName</strong> : @spec.SpecValue
+                            <strong>Description</strong> :
+                            <p class="mb-2">@Model.ProductDescription</p>
                         </div>
                     }
-                </div>
-            }
 
-        </div>
-    </div>
-</div>
+                    <!-- ✅ SIZE CHART -->
+                    @* @if (!string.IsNullOrEmpty(Model.sizechartPath))
+                    {
+                        <div class="highlight-row">
+                            <strong>Size Chart</strong> :
+                            <a href="@Url.Content(Model.sizechartPath)"
+                               target="_blank"
+                               class="size-guide-link">
+                                View Size Chart
+                            </a>
+                        </div>
+                    } *@
+
+                    <!-- ✅ SPECIFICATIONS -->
+                    @if (Model.Specificationsnew != null && Model.Specificationsnew.Any())
+                    {
+                        foreach (var spec in Model.Specificationsnew)
+                        {
+                            <div class="highlight-row">
+                                <strong>@spec.SpecName</strong> : @spec.SpecValue
+                            </div>
+                        }
+                    }
+
+                </div>
+}
 
 <!-- ================= STYLES ================= -->
 <style>
