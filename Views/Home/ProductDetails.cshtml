@@ -105,8 +105,8 @@
             <!-- ================= HIGHLIGHTS ================= -->
 @if (
             (Model.Specificationsnew != null && Model.Specificationsnew.Any()) ||
-            !string.IsNullOrEmpty(Model.ProductDescription) @* ||
-            !string.IsNullOrEmpty(Model.sizechartPath) *@
+            !string.IsNullOrEmpty(Model.ProductDescription) ||
+            !string.IsNullOrEmpty(Model.sizechartPath)
             )
 {
                 <div class="highlight-box mt-5">
@@ -122,7 +122,7 @@
                     }
 
                     <!-- ✅ SIZE CHART -->
-                    @* @if (!string.IsNullOrEmpty(Model.sizechartPath))
+                    @if (!string.IsNullOrEmpty(Model.sizechartPath))
                     {
                         <div class="highlight-row">
                             <strong>Size Chart</strong> :
@@ -132,7 +132,7 @@
                                 View Size Chart
                             </a>
                         </div>
-                    } *@
+                    }
 
                     <!-- ✅ SPECIFICATIONS -->
                     @if (Model.Specificationsnew != null && Model.Specificationsnew.Any())
