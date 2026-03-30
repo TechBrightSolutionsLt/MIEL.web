@@ -1,4 +1,4 @@
-﻿@model MIEL.web.Models.ViewModel.VATReportVM
+@model MIEL.web.Models.ViewModel.VATReportVM
 @{
     ViewData["Title"] = "GST REPORT";
     Layout = "_AdminLayout";
@@ -173,8 +173,8 @@
                     <tfoot>
                         <tr class="miel-total-row">
                             <td colspan="3" class="text-end">Total</td>
-                            <td>@Model.Results.Sum(x => x.GstAmount).ToString("N2")</td>
                             <td>@Model.Results.Sum(x => x.TaxableAmount).ToString("N2")</td>
+                            <td>@Model.Results.Sum(x => x.GstAmount).ToString("N2")</td>
                             <td>@Model.Results.Sum(x => x.NetAmount).ToString("N2")</td>
                         </tr>
                     </tfoot>
