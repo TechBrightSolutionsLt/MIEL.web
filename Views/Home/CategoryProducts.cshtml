@@ -1,4 +1,4 @@
-﻿@model List<MIEL.web.Models.ViewModel.ProductListVM>
+@model List<MIEL.web.Models.ViewModel.ProductListVM>
 
 <div class="container py-5">
     <div class="row g-4">
@@ -144,10 +144,15 @@
         fetch(`/Home/AddToCartFromCategory?productId=${productId}`, {
             method: 'POST'
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`Server returned HTTP ${res.status}`);
+            }
+            return res.json();
+        })
         .then(data => {
 
-            if (data.success) {
+            if (data && data.success) {
 
                 const cartCount = document.getElementById("cartCount");
 
@@ -155,19 +160,19 @@
                     cartCount.textContent = data.count;
                 }
 
-                alert("Added to cart");
+                alert("Added to cart successfully!");
 
             } else {
 
                 // ✅ SHOW ACTUAL MESSAGE FROM CONTROLLER
-                alert(data.message || "Something went wrong");
+                alert(data.message || "Failed to add product to cart");
 
             }
 
         })
         .catch(error => {
-            console.error(error);
-            alert("Error occurred while adding to cart");
+            console.error("Cart error:", error);
+            alert("Error occurred while adding to cart: " + error.message);
         });
     }
 </script>
