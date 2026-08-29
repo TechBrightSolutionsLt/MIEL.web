@@ -1,4 +1,4 @@
-﻿@model MIEL.web.Models.ViewModel.SalesVM
+@model MIEL.web.Models.ViewModel.SalesVM
 
 @{
     ViewData["Title"] = "Edit Sale";
@@ -153,14 +153,14 @@
                                 <h6 class="text-muted">
                                     Discount :
                                     <span class="text-danger fw-semibold">
-                                        ₹ @Model.TotalDiscount.ToString("0.00")
+                                        A$ @Model.TotalDiscount.ToString("0.00")
                                     </span>
                                 </h6>
 
                                 <h6 class="text-muted">
                                     GST :
                                     <span class="text-info fw-semibold">
-                                        ₹ @Model.GstAmount.ToString("0.00")
+                                        A$ @Model.GstAmount.ToString("0.00")
                                     </span>
                                 </h6>
 
@@ -169,7 +169,7 @@
                                 <h4 class="fw-bold">
                                     Total :
                                     <span class="text-success">
-                                        ₹ @Model.NetAmount.ToString("0.00")
+                                        A$ @Model.NetAmount.ToString("0.00")
                                     </span>
                                 </h4>
 

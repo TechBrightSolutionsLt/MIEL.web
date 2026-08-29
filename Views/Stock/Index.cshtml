@@ -1,4 +1,4 @@
-﻿@model MIEL.web.Models.ViewModel.StockReportVM
+@model MIEL.web.Models.ViewModel.StockReportVM
 @{
     ViewData["Title"] = "Stock Report";
     Layout = "_AdminLayout";
@@ -211,10 +211,11 @@
                         <td colspan="7" class="text-end fw-bold">
                             Total Stock Value :
                         </td>
-                        <td colspan="2" class="fw-bold">
+                        <td class="fw-bold">
                             ₹ @totalCostValue.ToString("N2")
-                            &nbsp;&nbsp;
-                            AUD @totalSellingValue.ToString("N2")
+                        </td>
+                        <td class="fw-bold">
+                            A$ @totalSellingValue.ToString("N2")
                         </td>
                     </tr>
                 </tfoot>

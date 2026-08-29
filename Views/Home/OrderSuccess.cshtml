@@ -1,4 +1,4 @@
-﻿@model MIEL.web.Models.ViewModel.PayIDViewModel
+@model MIEL.web.Models.ViewModel.PayIDViewModel
 <div class="container mt-5 text-center">
 
     <div class="card p-5 shadow-sm">
@@ -19,7 +19,7 @@
         </p>
 
         <p>
-            Total Amount: <strong>₹@Model.TotalAmount</strong>
+            Total Amount: <strong>A$@Model.TotalAmount.ToString("F2")</strong>
         </p>
 
         <a href="/Home/Index"
