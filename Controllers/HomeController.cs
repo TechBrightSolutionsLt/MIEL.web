@@ -127,6 +127,47 @@ namespace MIEL.web.Controllers
             return View(products);
         }
 
+        public IActionResult Search(string query)
+        {
+            LoadWishlistCount();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                ViewBag.SearchQuery = "";
+                return View("CategoryProducts", new List<ProductListVM>());
+            }
+
+            var search = query.Trim().ToLower();
+
+            var products = (from p in _context.ProductMasters
+                            where p.ProductName.ToLower().Contains(search) ||
+                                  (p.Brand != null && p.Brand.ToLower().Contains(search)) ||
+                                  (p.ProductDescription != null && p.ProductDescription.ToLower().Contains(search))
+                            select new ProductListVM
+                            {
+                                ProductId = p.ProductId,
+                                ProductName = p.ProductName,
+                                Brand = p.Brand,
+
+                                ImagePath = _context.ProductImages
+                                    .Where(i => i.ProductId == p.ProductId && i.Flag == 1)
+                                    .Select(i => i.ImgPath)
+                                    .FirstOrDefault(),
+
+                                NetAmount = (from v in _context.ProColorSizeVariants
+                                             join sp in _context.VariantPrices
+                                             on v.varientid equals sp.varientid
+                                             where v.ProductId == p.ProductId && sp.IsActive
+                                             orderby sp.VariantPriceId descending
+                                             select sp.SellingPrice)
+                                             .FirstOrDefault()
+                            }).ToList();
+
+            ViewBag.SearchQuery = query;
+
+            return View("CategoryProducts", products);
+        }
+
 
         public IActionResult ProductDetails(int id)
         {

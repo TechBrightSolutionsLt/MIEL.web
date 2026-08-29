@@ -1,6 +1,15 @@
 @model List<MIEL.web.Models.ViewModel.ProductListVM>
 
 <div class="container py-5">
+    @if (!string.IsNullOrEmpty(ViewBag.SearchQuery as string))
+    {
+        <h4 class="mb-4 text-dark fw-bold">Search Results for "@ViewBag.SearchQuery" (@Model.Count item@(Model.Count != 1 ? "s" : ""))</h4>
+        @if (!Model.Any())
+        {
+            <div class="alert alert-warning text-center py-4">No products found matching "@ViewBag.SearchQuery".</div>
+        }
+    }
+
     <div class="row g-4">
         @foreach (var item in Model)
         {
@@ -17,8 +26,8 @@
 
                         <div class="product-info text-center">
                             <h6 class="product-name">@item.ProductName</h6>
-                            <span class="product-brand">@item.Brand</span>
-                            <span class="product-brand">@item.NetAmount</span>
+                            <span class="product-brand d-block">@item.Brand</span>
+                            <span class="fw-bold text-dark d-block mt-1">A$ @(item.NetAmount?.ToString("F2") ?? "0.00")</span>
                         </div>
 
                     </a>

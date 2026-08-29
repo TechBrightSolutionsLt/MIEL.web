@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -108,10 +108,12 @@
             <div class="col-lg-4 col-6 text-right">
                 <div class="d-flex justify-content-end align-items-center header-icons">
 
-                    <div class="search-box mr-4 d-none d-lg-block">
-                        <input type="text" placeholder="Search">
-                        <i class="fa fa-search"></i>
-                    </div>
+                    <form asp-controller="Home" asp-action="Search" method="get" class="search-box mr-4 d-none d-lg-block">
+                        <input type="text" name="query" placeholder="Search" value="@Context.Request.Query["query"]" required />
+                        <button type="submit" class="search-btn">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </form>
                     <a href="https://wa.me/61430823457"
                        target="_blank"
                        class="icon-btn whatsapp-icon">
@@ -479,6 +481,7 @@
         /* Search */
         .search-box {
             position: relative;
+            display: inline-block;
         }
 
             .search-box input {
@@ -489,10 +492,17 @@
                 padding-right: 25px;
             }
 
-            .search-box i {
+            .search-box .search-btn {
                 position: absolute;
                 right: 0;
-                top: 3px;
+                top: 2px;
+                background: transparent;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+            }
+
+            .search-box i {
                 font-size: 13px;
                 color: #888;
             }
