@@ -1,6 +1,6 @@
-﻿@model List<MIEL.web.Models.ViewModel.SalesSummaryVM>
+@model List<MIEL.web.Models.ViewModel.SalesSummaryVM>
 @{
-    ViewData["Title"] = "Product Master Edit";
+    ViewData["Title"] = "Sales Invoice Summary";
     Layout = "_AdminLayout";
 }
 <div class="container mt-4">
@@ -11,12 +11,12 @@
 
         <div class="d-flex gap-2">
             <a href="@Url.Action("Export","Salessummary",
-                           new { fromDate = ViewBag.FromDate, toDate = ViewBag.ToDate, invoiceNo = ViewBag.InvoiceNo })"
+                           new { fromDate = ViewBag.FromDate, toDate = ViewBag.ToDate, invoiceNo = ViewBag.InvoiceNo, paymentType = ViewBag.PaymentType, orderType = ViewBag.OrderType })"
                class="btn btn-success">
                 ⬇ Export
             </a>
 
-            <a asp-action="Print" asp-route-fromDate="@ViewBag.FromDate" asp-route-toDate="@ViewBag.ToDate" asp-route-invoiceNo="@ViewBag.InvoiceNo" target="_blank" class="btn btn-primary">
+            <a asp-action="Print" asp-route-fromDate="@ViewBag.FromDate" asp-route-toDate="@ViewBag.ToDate" asp-route-invoiceNo="@ViewBag.InvoiceNo" asp-route-paymentType="@ViewBag.PaymentType" asp-route-orderType="@ViewBag.OrderType" target="_blank" class="btn btn-primary">
                 Print
             </a>
         </div>
@@ -26,7 +26,6 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="get" asp-controller="Salessummary" asp-action="Index" class="row g-3">
-
 
                 <div class="col-md-3">
                     <label>Invoice No</label>
@@ -39,24 +38,16 @@
                          class="list-group position-absolute w-100"
                          style="z-index:1000; display:none;"></div>
                 </div>
+
                 <div class="col-md-3">
                     <label class="form-label">From Date</label>
-                   @*  <input type="date" name="fromDate"
-                           value="@Context.Request.Query["fromDate"]"
-                           class="form-control" /> *@
                     <input type="date" name="fromDate" value="@ViewBag.FromDate" class="form-control" />
-
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label">To Date</label>
-
-                  @*   <input type="date" name="toDate"
-                           value="@Context.Request.Query["toDate"]"
-                           class="form-control" /> *@
                     <input type="date" name="toDate" value="@ViewBag.ToDate" class="form-control" />
                 </div>
-
 
                 <div class="col-md-3 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary w-50">
@@ -74,52 +65,55 @@
 
     <!-- Table Card -->
     @if (Context.Request.Query.Count > 0)
-{
-    <!-- Table Card -->
-    <div class="card shadow-sm">
-        <div class="card-body">
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
 
-            @if (!Model.Any())
-            {
-                <div class="text-center text-muted py-4">
-                    No data found
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle text-center">
+                @if (!Model.Any())
+                {
+                    <div class="text-center text-muted py-4">
+                        No data found
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle text-center">
 
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Invoice No</th>
-                                <th>Date</th>
-                                    <th>Customer</th>
-                                <th>Taxable Amount</th>
-                                <th>GST</th>
-                                <th>Net Amount</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach (var item in Model)
-                            {
+                            <thead class="table-dark">
                                 <tr>
-                                    <td class="fw-semibold">@item.InvoiceNo</td>
-                                    <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
-                                        <td>@item.CustomerName</td>
-                                    <td class="text-end">@item.TaxableAmount.ToString("N2")</td>
-                                    <td class="text-end">@item.GSTAmount.ToString("N2")</td>
-                                    <td class="text-end fw-bold text-success">
-                                        @item.NetAmount.ToString("N2")
-                                    </td>
+                                    <th>Invoice No</th>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Payment Type</th>
+                                    <th>Order Type</th>
+                                    <th>Taxable Amount</th>
+                                    <th>GST</th>
+                                    <th>Net Amount</th>
                                 </tr>
-                            }
-                        </tbody>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@item.InvoiceNo</td>
+                                        <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
+                                        <td>@item.CustomerName</td>
+                                        <td>@item.PaymentType</td>
+                                        <td>@item.OrderType</td>
+                                        <td class="text-end">@item.TaxableAmount.ToString("N2")</td>
+                                        <td class="text-end">@item.GSTAmount.ToString("N2")</td>
+                                        <td class="text-end fw-bold text-success">
+                                            @item.NetAmount.ToString("N2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
 
                             <tfoot class="table-light">
                                 <tr>
-                                    <th colspan="3" class="text-end">Total</th>
+                                    <th colspan="5" class="text-end">Total</th>
                                     <th class="text-end">
                                         @Model.Sum(x => x.TaxableAmount).ToString("N2")
                                     </th>
@@ -132,16 +126,16 @@
                                 </tr>
                             </tfoot>
 
-                    </table>
-                </div>
-            }
+                        </table>
+                    </div>
+                }
 
+            </div>
         </div>
-    </div>
     }
 </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(document).ready(function () {
@@ -180,7 +174,6 @@
 
     });
 
-
     $("#clearBtn").click(function () {
 
         // Clear inputs
@@ -194,9 +187,4 @@
         // Reload page without filters
         window.location.href = '@Url.Action("Index", "Salessummary")';
     });
-
-
-
-     
 </script>
-

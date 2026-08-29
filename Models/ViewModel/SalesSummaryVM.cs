@@ -1,4 +1,4 @@
-﻿namespace MIEL.web.Models.ViewModel
+namespace MIEL.web.Models.ViewModel
 {
     public class SalesSummaryVM
     {
@@ -14,9 +14,7 @@
 
         public decimal TaxAmount { get; set; }
 
-
-
-
-
+        public string PaymentType { get; set; }
+        public string OrderType { get; set; }
     }
 }

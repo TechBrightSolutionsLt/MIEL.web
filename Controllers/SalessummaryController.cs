@@ -1,4 +1,3 @@
-﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MIEL.web.Data;
@@ -17,10 +16,7 @@ namespace MIEL.web.Controllers
             _context = context;
         }
 
-
-
-
-        public async Task<IActionResult> Index(DateTime? fromDate, DateTime? toDate, string invoiceNo)
+        public async Task<IActionResult> Index(DateTime? fromDate, DateTime? toDate, string invoiceNo, string paymentType, string orderType)
         {
             // Default = current month
             if (!fromDate.HasValue && !toDate.HasValue)
@@ -33,6 +29,8 @@ namespace MIEL.web.Controllers
             ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
             ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
             ViewBag.InvoiceNo = invoiceNo;
+            ViewBag.PaymentType = paymentType;
+            ViewBag.OrderType = orderType;
 
             var query = _context.SalesMasters.AsQueryable();
 
@@ -58,19 +56,37 @@ namespace MIEL.web.Controllers
                     EF.Functions.Like(x.InvoiceNo, "%" + search + "%"));
             }
 
+            if (!string.IsNullOrWhiteSpace(paymentType))
+            {
+                query = query.Where(x => x.PaymentType == paymentType);
+            }
+
+            if (!string.IsNullOrWhiteSpace(orderType))
+            {
+                if (orderType == "Online")
+                {
+                    query = query.Where(x => x.salesmode == 2);
+                }
+                else if (orderType == "Direct")
+                {
+                    query = query.Where(x => x.salesmode != 2);
+                }
+            }
+
             var data = await query
                 .Select(x => new SalesSummaryVM
                 {
                     InvoiceNo = x.InvoiceNo,
                     SalesDate = x.SalesDate,
                     CustomerName = x.Customer != null
-            ? x.Customer.FirstName + " " + x.Customer.LastName
-            : "",
-
+                        ? x.Customer.FirstName + " " + x.Customer.LastName
+                        : "",
+                    PaymentType = x.PaymentType,
+                    OrderType = x.salesmode == 2 ? "Online" : "Direct",
                     TaxableAmount = x.TotalAmount -
-            _context.SalesItems
-                .Where(i => i.SalesId == x.SalesId)
-                .Sum(i => (decimal?)i.TaxAmount) ?? 0,
+                        (_context.SalesItems
+                            .Where(i => i.SalesId == x.SalesId)
+                            .Sum(i => (decimal?)i.TaxAmount) ?? 0),
                     GSTAmount = x.GstAmount,
                     NetAmount = x.NetAmount
                 })
@@ -79,8 +95,6 @@ namespace MIEL.web.Controllers
 
             return View(data);
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> GetInvoiceSuggestions(string term)
@@ -99,9 +113,7 @@ namespace MIEL.web.Controllers
             return Json(invoices);
         }
 
-
-
-        public async Task<IActionResult> Export(DateTime? fromDate, DateTime? toDate, string invoiceNo)
+        public async Task<IActionResult> Export(DateTime? fromDate, DateTime? toDate, string invoiceNo, string paymentType, string orderType)
         {
             var query = _context.SalesMasters.AsQueryable();
 
@@ -114,16 +126,29 @@ namespace MIEL.web.Controllers
             if (!string.IsNullOrWhiteSpace(invoiceNo))
                 query = query.Where(x => x.InvoiceNo.Contains(invoiceNo));
 
+            if (!string.IsNullOrWhiteSpace(paymentType))
+                query = query.Where(x => x.PaymentType == paymentType);
+
+            if (!string.IsNullOrWhiteSpace(orderType))
+            {
+                if (orderType == "Online")
+                    query = query.Where(x => x.salesmode == 2);
+                else if (orderType == "Direct")
+                    query = query.Where(x => x.salesmode != 2);
+            }
+
             var data = await query
                 .Select(x => new
                 {
                     x.InvoiceNo,
                     x.SalesDate,
-                    CustomerName = x.Customer.FirstName + " " + x.Customer.LastName,
+                    CustomerName = x.Customer != null ? x.Customer.FirstName + " " + x.Customer.LastName : "",
+                    PaymentType = x.PaymentType ?? "",
+                    OrderType = x.salesmode == 2 ? "Online" : "Direct",
                     TaxableAmount = x.TotalAmount -
-            _context.SalesItems
-                .Where(i => i.SalesId == x.SalesId)
-                .Sum(i => (decimal?)i.TaxAmount) ?? 0,
+                        (_context.SalesItems
+                            .Where(i => i.SalesId == x.SalesId)
+                            .Sum(i => (decimal?)i.TaxAmount) ?? 0),
                     x.GstAmount,
                     x.NetAmount
                 })
@@ -137,9 +162,11 @@ namespace MIEL.web.Controllers
                 ws.Cell(1, 1).Value = "Invoice No";
                 ws.Cell(1, 2).Value = "Date";
                 ws.Cell(1, 3).Value = "Customer";
-                ws.Cell(1, 4).Value = "Taxable";
-                ws.Cell(1, 5).Value = "GST";
-                ws.Cell(1, 6).Value = "Net Amount";
+                ws.Cell(1, 4).Value = "Payment Type";
+                ws.Cell(1, 5).Value = "Order Type";
+                ws.Cell(1, 6).Value = "Taxable";
+                ws.Cell(1, 7).Value = "GST";
+                ws.Cell(1, 8).Value = "Net Amount";
 
                 int row = 2;
 
@@ -153,9 +180,11 @@ namespace MIEL.web.Controllers
                     ws.Cell(row, 2).Value = item.SalesDate;
                     ws.Cell(row, 2).Style.DateFormat.Format = "dd-MM-yyyy";
                     ws.Cell(row, 3).Value = item.CustomerName;
-                    ws.Cell(row, 4).Value = item.TaxableAmount;
-                    ws.Cell(row, 5).Value = item.GstAmount;
-                    ws.Cell(row, 6).Value = item.NetAmount;
+                    ws.Cell(row, 4).Value = item.PaymentType;
+                    ws.Cell(row, 5).Value = item.OrderType;
+                    ws.Cell(row, 6).Value = item.TaxableAmount;
+                    ws.Cell(row, 7).Value = item.GstAmount;
+                    ws.Cell(row, 8).Value = item.NetAmount;
 
                     totalTaxable += item.TaxableAmount;
                     totalGST += item.GstAmount;
@@ -165,10 +194,10 @@ namespace MIEL.web.Controllers
                 }
 
                 // Totals row
-                ws.Cell(row, 3).Value = "TOTAL";
-                ws.Cell(row, 4).Value = totalTaxable;
-                ws.Cell(row, 5).Value = totalGST;
-                ws.Cell(row, 6).Value = totalNet;
+                ws.Cell(row, 5).Value = "TOTAL";
+                ws.Cell(row, 6).Value = totalTaxable;
+                ws.Cell(row, 7).Value = totalGST;
+                ws.Cell(row, 8).Value = totalNet;
 
                 ws.Columns().AdjustToContents();
 
@@ -181,7 +210,8 @@ namespace MIEL.web.Controllers
                 }
             }
         }
-        public async Task<IActionResult> Print(DateTime? fromDate, DateTime? toDate, string invoiceNo)
+
+        public async Task<IActionResult> Print(DateTime? fromDate, DateTime? toDate, string invoiceNo, string paymentType, string orderType)
         {
             // Same default date logic as Index
             if (!fromDate.HasValue && !toDate.HasValue)
@@ -201,16 +231,29 @@ namespace MIEL.web.Controllers
             if (!string.IsNullOrWhiteSpace(invoiceNo))
                 query = query.Where(x => x.InvoiceNo.Contains(invoiceNo));
 
+            if (!string.IsNullOrWhiteSpace(paymentType))
+                query = query.Where(x => x.PaymentType == paymentType);
+
+            if (!string.IsNullOrWhiteSpace(orderType))
+            {
+                if (orderType == "Online")
+                    query = query.Where(x => x.salesmode == 2);
+                else if (orderType == "Direct")
+                    query = query.Where(x => x.salesmode != 2);
+            }
+
             var data = await query
                 .Select(x => new SalesSummaryVM
                 {
                     InvoiceNo = x.InvoiceNo,
                     SalesDate = x.SalesDate,
                     CustomerName = x.Customer != null ? x.Customer.FirstName + " " + x.Customer.LastName : "",
+                    PaymentType = x.PaymentType,
+                    OrderType = x.salesmode == 2 ? "Online" : "Direct",
                     TaxableAmount = x.TotalAmount -
-            _context.SalesItems
-                .Where(i => i.SalesId == x.SalesId)
-                .Sum(i => (decimal?)i.TaxAmount) ?? 0,
+                        (_context.SalesItems
+                            .Where(i => i.SalesId == x.SalesId)
+                            .Sum(i => (decimal?)i.TaxAmount) ?? 0),
                     GSTAmount = x.GstAmount,
                     NetAmount = x.NetAmount
                 })
@@ -220,8 +263,10 @@ namespace MIEL.web.Controllers
             ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
             ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
             ViewBag.InvoiceNo = invoiceNo;
+            ViewBag.PaymentType = paymentType;
+            ViewBag.OrderType = orderType;
 
             return View(data);
         }
     }
-    }
+}

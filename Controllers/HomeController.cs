@@ -1236,6 +1236,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             var sales = _context.SalesMasters
                 .FirstOrDefault(x => x.SalesId == salesId);
 
+
             if (sales == null)
                 return RedirectToAction("Cart", "Home");
 

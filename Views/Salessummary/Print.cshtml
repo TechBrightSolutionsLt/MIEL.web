@@ -1,4 +1,4 @@
-﻿@model List<MIEL.web.Models.ViewModel.SalesSummaryVM>
+@model List<MIEL.web.Models.ViewModel.SalesSummaryVM>
 @{
     Layout = null; // Plain layout for printing
 }
@@ -64,16 +64,13 @@
         }
 
         @@media print {
-            button
+            button {
+                display: none;
+            }
 
-        {
-            display: none;
-        }
-
-        body {
-            margin: 10mm;
-        }
-
+            body {
+                margin: 10mm;
+            }
         }
 
         button {
@@ -98,6 +95,8 @@
                 <th>Invoice No</th>
                 <th>Date</th>
                 <th>Customer</th>
+                <th>Payment Type</th>
+                <th>Order Type</th>
                 <th class="right-align">Taxable</th>
                 <th class="right-align">GST</th>
                 <th class="right-align">Net Amount</th>
@@ -110,6 +109,8 @@
                     <td>@item.InvoiceNo</td>
                     <td>@item.SalesDate.ToString("dd-MM-yyyy")</td>
                     <td>@item.CustomerName</td>
+                    <td>@item.PaymentType</td>
+                    <td>@item.OrderType</td>
                     <td class="right-align">@item.TaxableAmount.ToString("N2")</td>
                     <td class="right-align">@item.GSTAmount.ToString("N2")</td>
                     <td class="right-align">@item.NetAmount.ToString("N2")</td>
@@ -118,7 +119,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" class="right-align">Total</td>
+                <td colspan="5" class="right-align">Total</td>
                 <td class="right-align">@Model.Sum(x => x.TaxableAmount).ToString("N2")</td>
                 <td class="right-align">@Model.Sum(x => x.GSTAmount).ToString("N2")</td>
                 <td class="right-align">@Model.Sum(x => x.NetAmount).ToString("N2")</td>
