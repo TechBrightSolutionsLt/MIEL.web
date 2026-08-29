@@ -49,11 +49,10 @@
 
             foreach (var item in bannerImages)
             {
-                <div class="carousel-item @(first ? "active" : "")" style="height:500px;">
+                <div class="carousel-item @(first ? "active" : "")">
 
-                    <img class="w-100"
+                    <img class="w-100 banner-img"
                          src="@item.ImagePath"
-                         style="height:500px; object-fit:cover; object-position: top center;"
                          alt="Banner Image">
 
                     <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
@@ -205,15 +204,47 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
+        /* Responsive Banner Carousel */
         #header-carousel .carousel-item {
             height: 500px;
+            overflow: hidden;
+            background-color: #000;
         }
 
         #header-carousel .banner-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 🔥 fills banner nicely */
-            object-position: center;
+            object-fit: cover;
+            object-position: center top;
+        }
+
+        /* Tablet View (768px - 991px) */
+        @@media (max-width: 991.98px) {
+            #header-carousel .carousel-item {
+                height: 350px;
+            }
+            #header-carousel .carousel-caption h3 {
+                font-size: 2rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+        }
+
+        /* Mobile View (< 768px) */
+        @@media (max-width: 767.98px) {
+            #header-carousel .carousel-item {
+                height: 230px;
+            }
+            #header-carousel .carousel-caption {
+                padding: 0.5rem !important;
+            }
+            #header-carousel .carousel-caption h3 {
+                font-size: 1.25rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            #header-carousel .carousel-caption .btn {
+                padding: 4px 12px !important;
+                font-size: 12px !important;
+            }
         }
 
         /* ===== MAIN CATEGORY BAR ===== */
