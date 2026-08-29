@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
@@ -439,6 +439,13 @@ namespace MIEL.web.Controllers
                     .Where(v => v.ProductId == productId)
                     .ToList();
 
+                var oldVariantIds = oldVariants.Select(v => v.varientid).ToList();
+                var oldCartItems = _db.Cart.Where(c => oldVariantIds.Contains(c.VariantId)).ToList();
+                if (oldCartItems.Any())
+                {
+                    _db.Cart.RemoveRange(oldCartItems);
+                }
+
                 _db.ProColorSizeVariants.RemoveRange(oldVariants);
                 _db.SaveChanges();
 
@@ -497,6 +504,14 @@ namespace MIEL.web.Controllers
             var variants = _db.ProColorSizeVariants
                 .Where(v => v.ProductId == id)
                 .ToList();
+
+            var variantIds = variants.Select(v => v.varientid).ToList();
+            var orphanCartItems = _db.Cart.Where(c => c.ProductId == id || variantIds.Contains(c.VariantId)).ToList();
+            if (orphanCartItems.Any())
+            {
+                _db.Cart.RemoveRange(orphanCartItems);
+            }
+
             _db.ProColorSizeVariants.RemoveRange(variants);
 
             // ---------- DELETE SPECIFICATIONS ----------

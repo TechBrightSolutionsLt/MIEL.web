@@ -703,6 +703,16 @@ namespace MIEL.web.Controllers
             string customerId = HttpContext.Session.GetString("CustomerId");
             string guestId = GetGuestId();
 
+            var validVariantIds = _context.ProColorSizeVariants.Select(v => v.varientid).ToHashSet();
+            var orphanCartRows = _context.Cart
+                .Where(c => (!string.IsNullOrEmpty(customerId) ? c.CustomerId == Convert.ToInt32(customerId) : c.GuestId == guestId)
+                         && !validVariantIds.Contains(c.VariantId))
+                .ToList();
+            if (orphanCartRows.Any())
+            {
+                _context.Cart.RemoveRange(orphanCartRows);
+                _context.SaveChanges();
+            }
 
             List<CartItem> cartItems = new List<CartItem>();
 
@@ -898,6 +908,17 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
 
             int customerId = Convert.ToInt32(userIdStr);
 
+            // Clean up orphan cart items (variants that were deleted from admin)
+            var validVariantIds = _context.ProColorSizeVariants.Select(v => v.varientid).ToHashSet();
+            var orphanCartRows = _context.Cart
+                .Where(c => c.CustomerId == customerId && !validVariantIds.Contains(c.VariantId))
+                .ToList();
+            if (orphanCartRows.Any())
+            {
+                _context.Cart.RemoveRange(orphanCartRows);
+                _context.SaveChanges();
+            }
+
             var cart = _context.Cart
                 .Where(c => c.CustomerId == customerId)
                 .Select(c => new CartItem
@@ -914,7 +935,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 .ToList();
 
             if (cart == null || !cart.Any())
-                return RedirectToAction("Cart", "Cart");
+                return RedirectToAction("Cart", "Home");
 
 
 
@@ -1015,7 +1036,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
 
             if (salesId == null)
             {
-                return RedirectToAction("Cart", "Cart");
+                return RedirectToAction("Cart", "Home");
             }
 
             // Redirect to payment page
@@ -1046,7 +1067,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 .FirstOrDefault();
 
             if (order == null)
-                return RedirectToAction("Cart", "Cart");
+                return RedirectToAction("Cart", "Home");
 
             return View(order);
         }
@@ -1058,7 +1079,24 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 .FirstOrDefault(x => x.SalesId == salesId);
 
             if (sales == null)
-                return RedirectToAction("Cart", "Cart");
+                return RedirectToAction("Cart", "Home");
+
+            // Check inventory stock BEFORE creating order
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == sales.CustomerId)
+                .ToList();
+
+            foreach (var item in cartItems)
+            {
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == item.VariantId);
+
+                if (variant == null || variant.QuantityOnHand < item.Quantity)
+                {
+                    TempData["ErrorMessage"] = $"Sorry, '{item.ProductName}' (Size: {item.Size}, Color: {item.Color}) has only {variant?.QuantityOnHand ?? 0} item(s) in stock.";
+                    return RedirectToAction("Cart", "Home");
+                }
+            }
 
             // Mark payment type as Cash On Delivery
             sales.PaymentType = "Cash";
@@ -1082,12 +1120,8 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // ✅ Update Inventory
-            var cartItems = _context.Cart
-                .Where(c => c.CustomerId == sales.CustomerId)
-                .ToList();
-
-            var itemDetails = new List<string>(); // for email
+            // Update Inventory Batches & Stock
+            var itemDetails = new List<string>();
 
             foreach (var item in cartItems)
             {
@@ -1105,11 +1139,6 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 var variant = _context.ProColorSizeVariants
                     .FirstOrDefault(v => v.varientid == variantId);
 
-                if (variant == null || variant.QuantityOnHand < cartQty)
-                {
-                    return RedirectToAction("Cart", "Cart");
-                }
-
                 // Update Batch
                 var batch = _context.InventoryBatch
                     .Where(b => b.varientid == variantId)
@@ -1122,13 +1151,19 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 }
 
                 // Reduce Stock
-                variant.QuantityOnHand -= cartQty;
+                if (variant != null)
+                {
+                    variant.QuantityOnHand -= cartQty;
+                }
             }
 
             _context.SaveChanges();
 
             // Clear Cart
             ClearCustomerCart(sales.CustomerId);
+
+            // Clear SalesId from Session so new orders start fresh
+            HttpContext.Session.Remove("SalesId");
 
             // Get Customer Info
             var user = _context.users_TB
@@ -1147,9 +1182,6 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 CustomerName = user?.FirstName,
                 ItemsSummary = string.Join(", ", itemDetails)
             };
-
-            // ✅ Send Email (reuse same email logic as PayID)
-
 
             // Redirect to Order Success Page
             return View("OrderSuccess", vm);
@@ -1184,7 +1216,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 .FirstOrDefault(x => x.SalesId == salesId);
 
             if (order == null)
-                return RedirectToAction("Cart", "Cart");
+                return RedirectToAction("Cart", "Home");
 
             // Map Order → PayIDViewModel
             PayIDViewModel model = new PayIDViewModel
@@ -1205,7 +1237,24 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 .FirstOrDefault(x => x.SalesId == salesId);
 
             if (sales == null)
-                return RedirectToAction("Cart", "Cart");
+                return RedirectToAction("Cart", "Home");
+
+            // Check inventory stock BEFORE creating order
+            var cartItems = _context.Cart
+                .Where(c => c.CustomerId == sales.CustomerId)
+                .ToList();
+
+            foreach (var item in cartItems)
+            {
+                var variant = _context.ProColorSizeVariants
+                    .FirstOrDefault(v => v.varientid == item.VariantId);
+
+                if (variant == null || variant.QuantityOnHand < item.Quantity)
+                {
+                    TempData["ErrorMessage"] = $"Sorry, '{item.ProductName}' (Size: {item.Size}, Color: {item.Color}) has only {variant?.QuantityOnHand ?? 0} item(s) in stock.";
+                    return RedirectToAction("Cart", "Home");
+                }
+            }
 
             // Mark payment type
             sales.PaymentType = "PayID";
@@ -1227,11 +1276,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
             _context.Orders.Add(order);
             _context.SaveChanges();
 
-            // ✅ UPDATE INVENTORY
-            var cartItems = _context.Cart
-                .Where(c => c.CustomerId == sales.CustomerId)
-                .ToList();
-            // ✅ EXTRA: Collect items for customer email
+            // Collect items for customer email & update inventory
             var itemDetails = new List<string>();
 
             foreach (var item in cartItems)
@@ -1243,24 +1288,14 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 {
                     itemDetails.Add($"{product.ProductName} - Qty: {item.Quantity}");
                 }
-            }
 
-            string itemsSummary = string.Join(", ", itemDetails);
-            foreach (var item in cartItems)
-            {
                 int variantId = item.VariantId;
                 int cartQty = item.Quantity;
 
                 var variant = _context.ProColorSizeVariants
                     .FirstOrDefault(v => v.varientid == variantId);
 
-                // 🚨 Safety Check
-                if (variant == null || variant.QuantityOnHand < cartQty)
-                {
-                    return RedirectToAction("Cart", "Cart");
-                }
-
-                // 🔹 Update Batch
+                // Update Batch
                 var batch = _context.InventoryBatch
                     .Where(b => b.varientid == variantId)
                     .OrderByDescending(b => b.InventoryBatchId)
@@ -1271,14 +1306,20 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                     batch.QuantityOut += cartQty;
                 }
 
-                // 🔹 Reduce Stock
-                variant.QuantityOnHand -= cartQty;
+                // Reduce Stock
+                if (variant != null)
+                {
+                    variant.QuantityOnHand -= cartQty;
+                }
             }
 
             _context.SaveChanges();
 
-            // ✅ Clear Cart
+            // Clear Cart
             ClearCustomerCart(sales.CustomerId);
+
+            // Clear Session SalesId
+            HttpContext.Session.Remove("SalesId");
 
             int? customerId = HttpContext.Session.GetInt32("CustomerId");
 
@@ -1295,7 +1336,7 @@ public IActionResult UpdateCartQty([FromBody] CartItem model)
                 BusinessEmail = "mielcollectionss@gmail.com",
                 CustomerEmail = user?.Email,
                 CustomerName = user?.FirstName,
-                ItemsSummary = itemsSummary
+                ItemsSummary = string.Join(", ", itemDetails)
             };
 
             return View("PayIDPage", vm);

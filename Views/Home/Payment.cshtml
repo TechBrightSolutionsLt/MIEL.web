@@ -1,4 +1,4 @@
-﻿@using MIEL.web.Models.ViewModel
+@using MIEL.web.Models.ViewModel
 @model PaymentVM
 
 <div class="container mt-5 mb-5">
@@ -105,14 +105,15 @@
 
                         <div>
                             <strong>@item.ProductName</strong><br />
-                            <small>Qty: @item.Quantity</small>
+                            <small class="text-muted">Qty: @item.Quantity</small>
                         </div>
 
                         <div class="text-end">
-                            ₹@item.Price <br />
-                   @*          <strong>
-                                ₹@(item.Price* item.Quantity)
-                            </strong> *@
+                            <strong>₹@(item.Price * item.Quantity)</strong>
+                            @if (item.Quantity > 1)
+                            {
+                                <br /><small class="text-muted">(₹@item.Price each)</small>
+                            }
                         </div>
 
                     </div>

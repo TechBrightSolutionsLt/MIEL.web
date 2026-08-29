@@ -1,4 +1,4 @@
-﻿@model List<MIEL.web.Models.ViewModel.CartItem>
+@model List<MIEL.web.Models.ViewModel.CartItem>
 
 @{
     var totalQty = Model.Sum(x => x.Quantity);
@@ -35,6 +35,14 @@
 
         <!-- ================= LEFT SIDE ================= -->
         <div class="col-md-8">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
             <h4 class="mb-3">My Cart (@totalQty item)</h4>
 
             @if (!Model.Any())
