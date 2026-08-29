@@ -93,6 +93,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Order No</th>
+                            <th>Date</th>
                             <th>Customer</th>
                             <th>Total Amount</th>
                             <th>Status</th>
@@ -107,6 +108,7 @@
                             {
                                 <tr>
                                     <td>@item.OrderNumber</td>
+                                    <td>@(item.OrderDate?.ToString("dd-MMM-yyyy") ?? "-")</td>
 
                                     <td>
                                         @item.Customer?.FirstName
@@ -151,7 +153,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="5"
+                                <td colspan="6"
                                     class="text-center text-muted py-4">
                                     No pending payments found.
                                 </td>

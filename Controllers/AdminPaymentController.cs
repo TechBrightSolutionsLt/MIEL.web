@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MIEL.web.Data;
 using MIEL.web.Models.EntityModels;
@@ -16,25 +16,31 @@ public class AdminPaymentController : Controller
     // 1️⃣ Show Pending Orders with Search
     public async Task<IActionResult> PendingPayments(string search)
     {
-        var query = _context.Orders
-            .Include(x => x.Customer)
-            .Where(x => x.PaymentStatus == "NotPaid")
-            .AsQueryable();
+        var query = from o in _context.Orders.Include(x => x.Customer)
+                    join s in _context.SalesMasters on o.SalesId equals s.SalesId into sGroup
+                    from s in sGroup.DefaultIfEmpty()
+                    where o.PaymentStatus == "NotPaid"
+                    select new { o, OrderDate = (DateTime?)s.SalesDate };
 
         if (!string.IsNullOrEmpty(search))
         {
             search = search.Trim().ToLower();
 
             query = query.Where(x =>
-                x.OrderNumber.ToLower().Contains(search) ||
-                x.Customer.FirstName.ToLower().Contains(search) ||
-                x.Customer.LastName.ToLower().Contains(search) ||
-                (x.Customer.FirstName + " " + x.Customer.LastName)
+                x.o.OrderNumber.ToLower().Contains(search) ||
+                x.o.Customer.FirstName.ToLower().Contains(search) ||
+                x.o.Customer.LastName.ToLower().Contains(search) ||
+                (x.o.Customer.FirstName + " " + x.o.Customer.LastName)
                     .ToLower().Contains(search)
             );
         }
 
-        var orders = await query.ToListAsync();
+        var data = await query.OrderByDescending(x => x.OrderDate).ToListAsync();
+
+        var orders = data.Select(x => {
+            x.o.OrderDate = x.OrderDate;
+            return x.o;
+        }).ToList();
 
         ViewBag.Search = search;
 

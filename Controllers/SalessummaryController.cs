@@ -90,7 +90,8 @@ namespace MIEL.web.Controllers
                     GSTAmount = x.GstAmount,
                     NetAmount = x.NetAmount
                 })
-                .OrderByDescending(x => x.SalesDate)
+                .OrderBy(x => x.SalesDate)
+                .ThenBy(x => x.InvoiceNo)
                 .ToListAsync();
 
             return View(data);
@@ -152,6 +153,8 @@ namespace MIEL.web.Controllers
                     x.GstAmount,
                     x.NetAmount
                 })
+                .OrderBy(x => x.SalesDate)
+                .ThenBy(x => x.InvoiceNo)
                 .ToListAsync();
 
             using (var workbook = new XLWorkbook())
@@ -257,7 +260,8 @@ namespace MIEL.web.Controllers
                     GSTAmount = x.GstAmount,
                     NetAmount = x.NetAmount
                 })
-                .OrderByDescending(x => x.SalesDate)
+                .OrderBy(x => x.SalesDate)
+                .ThenBy(x => x.InvoiceNo)
                 .ToListAsync();
 
             ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");

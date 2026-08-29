@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace MIEL.web.Models.EntityModels
 {
@@ -21,6 +21,9 @@ namespace MIEL.web.Models.EntityModels
 
         public DateTime? VerifiedDate { get; set; }
         public userModel Customer { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public DateTime? OrderDate { get; set; }
 
     }
 
