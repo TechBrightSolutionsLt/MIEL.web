@@ -66,6 +66,8 @@ namespace MIEL.web.Controllers
                     x.s.InvoiceNo,
                     x.s.SalesDate,
                     CustomerName = x.u.FirstName + " " + x.u.LastName,
+                    PaymentType = x.s.PaymentType ?? "",
+                    OrderType = x.s.salesmode == 2 ? "Online" : "Direct",
                     ProductName = x.n != null ? x.n.ProductName : "",
                     BatchNumber = x.si.BatchNo ?? "",
                     Quantity = x.si.Quantity,
@@ -82,7 +84,9 @@ namespace MIEL.web.Controllers
                     x.SalesId,
                     x.InvoiceNo,
                     x.SalesDate,
-                    x.CustomerName
+                    x.CustomerName,
+                    x.PaymentType,
+                    x.OrderType
                 })
                 .Select(g => {
                     var items = g.Select(i => {
@@ -114,6 +118,8 @@ namespace MIEL.web.Controllers
                         InvoiceNo = g.Key.InvoiceNo,
                         SalesDate = g.Key.SalesDate,
                         CustomerName = g.Key.CustomerName,
+                        PaymentType = g.Key.PaymentType,
+                        OrderType = g.Key.OrderType,
                         TotalNetAmt = items.Sum(x => x.NetAmt),
                         TotalDiscount = items.Sum(x => x.Discount),
                         TotalTax = items.Sum(x => x.Tax),
@@ -269,6 +275,8 @@ namespace MIEL.web.Controllers
                     x.s.InvoiceNo,
                     x.s.SalesDate,
                     CustomerName = x.u.FirstName + " " + x.u.LastName,
+                    PaymentType = x.s.PaymentType ?? "",
+                    OrderType = x.s.salesmode == 2 ? "Online" : "Direct",
                     ProductName = x.n != null ? x.n.ProductName : "",
                     BatchNumber = x.si.BatchNo ?? "",
                     x.s.NetAmount
@@ -283,9 +291,11 @@ namespace MIEL.web.Controllers
                 worksheet.Cell(1, 1).Value = "Invoice No";
                 worksheet.Cell(1, 2).Value = "Date";
                 worksheet.Cell(1, 3).Value = "Customer";
-                worksheet.Cell(1, 4).Value = "Product";
-                worksheet.Cell(1, 5).Value = "Batch";
-                worksheet.Cell(1, 6).Value = "Net Amount";
+                worksheet.Cell(1, 4).Value = "Payment Type";
+                worksheet.Cell(1, 5).Value = "Order Type";
+                worksheet.Cell(1, 6).Value = "Product";
+                worksheet.Cell(1, 7).Value = "Batch";
+                worksheet.Cell(1, 8).Value = "Net Amount";
 
                 int row = 2;
 
@@ -295,9 +305,11 @@ namespace MIEL.web.Controllers
                     worksheet.Cell(row, 2).Value = item.SalesDate;
                     worksheet.Cell(row, 2).Style.DateFormat.Format = "dd-MM-yyyy";
                     worksheet.Cell(row, 3).Value = item.CustomerName ?? "";
-                    worksheet.Cell(row, 4).Value = item.ProductName ?? "";
-                    worksheet.Cell(row, 5).Value = item.BatchNumber ?? "";
-                    worksheet.Cell(row, 6).Value = item.NetAmount;
+                    worksheet.Cell(row, 4).Value = item.PaymentType ?? "";
+                    worksheet.Cell(row, 5).Value = item.OrderType ?? "";
+                    worksheet.Cell(row, 6).Value = item.ProductName ?? "";
+                    worksheet.Cell(row, 7).Value = item.BatchNumber ?? "";
+                    worksheet.Cell(row, 8).Value = item.NetAmount;
 
                     row++;
                 }

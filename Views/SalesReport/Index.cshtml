@@ -191,22 +191,28 @@
             @foreach (var sale in Model.Results)
             {
                 <div class="report-card">
-                    <!-- Invoice Info -->
                     <div class="report-header-info">
                         <div class="row">
                             <div class="col-md-3">
                                 <span class="info-label">Invoice No:</span>
                                 <span class="info-value">@sale.InvoiceNo</span>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <span class="info-label">Sales Date:</span>
                                 <span class="info-value">@sale.SalesDate.ToString("dd-MMM-yyyy")</span>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <span class="info-label">Customer:</span>
                                 <span class="info-value">@sale.CustomerName</span>
                             </div>
-                           
+                            <div class="col-md-2">
+                                <span class="info-label">Payment Type:</span>
+                                <span class="info-value">@sale.PaymentType</span>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="info-label">Order Type:</span>
+                                <span class="info-value">@sale.OrderType</span>
+                            </div>
                         </div>
                     </div>
 

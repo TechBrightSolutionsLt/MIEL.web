@@ -42,6 +42,8 @@ public class SalesReportResultVM
         public string InvoiceNo { get; set; }
         public DateTime SalesDate { get; set; }
         public string CustomerName { get; set; }
+        public string PaymentType { get; set; }
+        public string OrderType { get; set; }
         public decimal TotalNetAmt { get; set; }
         public decimal TotalDiscount { get; set; }
         public decimal TotalTax { get; set; }
